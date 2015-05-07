@@ -1,0 +1,58 @@
+name:                log
+version:             0.1.0
+synopsis:            Structured logging solution with multiple backends
+
+description:         A library that provides a way to record structured log messages with multiple backends.
+                     .
+                     Supported backends:
+                     .
+                     * standard output
+                     .
+                     * PostgreSQL
+
+homepage:            https://github.com/scrive/log
+license:             BSD3
+license-file:        LICENSE
+author:              Scrive
+maintainer:          andrzej@scrive.com
+category:            System
+build-type:          Simple
+cabal-version:       >=1.10
+
+Source-repository head
+  Type:     git
+  Location: https://github.com/scrive/log
+
+library
+  exposed-modules:     Log,
+                       Log.Logger,
+                       Log.Class,
+                       Log.Data,
+                       Log.Monad,
+                       Log.Class.Instances,
+                       Log.Backend.PostgreSQL,
+                       Log.Backend.StandardOutput
+
+  build-depends:       base <5,
+                       aeson >=0.6.2.0,
+                       stm >=2.4,
+                       text,
+                       monad-time,
+                       time,
+                       deepseq,
+                       transformers-base,
+                       exceptions >=0.6,
+                       mtl,
+                       monad-control >=0.3,
+                       unordered-containers,
+                       bytestring,
+                       split,
+                       hpqtypes >=1.4,
+                       aeson-pretty >=0.7,
+                       old-locale
+
+  hs-source-dirs:      src
+
+  ghc-options:         -O2 -Wall -funbox-strict-fields
+
+  default-language:    Haskell2010
