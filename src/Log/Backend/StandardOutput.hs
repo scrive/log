@@ -1,11 +1,13 @@
-{-# LANGUAGE OverloadedStrings, RecordWildCards #-}
+{-# LANGUAGE CPP, OverloadedStrings, RecordWildCards #-}
 module Log.Backend.StandardOutput (stdoutLogger) where
 
 import Data.Aeson.Encode.Pretty
 import Data.Aeson.Types
 import Data.ByteString.Lazy (toStrict)
 import Data.Time
+#if !MIN_VERSION_time(1,5,0)
 import System.Locale
+#endif
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import qualified Data.Text.IO as T

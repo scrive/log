@@ -13,7 +13,8 @@ import Data.Time
 data LogLevel = LogAttention | LogInfo | LogTrace
   deriving (Bounded, Eq, Ord, Show)
 
-instance NFData LogLevel
+instance NFData LogLevel where
+  rnf = (`seq` ())
 
 -- | Represents message to be logged.
 data LogMessage = LogMessage {
