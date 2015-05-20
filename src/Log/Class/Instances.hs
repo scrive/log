@@ -16,6 +16,7 @@ instance (
   ) => MonadLog (t m) where
     logMessage time level message = lift . logMessage time level message
     localData data_ m = controlT $ \run -> localData data_ (run m)
+    localDomain domain m = controlT $ \run -> localDomain domain (run m)
 
 controlT :: (MonadTransControl t, Monad (t m), Monad m)
          => (Run t -> m (StT t a)) -> t m a

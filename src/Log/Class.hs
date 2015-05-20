@@ -22,8 +22,9 @@ import Log.Data
 
 -- | Represents the family of monads with logging capabilities.
 class MonadTime m => MonadLog m where
-  logMessage :: UTCTime -> LogLevel -> T.Text -> Value -> m ()
-  localData :: [Pair] -> m a -> m a
+  logMessage  :: UTCTime -> LogLevel -> T.Text -> Value -> m ()
+  localData   :: [Pair] -> m a -> m a
+  localDomain :: T.Text -> m a -> m a
 
 ----------------------------------------
 

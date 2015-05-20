@@ -30,6 +30,7 @@ import Log.Logger
 data LoggerEnv = LoggerEnv {
   leLogger    :: !Logger
 , leComponent :: !Text
+, leDomain    :: ![Text]
 , leData      :: ![Pair]
 }
 
@@ -43,6 +44,7 @@ runLogT :: Text -> Logger -> LogT m a -> m a
 runLogT component logger m = runReaderT (unLogT m) LoggerEnv {
   leLogger = logger
 , leComponent = component
+, leDomain = []
 , leData = []
 }
 
@@ -83,6 +85,7 @@ instance (MonadBase IO m, MonadTime m) => MonadLog (LogT m) where
         where
           lm = LogMessage {
             lmComponent = leComponent
+          , lmDomain = leDomain
           , lmTime = time
           , lmLevel = level
           , lmMessage = message
@@ -93,3 +96,5 @@ instance (MonadBase IO m, MonadTime m) => MonadLog (LogT m) where
           }
 
   localData data_ = LogT . local (\e -> e { leData = data_ ++ leData e }) . unLogT
+
+  localDomain domain = LogT . local (\e -> e { leDomain = leDomain e ++ [domain] }) . unLogT

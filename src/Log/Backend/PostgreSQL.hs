@@ -19,7 +19,7 @@ pgLogger :: ConnectionSource -> IO Logger
 pgLogger cs = mkBulkLogger "PostgreSQL" $ mapM_ serialize . chunksOf 1000
   where
     serialize :: [LogMessage] -> IO ()
-    serialize msgs = runDBT cs ts (runSQL_ $ "INSERT INTO logs (insertion_time, insertion_order, time, level, component, message, data) VALUES" <+> mintercalate ", " (map sqlifyMessage $ zip [1..] msgs)) `catches` [
+    serialize msgs = runDBT cs ts (runSQL_ $ "INSERT INTO logs (insertion_time, insertion_order, time, level, component, domain, message, data) VALUES" <+> mintercalate ", " (map sqlifyMessage $ zip [1..] msgs)) `catches` [
         Handler $ \(e::AsyncException) -> throwIO e
       , Handler $ \(e::SomeException) -> do
         putStrLn $ "PostgreSQL: couldn't serialize logs: " ++ show e ++ ", retrying in 10 seconds"
@@ -35,6 +35,7 @@ pgLogger cs = mkBulkLogger "PostgreSQL" $ mapM_ serialize . chunksOf 1000
       , "," <?> lmTime
       , "," <?> sqlifyLevel lmLevel
       , "," <?> lmComponent
+      , "," <?> Array1 lmDomain
       , "," <?> lmMessage
       , "," <?> toStrict (encode lmData) <> "::jsonb"
       , ")"

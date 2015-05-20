@@ -20,6 +20,8 @@ instance NFData LogLevel where
 data LogMessage = LogMessage {
   -- | Component of an application.
   lmComponent :: !Text
+  -- | Aplication log domain.
+, lmDomain    :: ![Text]
   -- | Time of log.
 , lmTime      :: !UTCTime
   -- | Log level.
@@ -32,6 +34,7 @@ data LogMessage = LogMessage {
 
 instance NFData LogMessage where
   rnf LogMessage{..} = rnf lmComponent
+    `seq` rnf lmDomain
     `seq` rnf lmTime
     `seq` rnf lmLevel
     `seq` rnf lmMessage

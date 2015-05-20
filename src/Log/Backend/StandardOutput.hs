@@ -25,7 +25,7 @@ printLogMessage LogMessage{..} = T.putStrLn . T.concat $ [
   , " "
   , textifyLevel lmLevel
   , " "
-  , lmComponent
+  , T.intercalate "/" $ lmComponent : lmDomain
   , ": "
   , lmMessage
   ] ++ if lmData == emptyObject
