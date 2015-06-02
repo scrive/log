@@ -4,7 +4,6 @@ module Log.Backend.PostgreSQL (pgLogger) where
 import Control.Concurrent
 import Control.Exception
 import Data.Aeson
-import Data.ByteString (ByteString)
 import Data.ByteString.Lazy (toStrict)
 import Data.Monoid
 import Data.Monoid.Utils
@@ -33,18 +32,13 @@ pgLogger cs = mkBulkLogger "PostgreSQL" $ mapM_ serialize . chunksOf 1000
       , "now()"
       , "," <?> n
       , "," <?> lmTime
-      , "," <?> sqlifyLevel lmLevel
+      , "," <?> showLogLevel lmLevel
       , "," <?> lmComponent
       , "," <?> Array1 lmDomain
       , "," <?> lmMessage
       , "," <?> toStrict (encode lmData) <> "::jsonb"
       , ")"
       ]
-
-    sqlifyLevel :: LogLevel -> ByteString
-    sqlifyLevel LogAttention = "attention"
-    sqlifyLevel LogInfo = "info"
-    sqlifyLevel LogTrace = "trace"
 
     ts :: TransactionSettings
     ts = def {
