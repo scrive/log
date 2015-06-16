@@ -75,7 +75,7 @@ instance ToJSON LogMessage where
   toJSON LogMessage{..} = object [
       "component" .= lmComponent
     , "domain"    .= lmDomain
-    , "time"      .= lmComponent
+    , "time"      .= lmTime
     , "level"     .= showLogLevel lmLevel
     , "message"   .= lmMessage
     , "data"      .= lmData
