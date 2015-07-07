@@ -28,22 +28,22 @@ class MonadTime m => MonadLog m where
 
 ----------------------------------------
 
-logAttention :: MonadLog m => String -> Value -> m ()
-logAttention = logNow LogAttention . T.pack
+logAttention :: MonadLog m => T.Text -> Value -> m ()
+logAttention = logNow LogAttention
 
-logInfo :: MonadLog m => String -> Value -> m ()
-logInfo = logNow LogInfo . T.pack
+logInfo :: MonadLog m => T.Text -> Value -> m ()
+logInfo = logNow LogInfo
 
-logTrace :: MonadLog m => String -> Value -> m ()
-logTrace = logNow LogTrace . T.pack
+logTrace :: MonadLog m => T.Text -> Value -> m ()
+logTrace = logNow LogTrace
 
-logAttention_ :: MonadLog m => String -> m ()
+logAttention_ :: MonadLog m => T.Text -> m ()
 logAttention_ = (`logAttention` emptyObject)
 
-logInfo_ :: MonadLog m => String -> m ()
+logInfo_ :: MonadLog m => T.Text -> m ()
 logInfo_ = (`logInfo` emptyObject)
 
-logTrace_ :: MonadLog m => String -> m ()
+logTrace_ :: MonadLog m => T.Text -> m ()
 logTrace_ = (`logTrace` emptyObject)
 
 ----------------------------------------

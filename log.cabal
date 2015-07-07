@@ -1,5 +1,5 @@
 name:                log
-version:             0.2.4
+version:             0.3.0
 synopsis:            Structured logging solution with multiple backends
 
 description:         A library that provides a way to record structured log messages with multiple backends.
