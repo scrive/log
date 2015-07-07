@@ -25,31 +25,32 @@ Source-repository head
 
 library
   exposed-modules:     Log,
-                       Log.Logger,
-                       Log.Class,
-                       Log.Data,
-                       Log.Monad,
-                       Log.Class.Instances,
                        Log.Backend.PostgreSQL,
-                       Log.Backend.StandardOutput
+                       Log.Backend.StandardOutput,
+                       Log.Class,
+                       Log.Class.Instances,
+                       Log.Data,
+                       Log.Logger,
+                       Log.Monad
 
   build-depends:       base <5,
                        aeson >=0.6.2.0,
+                       aeson-pretty >=0.7,
+                       bytestring,
+                       deepseq,
+                       exceptions >=0.6,
+                       hpqtypes >=1.4,
+                       monad-control >=0.3,
+                       monad-time,
+                       mtl,
+                       old-locale,
+                       split,
                        stm >=2.4,
                        text,
-                       monad-time,
                        time,
-                       deepseq,
                        transformers-base,
-                       exceptions >=0.6,
-                       mtl,
-                       monad-control >=0.3,
                        unordered-containers,
-                       bytestring,
-                       split,
-                       hpqtypes >=1.4,
-                       aeson-pretty >=0.7,
-                       old-locale
+                       vector
 
   hs-source-dirs:      src
 
