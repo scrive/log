@@ -106,7 +106,8 @@ pgLogger cs = mkBulkLogger loggerName
       when (T.length newS /= T.length s) $ put True
       return newS
 
-    mapTexts :: forall m. Monad m => (T.Text -> m T.Text) -> LogMessage -> m LogMessage
+    mapTexts :: forall m. (Applicative m, Monad m)
+             => (T.Text -> m T.Text) -> LogMessage -> m LogMessage
     mapTexts doText lm = do
       component <- doText      $ lmComponent lm
       domain    <- mapM doText $ lmDomain lm
