@@ -8,4 +8,4 @@ import Log.Logger
 
 -- | Create logger that prints messages to standard output.
 stdoutLogger :: IO Logger
-stdoutLogger = mkLogger "stdout" $ T.putStrLn . showLogMessage
+stdoutLogger = mkLogger "stdout" $ T.putStrLn . showLogMessage Nothing

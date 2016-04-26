@@ -53,10 +53,12 @@ data LogMessage = LogMessage {
 , lmData      :: !Value
 } deriving (Eq, Show)
 
-showLogMessage :: LogMessage -> T.Text
-showLogMessage LogMessage{..} = T.concat $ [
+showLogMessage :: Maybe UTCTime -> LogMessage -> T.Text
+showLogMessage mInsertionTime LogMessage{..} = T.concat $ [
     T.pack $ formatTime defaultTimeLocale "%Y-%m-%d %H:%M:%S" lmTime
-  , " "
+  , case mInsertionTime of
+      Nothing -> " "
+      Just it -> T.pack $ formatTime defaultTimeLocale " (%H:%M:%S) " it
   , T.toUpper $ showLogLevel lmLevel
   , " "
   , T.intercalate "/" $ lmComponent : lmDomain
