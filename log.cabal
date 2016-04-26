@@ -30,6 +30,7 @@ library
                        Log.Class,
                        Log.Class.Instances,
                        Log.Data,
+                       Log.Internal.Logger,
                        Log.Logger,
                        Log.Monad
 

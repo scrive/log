@@ -18,6 +18,19 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as T
 
 import Log.Data
+import Log.Internal.Logger
+
+-- | Make 'Logger' that consumes one queued message at a time.
+mkLogger :: T.Text -> (LogMessage -> IO ()) -> IO Logger
+mkLogger = mkLoggerImpl
+  newTQueueIO isEmptyTQueue readTQueue writeTQueue $ return ()
+
+-- | Make 'Logger' that consumes all queued messages once per second.
+mkBulkLogger :: T.Text -> ([LogMessage] -> IO ()) -> IO Logger
+mkBulkLogger = mkLoggerImpl
+  newSQueueIO isEmptySQueue readSQueue writeSQueue $ threadDelay 1000000
+
+----------------------------------------
 
 -- | Simple STM based queue.
 newtype SQueue a = SQueue (TVar [a])
@@ -41,48 +54,6 @@ readSQueue (SQueue queue) = do
 -- | Write a value to an 'SQueue'.
 writeSQueue :: SQueue a -> a -> STM ()
 writeSQueue (SQueue queue) a = modifyTVar queue (a :)
-
-----------------------------------------
-
--- | Opaque data type representing logger.
-data Logger = Logger {
-  loggerWriteMessage :: !(LogMessage -> IO ())
-, loggerWaitForWrite :: !(STM ())
-, loggerFinalizers   :: ![IORef ()]
-}
-
--- | Execute logger to serialize a 'LogMessage'.
-execLogger :: Logger -> LogMessage -> IO ()
-execLogger Logger{..} = loggerWriteMessage
-
--- | Wait until logs stored in an internal queue are serialized.
-waitForLogger :: Logger -> IO ()
-waitForLogger Logger{..} = atomically loggerWaitForWrite
-
--- | Composition of 'Logger' objects.
-instance Monoid Logger where
-  mempty = Logger (const $ return ()) (return ()) []
-  l1 `mappend` l2 = Logger {
-    loggerWriteMessage = \msg -> do
-      loggerWriteMessage l1 msg
-      loggerWriteMessage l2 msg
-  , loggerWaitForWrite = do
-      loggerWaitForWrite l1
-      loggerWaitForWrite l2
-  , loggerFinalizers = loggerFinalizers l1 ++ loggerFinalizers l2
-  }
-
-----------------------------------------
-
--- | Make 'Logger' that consumes one queued message at a time.
-mkLogger :: T.Text -> (LogMessage -> IO ()) -> IO Logger
-mkLogger = mkLoggerImpl
-  newTQueueIO isEmptyTQueue readTQueue writeTQueue $ return ()
-
--- | Make 'Logger' that consumes all queued messages once per second.
-mkBulkLogger :: T.Text -> ([LogMessage] -> IO ()) -> IO Logger
-mkBulkLogger = mkLoggerImpl
-  newSQueueIO isEmptySQueue readSQueue writeSQueue $ threadDelay 1000000
 
 ----------------------------------------
 
