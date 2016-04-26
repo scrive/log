@@ -1,4 +1,6 @@
-{-# LANGUAGE OverlappingInstances #-}
+{-# OPTIONS_GHC -fno-warn-deprecated-flags #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, OverlappingInstances
+  , RankNTypes, UndecidableInstances #-}
 module Log.Class (
     UTCTime
   , MonadTime(..)
@@ -12,7 +14,8 @@ module Log.Class (
   ) where
 
 import Control.Monad.Time
-import Control.Monad.Time.Instances ()
+import Control.Monad.Trans
+import Control.Monad.Trans.Control
 import Data.Aeson
 import Data.Aeson.Types
 import Data.Time
@@ -25,6 +28,20 @@ class MonadTime m => MonadLog m where
   logMessage  :: UTCTime -> LogLevel -> T.Text -> Value -> m ()
   localData   :: [Pair] -> m a -> m a
   localDomain :: T.Text -> m a -> m a
+
+-- | Generic, overlapping instance.
+instance (
+    MonadLog m
+  , Monad (t m)
+  , MonadTransControl t
+  ) => MonadLog (t m) where
+    logMessage time level message = lift . logMessage time level message
+    localData data_ m = controlT $ \run -> localData data_ (run m)
+    localDomain domain m = controlT $ \run -> localDomain domain (run m)
+
+controlT :: (MonadTransControl t, Monad (t m), Monad m)
+         => (Run t -> m (StT t a)) -> t m a
+controlT f = liftWith f >>= restoreT . return
 
 ----------------------------------------
 

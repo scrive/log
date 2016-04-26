@@ -1,5 +1,5 @@
 name:                log
-version:             0.3.1
+version:             0.4
 synopsis:            Structured logging solution with multiple backends
 
 description:         A library that provides a way to record structured log messages with multiple backends.
@@ -28,7 +28,6 @@ library
                        Log.Backend.PostgreSQL,
                        Log.Backend.StandardOutput,
                        Log.Class,
-                       Log.Class.Instances,
                        Log.Data,
                        Log.Internal.Logger,
                        Log.Logger,
@@ -44,7 +43,7 @@ library
                        hpqtypes >=1.4,
                        lifted-base,
                        monad-control >=0.3,
-                       monad-time,
+                       monad-time >= 0.2,
                        mtl,
                        old-locale,
                        split,
