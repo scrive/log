@@ -17,6 +17,7 @@ import Control.Monad.Trans.Control
 import Data.Aeson
 import Data.Aeson.Types
 import Data.Text (Text)
+import Prelude
 import qualified Control.Exception as E
 import qualified Data.HashMap.Strict as H
 

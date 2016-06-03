@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 module Log.Data (
     LogLevel(..)
   , showLogLevel
@@ -13,9 +12,7 @@ import Data.Aeson.Encode.Pretty
 import Data.Aeson.Types
 import Data.ByteString.Lazy (toStrict)
 import Data.Time
-#if !MIN_VERSION_time(1,5,0)
-import System.Locale
-#endif
+import Prelude
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 

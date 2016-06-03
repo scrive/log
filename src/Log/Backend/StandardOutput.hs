@@ -1,5 +1,6 @@
 module Log.Backend.StandardOutput (stdoutLogger) where
 
+import Prelude
 import qualified Data.Text.IO as T
 
 import Log.Data

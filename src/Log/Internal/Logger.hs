@@ -7,6 +7,7 @@ module Log.Internal.Logger (
 import Control.Concurrent.STM
 import Data.IORef
 import Data.Monoid
+import Prelude
 
 import Log.Data
 

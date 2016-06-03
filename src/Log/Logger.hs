@@ -13,6 +13,7 @@ import Control.Exception
 import Control.Monad
 import Data.IORef
 import Data.Monoid
+import Prelude
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 
