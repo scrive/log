@@ -28,7 +28,7 @@ newtype InvalidEncodingRecoveryAttempt = Attempt Int
   deriving Enum
 
 -- | Create logger that inserts log messages into PostgreSQL database.
-pgLogger :: ConnectionSource -> IO Logger
+pgLogger :: ConnectionSourceM IO -> IO Logger
 pgLogger cs = mkBulkLogger loggerName
             $ mapM_ (serialize $ Attempt 1) . chunksOf 1000
   where
