@@ -58,4 +58,15 @@ library
 
   ghc-options:         -O2 -Wall -funbox-strict-fields
 
-  default-language:    Haskell2010
+  default-language:   Haskell2010
+  default-extensions: BangPatterns
+                    , FlexibleContexts
+                    , FlexibleInstances
+                    , GeneralizedNewtypeDeriving
+                    , MultiParamTypeClasses
+                    , OverloadedStrings
+                    , RankNTypes
+                    , RecordWildCards
+                    , ScopedTypeVariables
+                    , TypeFamilies
+                    , UndecidableInstances

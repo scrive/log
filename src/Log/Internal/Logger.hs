@@ -1,4 +1,3 @@
-{-# LANGUAGE RecordWildCards #-}
 module Log.Internal.Logger (
     Logger(..)
   , execLogger

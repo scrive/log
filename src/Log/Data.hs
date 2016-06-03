@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP, OverloadedStrings, RecordWildCards #-}
+{-# LANGUAGE CPP #-}
 module Log.Data (
     LogLevel(..)
   , showLogLevel

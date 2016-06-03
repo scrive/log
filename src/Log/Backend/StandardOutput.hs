@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
 module Log.Backend.StandardOutput (stdoutLogger) where
 
 import qualified Data.Text.IO as T

@@ -1,5 +1,3 @@
-{-# LANGUAGE BangPatterns, GeneralizedNewtypeDeriving, OverloadedStrings
-  , RecordWildCards, ScopedTypeVariables #-}
 module Log.Backend.PostgreSQL (pgLogger) where
 
 import Control.Applicative

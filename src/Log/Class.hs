@@ -1,6 +1,5 @@
 {-# OPTIONS_GHC -fno-warn-deprecated-flags #-}
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, OverlappingInstances
-  , RankNTypes, UndecidableInstances #-}
+{-# LANGUAGE OverlappingInstances #-}
 module Log.Class (
     UTCTime
   , MonadTime(..)

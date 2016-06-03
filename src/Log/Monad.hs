@@ -1,6 +1,4 @@
-{-# LANGUAGE CPP, FlexibleContexts, FlexibleInstances
-  , GeneralizedNewtypeDeriving, MultiParamTypeClasses, OverloadedStrings
-  , RecordWildCards, TypeFamilies, UndecidableInstances #-}
+{-# LANGUAGE CPP #-}
 module Log.Monad (
     Logger
   , LoggerEnv(..)
