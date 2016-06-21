@@ -11,7 +11,7 @@ import Data.Monoid
 import Data.Monoid.Utils
 import Data.String
 import Data.Typeable
-import Database.PostgreSQL.PQTypes hiding (put)
+import Database.PostgreSQL.PQTypes
 import Prelude
 import qualified Data.ByteString.Base64 as B64
 import qualified Data.Foldable as F
