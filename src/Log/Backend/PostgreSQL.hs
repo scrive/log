@@ -5,7 +5,6 @@ import Control.Concurrent
 import Control.Exception.Lifted
 import Control.Monad.State.Lazy
 import Data.Aeson
-import Data.ByteString.Lazy (toStrict)
 import Data.List.Split
 import Data.Monoid
 import Data.Monoid.Utils
@@ -136,7 +135,7 @@ pgLogger cs = mkBulkLogger loggerName
       , "," <?> lmComponent
       , "," <?> Array1 lmDomain
       , "," <?> lmMessage
-      , "," <?> toStrict (encode lmData) <> "::jsonb"
+      , "," <?> JSONB (encode lmData)
       , ")"
       ]
 
