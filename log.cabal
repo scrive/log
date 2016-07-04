@@ -14,7 +14,7 @@ homepage:            https://github.com/scrive/log
 license:             BSD3
 license-file:        LICENSE
 author:              Scrive
-maintainer:          andrzej@scrive.com
+maintainer:          Andrzej Rybczak <andrzej@rybczak.net>
 category:            System
 build-type:          Simple
 cabal-version:       >=1.10
