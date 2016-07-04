@@ -7,6 +7,7 @@ import Control.Arrow (second)
 import Control.Concurrent
 import Control.Conditional (unlessM)
 import Control.Exception
+import Control.Monad
 import Control.Monad.IO.Class
 import Data.Aeson
 import Data.Aeson.Encode.Pretty
@@ -14,7 +15,6 @@ import Data.Bits
 import Data.IORef
 import Data.Monoid
 import Data.Monoid.Utils
-import Control.Monad
 import Data.Time
 import Data.Time.Clock.POSIX
 import Data.Word
