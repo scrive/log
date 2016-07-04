@@ -3,6 +3,7 @@ module Log.Backend.ElasticSearch (
   , elasticSearchLogger
   ) where
 
+import Control.Applicative
 import Control.Arrow (second)
 import Control.Concurrent
 import Control.Conditional (unlessM)
