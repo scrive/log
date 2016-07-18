@@ -1,5 +1,5 @@
 name:                log
-version:             0.5.1
+version:             0.5.2
 synopsis:            Structured logging solution with multiple backends
 
 description:         A library that provides a way to record structured log messages with multiple backends.
@@ -8,13 +8,15 @@ description:         A library that provides a way to record structured log mess
                      .
                      * standard output
                      .
+                     * Elasticsearch
+                     .
                      * PostgreSQL
 
 homepage:            https://github.com/scrive/log
 license:             BSD3
 license-file:        LICENSE
 author:              Scrive
-maintainer:          Andrzej Rybczak <andrzej@rybczak.net>
+maintainer:          Andrzej Rybczak <andrzej@rybczak.net>, Jonathan Jouty <jonathan@scrive.com>
 category:            System
 build-type:          Simple
 cabal-version:       >=1.10
