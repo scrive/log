@@ -135,7 +135,7 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
     runBH_ = withBH defaultManagerSettings server
 
     jsonToBSL :: Value -> BSL.ByteString
-    jsonToBSL = encodePretty' defConfig { confIndent = 2 }
+    jsonToBSL = encodePretty' defConfig { confIndent = Spaces 2 }
 
     toJsonMsg :: UTCTime -> (Word32, LogMessage) -> (Word32, H.HashMap T.Text Value)
     toJsonMsg now (n, msg) = (n, H.union jMsg $ H.fromList [

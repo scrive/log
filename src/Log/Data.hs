@@ -67,7 +67,7 @@ showLogMessage mInsertionTime LogMessage{..} = T.concat $ [
   where
     textifyData :: Value -> T.Text
     textifyData = T.decodeUtf8 . toStrict . encodePretty' defConfig {
-      confIndent = 2
+      confIndent = Spaces 2
     }
 
 instance ToJSON LogMessage where

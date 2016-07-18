@@ -1,5 +1,5 @@
 name:                log
-version:             0.5.2
+version:             0.5.3
 synopsis:            Structured logging solution with multiple backends
 
 description:         A library that provides a way to record structured log messages with multiple backends.
@@ -38,7 +38,7 @@ library
 
   build-depends:       base <5,
                        aeson >=0.6.2.0,
-                       aeson-pretty >=0.7,
+                       aeson-pretty >=0.8,
                        base64-bytestring,
                        bloodhound,
                        bytestring,
