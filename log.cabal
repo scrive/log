@@ -2,7 +2,8 @@ name:                log
 version:             0.5.3
 synopsis:            Structured logging solution with multiple backends
 
-description:         A library that provides a way to record structured log messages with multiple backends.
+description:         A library that provides a way to record structured
+                     log messages with multiple backends.
                      .
                      Supported backends:
                      .
@@ -16,7 +17,8 @@ homepage:            https://github.com/scrive/log
 license:             BSD3
 license-file:        LICENSE
 author:              Scrive AB
-maintainer:          Andrzej Rybczak <andrzej@rybczak.net>, Jonathan Jouty <jonathan@scrive.com>
+maintainer:          Andrzej Rybczak <andrzej@rybczak.net>,
+                     Jonathan Jouty <jonathan@scrive.com>
 copyright:           Scrive AB
 category:            System
 build-type:          Simple
@@ -25,7 +27,7 @@ tested-with:         GHC == 7.8.4, GHC == 7.10.3, GHC == 8.0.1
 
 Source-repository head
   Type:     git
-  Location: https://github.com/scrive/log
+  Location: https://github.com/scrive/log.git
 
 library
   exposed-modules:     Log,
