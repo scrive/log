@@ -1,3 +1,5 @@
+-- | The 'Logger' type - implementation details.
+{-# OPTIONS_HADDOCK hide #-}
 module Log.Internal.Logger (
     Logger(..)
   , execLogger
@@ -11,11 +13,19 @@ import Prelude
 
 import Log.Data
 
--- | Data type representing logger.
+-- | A logging back-end that outputs 'LogMessage's using
+-- e.g. PostgreSQL, Elasticsearch or stdout.
 data Logger = Logger {
-  loggerWriteMessage :: !(LogMessage -> IO ())
+  loggerWriteMessage :: !(LogMessage -> IO ()) -- ^ Output a 'LogMessage'.
 , loggerWaitForWrite :: !(STM ())
+                     -- ^ Wait for the logger to output all messages
+                     -- in its input queue (in the case logging is
+                     -- done asynchronously).
 , loggerFinalizers   :: ![IORef ()]
+                     -- ^ When this list is garbage collected, the
+                     -- finalizers associated with each 'IORef' are
+                     -- run, ensuring that the logger shuts down
+                     -- properly.
 }
 
 -- | Execute logger to serialize a 'LogMessage'.

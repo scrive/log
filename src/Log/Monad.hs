@@ -1,3 +1,4 @@
+-- | The 'LogT' monad transformer for adding logging capabilities to any monad.
 {-# LANGUAGE CPP #-}
 module Log.Monad (
     Logger
@@ -25,21 +26,27 @@ import Log.Class
 import Log.Data
 import Log.Logger
 
--- | 'LogT' environment.
+-- | The state that every 'LogT' carries around.
 data LoggerEnv = LoggerEnv {
-  leLogger    :: !Logger
-, leComponent :: !Text
-, leDomain    :: ![Text]
-, leData      :: ![Pair]
+  leLogger    :: !Logger -- ^ The 'Logger' to use.
+, leComponent :: !Text   -- ^ Current application component.
+, leDomain    :: ![Text] -- ^ Current application domain.
+, leData      :: ![Pair] -- ^ Additional data to be merged with the
+                         -- log message\'s data.
 }
 
 type InnerLogT = ReaderT LoggerEnv
 
 -- | Monad transformer that adds logging capabilities to the underlying monad.
 newtype LogT m a = LogT { unLogT :: InnerLogT m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadBase b, MonadCatch, MonadIO, MonadMask, MonadPlus, MonadThrow, MonadTrans)
+  deriving (Alternative, Applicative, Functor, Monad, MonadBase b, MonadCatch
+           ,MonadIO, MonadMask, MonadPlus, MonadThrow, MonadTrans)
 
-runLogT :: Text -> Logger -> LogT m a -> m a
+-- | Run a 'LogT' computation.
+runLogT :: Text     -- ^ Application component name to use.
+        -> Logger   -- ^ The logging back-end to use.
+        -> LogT m a -- ^ The 'LogT' computation to run.
+        -> m a
 runLogT component logger m = runReaderT (unLogT m) LoggerEnv {
   leLogger = logger
 , leComponent = component
@@ -47,6 +54,7 @@ runLogT component logger m = runReaderT (unLogT m) LoggerEnv {
 , leData = []
 }
 
+-- | Transform the computation inside a 'LogT'.
 mapLogT :: (m a -> n b) -> LogT m a -> LogT n b
 mapLogT f = LogT . mapReaderT f . unLogT
 
@@ -94,6 +102,8 @@ instance (MonadBase IO m, MonadTime m) => MonadLog (LogT m) where
               | otherwise -> object $ ("_data", data_) : leData
           }
 
-  localData data_ = LogT . local (\e -> e { leData = data_ ++ leData e }) . unLogT
+  localData data_ =
+    LogT . local (\e -> e { leData = data_ ++ leData e }) . unLogT
 
-  localDomain domain = LogT . local (\e -> e { leDomain = leDomain e ++ [domain] }) . unLogT
+  localDomain domain =
+    LogT . local (\e -> e { leDomain = leDomain e ++ [domain] }) . unLogT

@@ -1,3 +1,4 @@
+-- | PostgreSQL logging back-end.
 module Log.Backend.PostgreSQL (pgLogger) where
 
 import Control.Applicative
@@ -25,7 +26,7 @@ import Log.Logger
 newtype InvalidEncodingRecoveryAttempt = Attempt Int
   deriving Enum
 
--- | Create logger that inserts log messages into PostgreSQL database.
+-- | Create a logger that inserts log messages into a PostgreSQL database.
 pgLogger :: ConnectionSourceM IO -> IO Logger
 pgLogger cs = mkBulkLogger loggerName
             $ mapM_ (serialize $ Attempt 1) . chunksOf 1000
@@ -34,10 +35,15 @@ pgLogger cs = mkBulkLogger loggerName
     loggerName = "PostgreSQL"
 
     sqlInsertLog :: SQL
-    sqlInsertLog = "INSERT INTO logs (insertion_time, insertion_order, time, level, component, domain, message, data) VALUES"
+    sqlInsertLog = "INSERT INTO logs "
+      <+> "(insertion_time, insertion_order, time, level, component,"
+      <+> " domain, message, data) VALUES"
 
     serialize :: InvalidEncodingRecoveryAttempt -> [LogMessage] -> IO ()
-    serialize !attempt msgs = runDBT cs ts (runSQL_ $ sqlInsertLog <+> mintercalate ", " (map sqlifyMessage $ zip [1..] msgs)) `catches` [
+    serialize !attempt msgs = runDBT cs ts
+      (runSQL_ $ sqlInsertLog
+       <+> mintercalate ", " (map sqlifyMessage $ zip [1..] msgs))
+      `catches` [
         -- Propagate base async exceptions thrown by the runtime system.
         Handler $ \(e::AsyncException) -> throwIO e
       , Handler $ \(e::SomeException) -> case fromException e of
@@ -49,13 +55,16 @@ pgLogger cs = mkBulkLogger loggerName
               -- serialization), then this error occurs only when any of the
               -- strings we want to serialize contains NULL bytes. In such
               -- case we scan the logs and replace each NULL with "\0".
-              putStrLn $ loggerName ++ ": couldn't serialize logs due to character encoding error \"" ++ qeMessagePrimary qe ++ "\", removing NULL bytes and retrying"
+              putStrLn $ loggerName
+                ++ ": couldn't serialize logs due to character encoding error \""
+                ++ qeMessagePrimary qe ++ "\", removing NULL bytes and retrying"
               serialize (succ attempt) $ map (\msg ->
                 -- If any text inside the message had NULL bytes,
                 -- add acknowledgment of that fact to its data.
                 case runState (mapTexts removeNULLs msg) False of
                   (newMsg, True) -> newMsg {
-                    lmData = lmData newMsg `addPair` ("_log", "NULL bytes were escaped")
+                    lmData = lmData newMsg
+                             `addPair` ("_log", "NULL bytes were escaped")
                   }
                   (_, False) -> msg) msgs
             Attempt 2 -> do
@@ -63,17 +72,28 @@ pgLogger cs = mkBulkLogger loggerName
               -- a minute. If the error is still happening after removal
               -- of NULL bytes, go through each message and encode all
               -- texts as base64, effectively transforming them into ASCII.
-              putStrLn $ loggerName ++ ": couldn't serialize logs due to character encoding error \"" ++ qeMessagePrimary qe ++ "\" after NULL bytes were removed, encoding all texts in the problematic batch as base64 to make them ASCII"
+              putStrLn $ loggerName
+                ++ ": couldn't serialize logs due to character encoding error \""
+                ++ qeMessagePrimary qe
+                ++ "\" after NULL bytes were removed, encoding all texts"
+                ++ " in the problematic batch as base64 to make them ASCII"
               serialize (succ attempt) $ map (\msg ->
                 let newMsg = runIdentity $ mapTexts convertBase64 msg
                  in newMsg {
-                  lmData = lmData newMsg `addPair` ("_log", "Texts encoded as base64")
+                  lmData = lmData newMsg
+                    `addPair` ("_log", "Texts encoded as base64")
                 }) msgs
             Attempt _ -> do
               -- This can't happen, all texts are ASCII now.
-              putStrLn $ loggerName ++ ": impossible happened (>2 attempt failed because of character encoding error \"" ++ qeMessagePrimary qe ++ "\" even though all texts are ASCII), skipping the batch"
+              putStrLn $ loggerName
+                ++ ": impossible happened "
+                ++ "(>2 attempt failed because of character encoding error \""
+                ++ qeMessagePrimary qe
+                ++ "\" even though all texts are ASCII), skipping the batch"
         _ -> do
-          putStrLn $ loggerName ++ ": couldn't serialize logs:" <+> show e ++ ", retrying in 10 seconds"
+          putStrLn $ loggerName
+            ++ ": couldn't serialize logs:"
+            <+> show e ++ ", retrying in 10 seconds"
           threadDelay $ 10 * 1000000
           -- Do not increment the attempt here, it's used to
           -- track invalid encoding recovery attempts only.

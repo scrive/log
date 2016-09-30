@@ -1,3 +1,4 @@
+-- | Structured logging solution with multiple backends.
 module Log (
     module Log.Class
   , module Log.Data
