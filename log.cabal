@@ -85,3 +85,24 @@ library
                     , ScopedTypeVariables
                     , TypeFamilies
                     , UndecidableInstances
+
+test-suite log-test
+  type:               exitcode-stdio-1.0
+  build-depends:      aeson,
+                      base,
+                      bloodhound,
+                      bytestring,
+                      http-client,
+                      http-types,
+                      log,
+                      random,
+                      tasty,
+                      tasty-hunit,
+                      time,
+                      text
+  hs-source-dirs:     test
+  main-is:            Test.hs
+  ghc-options:        -Wall -threaded
+  default-language:   Haskell2010
+  default-extensions: BangPatterns
+                    , RecordWildCards

@@ -2,6 +2,7 @@
 module Log.Backend.ElasticSearch (
     ElasticSearchConfig(..)
   , elasticSearchLogger
+
   ) where
 
 import Control.Applicative

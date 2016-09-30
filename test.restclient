@@ -1,0 +1,83 @@
+# -*- restclient -*-
+
+:url  = localhost:9200
+:date = 2016-10-03
+
+# Check that Elasticsearch is working.
+GET http://:url
+
+# List all indices.
+GET http://:url/_cat/indices
+
+# Put an index.
+PUT http://:url/logs-:date
+
+{
+  "settings" : {
+    "index" : {
+      "number_of_shards" : 4,
+      "number_of_replicas" : 1
+    }
+  }
+}
+
+# Get an index.
+GET http://:url/logs-:date
+
+# Delete an index.
+DELETE http://:url/logs-:date
+
+# List all mappings for an index.
+GET http://:url/logs-:date/_mapping/
+
+# Put a mapping.
+PUT http://:url/logs-:date/_mapping/log
+
+{
+  "properties" : {
+    "insertion_order" : {
+      "type" : "integer"
+    },
+    "insertion_time" : {
+      "type" : "date",
+      "format" : "date_time"
+    },
+    "time" : {
+      "type" : "date",
+      "format" : "date_time"
+    },
+    "domain" : {
+      "type" : "string"
+    },
+    "level" : {
+      "type" : "string"
+    },
+    "component" : {
+      "type" : "string"
+    },
+    "message" : {
+      "type" : "string"
+    }
+  }
+}
+
+# Delete a mapping
+DELETE http://:url/logs-:date/_mapping/log
+
+# Put a log entry
+POST http://:url/logs-:date/log/
+
+{
+    "level": "trace",
+    "message": "A log message: foo bar baz",
+    "insertion_time": "2016-10-03T13:54:14.248352411Z",
+    "insertion_order": 1,
+    "domain": [],
+    "data": null,
+    "time": "2016-10-03T13:54:14.247592998Z",
+    "component": "main"
+}
+
+
+# Find a log entry
+GET http://:url/logs-:date/_search?q=foo
