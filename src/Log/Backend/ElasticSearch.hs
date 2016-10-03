@@ -182,11 +182,11 @@ instance ToJSON LogsMapping where
           ]
         , "insertion_time" .= object [
             "type"   .= ("date"::T.Text)
-          , "format" .= ("strict_date_time"::T.Text)
+          , "format" .= ("date_time"::T.Text)
           ]
         , "time" .= object [
             "type"   .= ("date"::T.Text)
-          , "format" .= ("strict_date_time"::T.Text)
+          , "format" .= ("date_time"::T.Text)
           ]
         , "domain" .= object [
             "type" .= ("string"::T.Text)
@@ -201,7 +201,6 @@ instance ToJSON LogsMapping where
             "type" .= ("string"::T.Text)
           ]
         ]
-      ]
     ]
 
 ----------------------------------------
