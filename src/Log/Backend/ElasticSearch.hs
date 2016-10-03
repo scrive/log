@@ -176,9 +176,8 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
 data LogsMapping = LogsMapping
 instance ToJSON LogsMapping where
   toJSON LogsMapping = object [
-      "logs" .= object [
-        "properties" .= object [
-          "insertion_order" .= object [
+    "properties" .= object [
+        "insertion_order" .= object [
             "type" .= ("integer"::T.Text)
           ]
         , "insertion_time" .= object [
