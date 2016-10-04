@@ -86,8 +86,8 @@ mkLoggerImpl newQueue isQueueEmpty readQueue writeQueue afterExecDo name exec = 
       killThread tid
     return Logger {
       loggerWriteMessage = atomically . writeQueue queue
-    , loggerWaitForWrite = waitForWrite
-    , loggerFinalizers = [finalizer]
+    , loggerWaitForWrite = atomically $ waitForWrite
+    , loggerFinalizers   = [finalizer]
     }
   where
     printLoggerTerminated = T.putStrLn $ name <> ": logger thread terminated"
