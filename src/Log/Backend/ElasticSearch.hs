@@ -1,6 +1,8 @@
+-- | Elasticsearch logging back-end.
 module Log.Backend.ElasticSearch (
     ElasticSearchConfig(..)
   , elasticSearchLogger
+
   ) where
 
 import Control.Applicative
@@ -33,15 +35,23 @@ import qualified Data.Text.Encoding as T
 import qualified Data.Traversable as F
 import qualified Data.Vector as V
 
+-- | Configuration for the Elasticsearch 'Logger'. See
+-- <https://www.elastic.co/guide/en/elasticsearch/reference/current/glossary.html>
+-- for the explanation of terms.
 data ElasticSearchConfig = ElasticSearchConfig {
-    esServer  :: !T.Text
-  , esIndex   :: !T.Text
-  , esMapping :: !T.Text
+    esServer  :: !T.Text -- ^ Elasticsearch server address.
+  , esIndex   :: !T.Text -- ^ Elasticsearch index name.
+  , esMapping :: !T.Text -- ^ Elasticsearch mapping name.
   } deriving (Eq, Show)
 
 ----------------------------------------
 
-elasticSearchLogger :: ElasticSearchConfig -> IO Word32 -> IO Logger
+-- | Create a 'Logger' that stores messages using Elasticsearch.
+elasticSearchLogger ::
+  ElasticSearchConfig -- ^ Configuration.
+  -> IO Word32        -- ^ Generate a random 32-bit word for use in
+                      -- document IDs.
+  -> IO Logger
 elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
   checkElasticSearchConnection
   indexRef <- newIORef $ IndexName T.empty
@@ -56,7 +66,7 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
       <$> (littleEndianRep <$> liftIO genRandomWord)
       <*> pure (littleEndianRep . floor $ timeToDouble now)
     retryOnException . runBH_ $ do
-      -- ElasticSearch index names are additionally indexed by date so that each
+      -- Elasticsearch index names are additionally indexed by date so that each
       -- day is logged to a separate index to make log management easier.
       let index = IndexName $ T.concat [
               esIndex
@@ -77,7 +87,9 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
           void $ createIndex indexSettings index
           reply <- putMapping index mapping LogsMapping
           when (not $ isSuccess reply) $ do
-            error $ "ElasticSearch: error while creating mapping:" <+> T.unpack (T.decodeUtf8 . BSL.toStrict . jsonToBSL $ decodeReply reply)
+            error $ "ElasticSearch: error while creating mapping:"
+              <+> T.unpack (T.decodeUtf8 . BSL.toStrict . jsonToBSL
+                            $ decodeReply reply)
         liftIO $ writeIORef indexRef index
       let jsonMsgs = V.fromList $ map (toJsonMsg now) $ zip [1..] msgs
       reply <- bulk $ V.map (toBulk index baseID) jsonMsgs
@@ -95,7 +107,8 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
             guard $ V.length items == V.length jsonMsgs
             return (hasErrors, items)
       case result of
-        Nothing -> liftIO . BSL.putStrLn $ "ElasticSearch: unexpected response:" <+> jsonToBSL replyBody
+        Nothing -> liftIO . BSL.putStrLn
+          $ "ElasticSearch: unexpected response:" <+> jsonToBSL replyBody
         Just (hasErrors, items) -> when hasErrors $ do
           -- If any message failed to be inserted because of type mismatch, go
           -- back to them, replace their data with elastic search error and put
@@ -117,13 +130,16 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
 
     checkElasticSearchConnection :: IO ()
     checkElasticSearchConnection = try (void $ runBH_ listIndices) >>= \case
-      Left (ex::HttpException) -> error $ "ElasticSearch: unexpected error: " <> show ex <> " (is ElasticSearch server running?)"
+      Left (ex::HttpException) -> error $ "ElasticSearch: unexpected error: "
+                                  <> show ex
+                                  <> " (is ElasticSearch server running?)"
       Right () -> return ()
 
     retryOnException :: forall r. IO r -> IO r
     retryOnException m = try m >>= \case
       Left (ex::SomeException) -> do
-        putStrLn $ "ElasticSearch: unexpected error: " <> show ex <> ", retrying in 10 seconds"
+        putStrLn $ "ElasticSearch: unexpected error: "
+          <> show ex <> ", retrying in 10 seconds"
         threadDelay $ 10 * 1000000
         retryOnException m
       Right result -> return result
@@ -137,7 +153,8 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
     jsonToBSL :: Value -> BSL.ByteString
     jsonToBSL = encodePretty' defConfig { confIndent = Spaces 2 }
 
-    toJsonMsg :: UTCTime -> (Word32, LogMessage) -> (Word32, H.HashMap T.Text Value)
+    toJsonMsg :: UTCTime -> (Word32, LogMessage)
+              -> (Word32, H.HashMap T.Text Value)
     toJsonMsg now (n, msg) = (n, H.union jMsg $ H.fromList [
         ("insertion_order", toJSON n)
       , ("insertion_time",  toJSON now)
@@ -146,29 +163,31 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
         Object jMsg = toJSON msg
 
     mkDocId :: BS.ByteString -> Word32 -> DocId
-    mkDocId baseID insertionOrder = DocId . T.decodeUtf8 . B64.encode $ BS.concat [
+    mkDocId baseID insertionOrder = DocId . T.decodeUtf8
+                                    . B64.encode $ BS.concat [
         baseID
       , littleEndianRep insertionOrder
       ]
 
-    toBulk :: IndexName -> BS.ByteString -> (Word32, H.HashMap T.Text Value) -> BulkOperation
-    toBulk index baseID (n, obj) = BulkIndex index mapping (mkDocId baseID n) $ Object obj
+    toBulk :: IndexName -> BS.ByteString -> (Word32, H.HashMap T.Text Value)
+           -> BulkOperation
+    toBulk index baseID (n, obj) =
+      BulkIndex index mapping (mkDocId baseID n) $ Object obj
 
 data LogsMapping = LogsMapping
 instance ToJSON LogsMapping where
   toJSON LogsMapping = object [
-      "logs" .= object [
-        "properties" .= object [
-          "insertion_order" .= object [
+    "properties" .= object [
+        "insertion_order" .= object [
             "type" .= ("integer"::T.Text)
           ]
         , "insertion_time" .= object [
             "type"   .= ("date"::T.Text)
-          , "format" .= ("strict_date_time"::T.Text)
+          , "format" .= ("date_time"::T.Text)
           ]
         , "time" .= object [
             "type"   .= ("date"::T.Text)
-          , "format" .= ("strict_date_time"::T.Text)
+          , "format" .= ("date_time"::T.Text)
           ]
         , "domain" .= object [
             "type" .= ("string"::T.Text)
@@ -183,7 +202,6 @@ instance ToJSON LogsMapping where
             "type" .= ("string"::T.Text)
           ]
         ]
-      ]
     ]
 
 ----------------------------------------

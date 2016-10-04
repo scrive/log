@@ -1,3 +1,4 @@
+-- | Stdout logging back-end.
 module Log.Backend.StandardOutput (
     simpleStdoutLogger
   , stdoutLogger
@@ -18,6 +19,6 @@ simpleStdoutLogger = Logger {
   , loggerFinalizers   = []
   }
 
--- | Create logger that prints messages to standard output.
+-- | Create a logger that prints messages to standard output.
 stdoutLogger :: IO Logger
 stdoutLogger = mkLogger "stdout" $ T.putStrLn . showLogMessage Nothing

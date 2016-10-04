@@ -1,3 +1,4 @@
+-- | Basic data types used throughout the package.
 module Log.Data (
     LogLevel(..)
   , showLogLevel
@@ -24,7 +25,8 @@ readLogLevel :: T.Text -> LogLevel
 readLogLevel "attention" = LogAttention
 readLogLevel "info"      = LogInfo
 readLogLevel "trace"     = LogTrace
-readLogLevel level       = error $ "readLogLevel: unknown level: " ++ T.unpack level
+readLogLevel level       = error $ "readLogLevel: unknown level: "
+                           ++ T.unpack level
 
 showLogLevel :: LogLevel -> T.Text
 showLogLevel LogAttention = "attention"
@@ -40,7 +42,7 @@ data LogMessage = LogMessage {
   lmComponent :: !T.Text
   -- | Aplication log domain.
 , lmDomain    :: ![T.Text]
-  -- | Time of log.
+  -- | Time of the logged event.
 , lmTime      :: !UTCTime
   -- | Log level.
 , lmLevel     :: !LogLevel
@@ -50,7 +52,10 @@ data LogMessage = LogMessage {
 , lmData      :: !Value
 } deriving (Eq, Show)
 
-showLogMessage :: Maybe UTCTime -> LogMessage -> T.Text
+-- | Render a 'LogMessage' to 'Text'.
+showLogMessage :: Maybe UTCTime -- ^ The time that message was added to the log.
+               -> LogMessage    -- ^ The actual message.
+               -> T.Text
 showLogMessage mInsertionTime LogMessage{..} = T.concat $ [
     T.pack $ formatTime defaultTimeLocale "%Y-%m-%d %H:%M:%S" lmTime
   , case mInsertionTime of

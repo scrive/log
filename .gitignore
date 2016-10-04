@@ -1,2 +1,7 @@
 /dist/
 /dist-newstyle/
+/.cabal-sandbox/
+TAGS
+cabal.project.local
+cabal.project.freeze
+cabal.sandbox.config
