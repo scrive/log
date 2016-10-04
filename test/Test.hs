@@ -6,7 +6,6 @@ import Log.Backend.ElasticSearch
 import Control.Concurrent
 import Control.Monad
 import Data.Aeson
-import qualified Data.ByteString.Lazy.Char8 as B8
 import Data.Either (Either(..))
 import Data.Text (Text)
 import Data.Time
@@ -75,7 +74,6 @@ getNumHits TestConfig{..} query = do
   let tquery = TermQuery (Term "message" query) Nothing
       search = mkSearch (Just tquery) Nothing
   reply <- withBH' $ searchByIndex testIndex search
-  B8.putStrLn (responseBody reply)
   let result = eitherDecode (responseBody reply)
         :: Either String (SearchResult Value)
   case result of
