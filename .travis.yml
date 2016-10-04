@@ -6,9 +6,6 @@ sudo: false
 git:
   submodules: false  # whether to recursively clone submodules
 
-services:
-  - elasticsearch
-
 cache:
   directories:
     - $HOME/.cabal/packages
@@ -25,25 +22,36 @@ before_cache:
 
 matrix:
   include:
-    - env: CABALVER=head GHCVER=7.8.4 ELASTICSEARCH=1.7
+    - env: CABALVER=head GHCVER=7.8.4 ELASTICSEARCH=1.5.2
       compiler: ": #GHC 7.8.4"
-      addons: {apt: {packages: [elasticsearch,cabal-install-head,ghc-7.8.4], sources: [elasticsearch-1.7,hvr-ghc]}}
-    - env: CABALVER=head GHCVER=7.10.3 ELASTICSEARCH=1.7
+      addons: {apt: {packages: [openjdk-jre,cabal-install-head,ghc-7.8.4], sources: [hvr-ghc]}}
+    - env: CABALVER=head GHCVER=7.8.4 ELASTICSEARCH=2.3.5
+      compiler: ": #GHC 7.8.4"
+      addons: {apt: {packages: [openjdk-jre,cabal-install-head,ghc-7.8.4], sources: [hvr-ghc]}}
+    - env: CABALVER=head GHCVER=7.10.3 ELASTICSEARCH=1.5.2
       compiler: ": #GHC 7.10.3"
-      addons: {apt: {packages: [elasticsearch,cabal-install-head,ghc-7.10.3], sources: [elasticsearch-1.7,hvr-ghc]}}
-    - env: CABALVER=head GHCVER=8.0.1 ELASTICSEARCH=1.7
+      addons: {apt: {packages: [openjdk-jre,cabal-install-head,ghc-7.10.3], sources: [hvr-ghc]}}
+    - env: CABALVER=head GHCVER=7.10.3 ELASTICSEARCH=2.3.5
+      compiler: ": #GHC 7.10.3"
+      addons: {apt: {packages: [openjdk-jre,cabal-install-head,ghc-7.10.3], sources: [hvr-ghc]}}
+    - env: CABALVER=head GHCVER=8.0.1 ELASTICSEARCH=1.5.2
       compiler: ": #GHC 8.0.1"
-      addons: {apt: {packages: [elasticsearch,cabal-install-head,ghc-8.0.1], sources: [elasticsearch-1.7,hvr-ghc]}}
-
-# Elasticsearch takes a few seconds to start.
-before_script:
- - sleep 10
+      addons: {apt: {packages: [openjdk-jre,cabal-install-head,ghc-8.0.1], sources: [hvr-ghc]}}
+    - env: CABALVER=head GHCVER=8.0.1 ELASTICSEARCH=2.3.5
+      compiler: ": #GHC 8.0.1"
+      addons: {apt: {packages: [openjdk-jre,cabal-install-head,ghc-8.0.1], sources: [hvr-ghc]}}
 
 before_install:
  - unset CC
  - export PATH=/opt/ghc/$GHCVER/bin:/opt/cabal/$CABALVER/bin:$PATH
 
 install:
+ - wget --no-check-certificate https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-$ELASTICSEARCH.tar.gz
+ - tar xzf elasticsearch-$ELASTICSEARCH.tar.gz
+ - echo "path.repo = [\"/tmp\"]" >> ./elasticsearch-$ELASTICSEARCH/elasticsearch.yml
+ - if [ "x$ELASTICSEARCH" = "x1.5.2" ]; then ES_VERSION_ARG=-v; else ES_VERSION_ARG=--version; fi
+ - ./elasticsearch-$ELASTICSEARCH/bin/elasticsearch $ES_VERSION_ARG
+ - ./elasticsearch-$ELASTICSEARCH/bin/elasticsearch &
  - cabal --version
  - BENCH=${BENCH---enable-benchmarks}
  - TEST=${TEST---enable-tests}
@@ -55,7 +63,6 @@ install:
 # Here starts the actual work to be performed for the package under test;
 # any command which exits with a non-zero exit code causes the build to fail.
 script:
- - elasticsearch -v
  - curl -X GET http://localhost:9200
  - if [ -f configure.ac ]; then autoreconf -i; fi
  # this builds all libraries and executables (including tests/benchmarks)
