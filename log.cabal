@@ -105,4 +105,5 @@ test-suite log-test
   ghc-options:        -Wall -threaded
   default-language:   Haskell2010
   default-extensions: BangPatterns
+                    , OverloadedStrings
                     , RecordWildCards
