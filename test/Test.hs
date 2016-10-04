@@ -3,8 +3,6 @@ module Main where
 import Log
 import Log.Backend.ElasticSearch
 
-import Control.Concurrent
-import Control.Monad
 import Data.Aeson
 import Data.Either (Either(..))
 import Data.Text (Text)
@@ -39,7 +37,6 @@ tests config logger = testGroup "Unit Tests" [
       runLogT "log-test" logger $ do
         logTrace_ "foo"
       waitForLogger logger
-      refreshTestIndex config
       hits <- getNumHits config "foo"
       assertBool "expected at least one hit for 'foo'" (hits > 0),
   testCase "After logging 'foo' thrice, searching 'foo' gives >=3 hits" $ do
@@ -48,7 +45,6 @@ tests config logger = testGroup "Unit Tests" [
         logTrace_ "foo"
         logTrace_ "foo"
       waitForLogger logger
-      refreshTestIndex config
       hits <- getNumHits config "foo"
       assertBool "expected at least 3 hits for 'foo'" (hits >= 3),
   testCase "After logging 'foo' and 'bar', searching 'baz' gives 0 hits" $ do
@@ -56,18 +52,9 @@ tests config logger = testGroup "Unit Tests" [
         logTrace_ "foo"
         logTrace_ "bar"
       waitForLogger logger
-      refreshTestIndex config
-      threadDelay 1000000
       hits <- getNumHits config "baz"
       assertBool "expected zero hits for 'baz'"  (hits == 0)
   ]
-
-refreshTestIndex :: TestConfig -> IO ()
-refreshTestIndex TestConfig{..} =
-  void . withBH' $ refreshIndex testIndex
-
-  where
-    withBH' = withBH defaultManagerSettings testServer
 
 getNumHits :: TestConfig -> Text -> IO Int
 getNumHits TestConfig{..} query = do
