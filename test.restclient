@@ -1,4 +1,13 @@
 # -*- restclient -*-
+#
+# This file is for manual testing with restclient.el in Emacs.
+#
+# See
+#
+# * https://github.com/pashky/restclient.el
+# * http://emacsrocks.com/e15.html.
+#
+# for details on how to use restclient.el.
 
 :url  = localhost:9200
 :date = 2016-10-03
