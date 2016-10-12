@@ -108,3 +108,18 @@ test-suite log-test
   default-extensions: BangPatterns
                     , OverloadedStrings
                     , RecordWildCards
+
+test-suite log-test-integration
+  type:               exitcode-stdio-1.0
+  build-depends:      base,
+                      log,
+                      process,
+                      tasty,
+                      tasty-hunit
+  hs-source-dirs:     test
+  main-is:            IntegrationTest.hs
+  ghc-options:        -Wall -threaded
+  default-language:   Haskell2010
+  default-extensions: BangPatterns
+                    , OverloadedStrings
+                    , RecordWildCards
