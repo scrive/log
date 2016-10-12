@@ -2,12 +2,11 @@ module Main where
 
 import Log
 import Log.Backend.ElasticSearch
+import Test.ElasticSearch
 
 import System.Random
 import Test.Tasty
 import Test.Tasty.HUnit
-
-import Test.ElasticSearch
 
 tests :: ElasticSearchTestConfig -> Logger -> TestTree
 tests config logger = testGroup "Unit Tests" [
