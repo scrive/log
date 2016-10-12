@@ -1,5 +1,5 @@
 name:                log
-version:             0.5.3
+version:             0.5.4
 synopsis:            Structured logging solution with multiple backends
 
 description:         A library that provides a way to record structured
@@ -35,6 +35,7 @@ library
                        Log.Backend.ElasticSearch,
                        Log.Backend.PostgreSQL,
                        Log.Backend.StandardOutput,
+                       Log.Backend.StandardOutput.Bulk,
                        Log.Class,
                        Log.Data,
                        Log.Internal.Logger,
