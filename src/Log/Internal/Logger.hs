@@ -11,8 +11,9 @@ import Prelude
 
 import Log.Data
 
--- | A logging back-end that outputs 'LogMessage's using
--- e.g. PostgreSQL, Elasticsearch or stdout.
+-- | An object used for communication with a logger thread that
+-- outputs 'LogMessage's using e.g. PostgreSQL, Elasticsearch or
+-- stdout (depending on the back-end chosen).
 data Logger = Logger {
   loggerWriteMessage :: !(LogMessage -> IO ()) -- ^ Output a 'LogMessage'.
 , loggerWaitForWrite :: !(IO ())
@@ -25,7 +26,8 @@ data Logger = Logger {
 execLogger :: Logger -> LogMessage -> IO ()
 execLogger Logger{..} = loggerWriteMessage
 
--- | Wait until logs stored in an internal queue are serialized.
+-- | Wait until all 'LogMessage's stored in the internal queue are
+-- serialized.
 waitForLogger :: Logger -> IO ()
 waitForLogger Logger{..} = loggerWaitForWrite
 

@@ -47,7 +47,11 @@ data ElasticSearchConfig = ElasticSearchConfig {
 
 ----------------------------------------
 
--- | Create a 'Logger' that stores messages using Elasticsearch.
+-- | Start an asynchronous logger thread that stores messages using
+-- Elasticsearch.
+--
+-- Implemented using 'mkBulkLogger', see the note attached to that
+-- function.
 elasticSearchLogger ::
   ElasticSearchConfig -- ^ Configuration.
   -> IO Word32        -- ^ Generate a random 32-bit word for use in

@@ -10,7 +10,6 @@ module Log.Logger (
 import Control.Applicative
 import Control.Concurrent
 import Control.Concurrent.STM
-import Control.Exception
 import Control.Monad
 import Data.Monoid
 import Prelude
@@ -20,12 +19,33 @@ import qualified Data.Text.IO as T
 import Log.Data
 import Log.Internal.Logger
 
--- | Create a 'Logger' that consumes one queued message at a time.
+-- | Start a logger thread that consumes one queued message at a time.
 mkLogger :: T.Text -> (LogMessage -> IO ()) -> IO Logger
 mkLogger = mkLoggerImpl
   newTQueueIO isEmptyTQueue readTQueue writeTQueue $ return ()
 
--- | Create a 'Logger' that consumes all queued messages once per second.
+-- | Start a logger thread that consumes all queued messages once per second.
+--
+-- Note: if 'mkBulkLogger' is called directly from the main thread,
+-- some messages can be lost when the main thread shuts down because
+-- in that case child threads are not given a chance to clean up by
+-- the RTS. This is apparently a feature:
+-- <https://mail.haskell.org/pipermail/haskell-cafe/2014-February/112754.html>
+--
+-- To work around this, make your program entry point a child of the
+-- main program thread:
+--
+-- @
+-- import Control.Concurrent.Async
+--
+-- main :: IO ()
+-- main = do
+--    a <- async (main')
+--    wait a
+--
+-- main' :: IO ()
+-- main' = [...]
+-- @
 mkBulkLogger :: T.Text -> ([LogMessage] -> IO ()) -> IO Logger
 mkBulkLogger = mkLoggerImpl
   newSQueueIO isEmptySQueue readSQueue writeSQueue $ threadDelay 1000000
@@ -67,21 +87,33 @@ mkLoggerImpl :: IO queue
              -> IO Logger
 mkLoggerImpl newQueue isQueueEmpty readQueue writeQueue afterExecDo name exec = do
   (queue, inProgress) <- (,) <$> newQueue <*> newTVarIO False
-  mask $ \release -> do
-    void $ forkIO . (`finally` printLoggerTerminated) . release . forever $ do
+  void $ forkFinally (forever $ loop queue inProgress)
+                     (\_ -> cleanup queue inProgress)
+  return Logger {
+    loggerWriteMessage = atomically . writeQueue queue,
+    loggerWaitForWrite = atomically $ waitForWrite queue inProgress
+    }
+  where
+    loop queue inProgress = do
+      step queue inProgress
+      afterExecDo
+
+    step queue inProgress = do
       msgs <- atomically $ do
         writeTVar inProgress True
         readQueue queue
       exec msgs
       atomically $ writeTVar inProgress False
-      afterExecDo
-    let waitForWrite = do
-          isEmpty <- isQueueEmpty queue
-          isInProgress <- readTVar inProgress
-          when (not isEmpty || isInProgress) retry
-    return Logger {
-      loggerWriteMessage = atomically . writeQueue queue
-    , loggerWaitForWrite = atomically $ waitForWrite
-    }
-  where
+
+    cleanup queue inProgress = do
+      step queue inProgress
+      -- Don't call afterExecDo since it's either a no-op or
+      -- threadDelay.
+      printLoggerTerminated
+
+    waitForWrite queue inProgress = do
+      isEmpty <- isQueueEmpty queue
+      isInProgress <- readTVar inProgress
+      when (not isEmpty || isInProgress) retry
+
     printLoggerTerminated = T.putStrLn $ name <> ": logger thread terminated"

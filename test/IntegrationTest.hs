@@ -6,6 +6,7 @@ import Log.Backend.StandardOutput.Bulk
 
 import Data.List
 
+import Control.Concurrent.Async
 import Test.Tasty
 import Test.Tasty.HUnit
 import System.Environment
@@ -17,20 +18,23 @@ main = do
   case args of
     ["test-simple-stdout"] -> do
       logger <- stdoutLogger
-      runLogT "main" logger $ do
-        logTrace_ "foo"
+      a <- async (runLogT "main" logger $ logTrace_ "foo")
+      wait a
     ["test-bulk-stdout"] -> do
       logger <- bulkStdoutLogger
-      runLogT "main" logger $ do
-        logTrace_ "foo"
-    _ -> do
-      path <- getExecutablePath
-      defaultMain $ testGroup "Integration Tests" [
-        testCase "Log messages are not lost (simple stdout back-end)" $ do
-            out <- readProcess path ["test-simple-stdout"] ""
-            assertBool "Output doesn't contain 'foo'" $ "foo" `isInfixOf` out,
+      a <- async (runLogT "main" logger $ logTrace_ "foo")
+      wait a
+    _ -> runTests
 
-        testCase "Log messages are not lost (bulk stdout back-end)" $ do
-            out <- readProcess path ["test-bulk-stdout"] ""
-            assertBool "Output doesn't contain 'foo'" $ "foo" `isInfixOf` out
-        ]
+runTests :: IO ()
+runTests = do
+  path <- getExecutablePath
+  defaultMain $ testGroup "Integration Tests" [
+    testCase "Log messages are not lost (simple stdout back-end)" $ do
+        out <- readProcess path ["test-simple-stdout"] ""
+        assertBool "Output doesn't contain 'foo'" $ "foo" `isInfixOf` out,
+
+    testCase "Log messages are not lost (bulk stdout back-end)" $ do
+        out <- readProcess path ["test-bulk-stdout"] ""
+        assertBool "Output doesn't contain 'foo'" $ "foo" `isInfixOf` out
+    ]

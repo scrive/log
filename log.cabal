@@ -111,7 +111,8 @@ test-suite log-test
 
 test-suite log-test-integration
   type:               exitcode-stdio-1.0
-  build-depends:      base,
+  build-depends:      async,
+                      base,
                       log,
                       process,
                       tasty,

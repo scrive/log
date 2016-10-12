@@ -10,8 +10,11 @@ import Log.Data
 import Log.Internal.Logger
 import Log.Logger
 
--- | Create an asynchronous logger that prints messages to standard
--- output.
+-- | Start an asynchronous logger thread that prints messages to
+-- standard output.
+--
+-- Implemented using 'mkBulkLogger', see the note attached to that
+-- function.
 bulkStdoutLogger :: IO Logger
 bulkStdoutLogger = mkBulkLogger "stdout-bulk" $
                    mapM_ (T.putStrLn . showLogMessage Nothing)

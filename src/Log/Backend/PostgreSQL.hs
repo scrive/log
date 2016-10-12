@@ -26,7 +26,11 @@ import Log.Logger
 newtype InvalidEncodingRecoveryAttempt = Attempt Int
   deriving Enum
 
--- | Create a logger that inserts log messages into a PostgreSQL database.
+-- | Start an asynchronous logger thread that inserts log messages
+-- into a PostgreSQL database.
+--
+-- Implemented using 'mkBulkLogger', see the note attached to that
+-- function.
 pgLogger :: ConnectionSourceM IO -> IO Logger
 pgLogger cs = mkBulkLogger loggerName
             $ mapM_ (serialize $ Attempt 1) . chunksOf 1000
