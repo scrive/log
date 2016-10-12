@@ -103,6 +103,7 @@ test-suite log-test
                       text
   hs-source-dirs:     test
   main-is:            Test.hs
+  other-modules:      Test.ElasticSearch
   ghc-options:        -Wall -threaded
   default-language:   Haskell2010
   default-extensions: BangPatterns
