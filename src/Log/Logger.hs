@@ -12,7 +12,6 @@ import Control.Concurrent
 import Control.Concurrent.STM
 import Control.Exception
 import Control.Monad
-import Data.IORef
 import Data.Monoid
 import Prelude
 import qualified Data.Text as T
@@ -68,9 +67,8 @@ mkLoggerImpl :: IO queue
              -> IO Logger
 mkLoggerImpl newQueue isQueueEmpty readQueue writeQueue afterExecDo name exec = do
   (queue, inProgress) <- (,) <$> newQueue <*> newTVarIO False
-  finalizer <- newIORef ()
   mask $ \release -> do
-    tid <- forkIO . (`finally` printLoggerTerminated) . release . forever $ do
+    void $ forkIO . (`finally` printLoggerTerminated) . release . forever $ do
       msgs <- atomically $ do
         writeTVar inProgress True
         readQueue queue
@@ -81,13 +79,9 @@ mkLoggerImpl newQueue isQueueEmpty readQueue writeQueue afterExecDo name exec = 
           isEmpty <- isQueueEmpty queue
           isInProgress <- readTVar inProgress
           when (not isEmpty || isInProgress) retry
-    void . mkWeakIORef finalizer $ do
-      atomically waitForWrite
-      killThread tid
     return Logger {
       loggerWriteMessage = atomically . writeQueue queue
     , loggerWaitForWrite = atomically $ waitForWrite
-    , loggerFinalizers   = [finalizer]
     }
   where
     printLoggerTerminated = T.putStrLn $ name <> ": logger thread terminated"

@@ -6,7 +6,6 @@ module Log.Internal.Logger (
   , waitForLogger
   ) where
 
-import Data.IORef
 import Data.Monoid
 import Prelude
 
@@ -20,11 +19,6 @@ data Logger = Logger {
                      -- ^ Wait for the logger to output all messages
                      -- in its input queue (in the case logging is
                      -- done asynchronously).
-, loggerFinalizers   :: ![IORef ()]
-                     -- ^ When this list is garbage collected, the
-                     -- finalizers associated with each 'IORef' are
-                     -- run, ensuring that the logger shuts down
-                     -- properly.
 }
 
 -- | Execute logger to serialize a 'LogMessage'.
@@ -37,7 +31,7 @@ waitForLogger Logger{..} = loggerWaitForWrite
 
 -- | Composition of 'Logger' objects.
 instance Monoid Logger where
-  mempty = Logger (const $ return ()) (return ()) []
+  mempty = Logger (const $ return ()) (return ())
   l1 `mappend` l2 = Logger {
     loggerWriteMessage = \msg -> do
       loggerWriteMessage l1 msg
@@ -45,5 +39,4 @@ instance Monoid Logger where
   , loggerWaitForWrite = do
       loggerWaitForWrite l1
       loggerWaitForWrite l2
-  , loggerFinalizers = loggerFinalizers l1 ++ loggerFinalizers l2
   }

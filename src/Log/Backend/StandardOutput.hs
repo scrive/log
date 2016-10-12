@@ -16,7 +16,6 @@ simpleStdoutLogger :: Logger
 simpleStdoutLogger = Logger {
     loggerWriteMessage = T.putStrLn . showLogMessage Nothing
   , loggerWaitForWrite = return ()
-  , loggerFinalizers   = []
   }
 
 -- | Create a logger that prints messages to standard output.
