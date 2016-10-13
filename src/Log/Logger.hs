@@ -21,34 +21,52 @@ import Log.Internal.Logger
 
 -- | Start a logger thread that consumes one queued message at a time.
 mkLogger :: T.Text -> (LogMessage -> IO ()) -> IO Logger
-mkLogger = mkLoggerImpl
-  newTQueueIO isEmptyTQueue readTQueue writeTQueue $ return ()
+mkLogger name exec = mkLoggerImpl
+  newTQueueIO isEmptyTQueue readTQueue writeTQueue (return ())
+  name exec (return ())
 
--- | Start a logger thread that consumes all queued messages once per second.
+-- | Start an asynchronous logger thread that consumes all queued
+-- messages once per second.
 --
--- Note: if 'mkBulkLogger' is called directly from the main thread,
--- some messages can be lost when the main thread shuts down because
--- in that case child threads are not given a chance to clean up by
--- the RTS. This is apparently a feature:
+-- Note: some messages can be lost when the main thread shuts down
+-- without making sure that its children have finished because in that
+-- case child threads are not given a chance to clean up by the
+-- RTS. This is apparently a feature:
 -- <https://mail.haskell.org/pipermail/haskell-cafe/2014-February/112754.html>
 --
--- To work around this, make your program entry point a child of the
--- main program thread:
+-- To work around it, make sure that child threads that write to the
+-- log finish before the main thread. If you're passing a 'Logger'
+-- object around explicitly instead of using 'runLogT', you must also
+-- add a @`finally` waitForLogger logger@ block after you're done with
+-- the logger ('runLogT' does this automatically).
+--
+-- Problematic example:
+--
+-- @
+-- main :: IO ()
+-- main = do
+--    logger <- mkLogger
+--    void $ forkIO (runLogT "main" logger $ logTrace_ "foo")
+--    -- Main thread exits, child thread is aborted
+--    -- without a chance to do cleanup.
+-- @
+--
+-- Fixed example:
 --
 -- @
 -- import Control.Concurrent.Async
 --
 -- main :: IO ()
 -- main = do
---    a <- async (main')
+--    logger <- mkLogger
+--    a <- async (runLogT "main" logger $ logTrace_ "foo")
 --    wait a
---
--- main' :: IO ()
--- main' = [...]
+--    -- Main thread waits for its child
+--    -- to finish and do cleanup.
 -- @
-mkBulkLogger :: T.Text -> ([LogMessage] -> IO ()) -> IO Logger
+mkBulkLogger :: T.Text -> ([LogMessage] -> IO ()) -> IO () -> IO Logger
 mkBulkLogger = mkLoggerImpl
-  newSQueueIO isEmptySQueue readSQueue writeSQueue $ threadDelay 1000000
+  newSQueueIO isEmptySQueue readSQueue writeSQueue (threadDelay 1000000)
 
 ----------------------------------------
 
@@ -84,14 +102,17 @@ mkLoggerImpl :: IO queue
              -> IO ()
              -> T.Text
              -> (msgs -> IO ())
+             -> IO ()
              -> IO Logger
-mkLoggerImpl newQueue isQueueEmpty readQueue writeQueue afterExecDo name exec = do
+mkLoggerImpl newQueue isQueueEmpty readQueue writeQueue afterExecDo
+  name exec sync = do
   (queue, inProgress) <- (,) <$> newQueue <*> newTVarIO False
   void $ forkFinally (forever $ loop queue inProgress)
-                     (\_ -> cleanup queue inProgress)
+                     (\_ -> printLoggerTerminated)
   return Logger {
     loggerWriteMessage = atomically . writeQueue queue,
-    loggerWaitForWrite = atomically $ waitForWrite queue inProgress
+    loggerWaitForWrite = do atomically $ waitForWrite queue inProgress
+                            sync
     }
   where
     loop queue inProgress = do
@@ -104,12 +125,6 @@ mkLoggerImpl newQueue isQueueEmpty readQueue writeQueue afterExecDo name exec = 
         readQueue queue
       exec msgs
       atomically $ writeTVar inProgress False
-
-    cleanup queue inProgress = do
-      step queue inProgress
-      -- Don't call afterExecDo since it's either a no-op or
-      -- threadDelay.
-      printLoggerTerminated
 
     waitForWrite queue inProgress = do
       isEmpty <- isQueueEmpty queue

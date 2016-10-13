@@ -23,7 +23,6 @@ import Data.Time.Clock.POSIX
 import Data.Word
 import Database.Bloodhound hiding (Status)
 import Log
-import Log.Internal.Logger
 import Network.HTTP.Client
 import Prelude
 import TextShow
@@ -60,7 +59,7 @@ elasticSearchLogger ::
 elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
   checkElasticSearchConnection
   indexRef <- newIORef $ IndexName T.empty
-  (addElasticSearchSync indexRef) <$> (mkBulkLogger "ElasticSearch" $ \msgs -> do
+  mkBulkLogger "ElasticSearch" (\msgs -> do
     now <- getCurrentTime
     oldIndex <- readIORef indexRef
     -- Bloodhound doesn't support letting ES autogenerate IDs, so let's generate
@@ -129,16 +128,15 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
             return . second (H.adjust modifyData "data") $ jsonMsgs V.! n
           -- Attempt to put modified messages and ignore any further errors.
           void $ bulk (V.map (toBulk index baseID) dummyMsgs))
+    (elasticSearchSync indexRef)
   where
     server  = Server esServer
     mapping = MappingName esMapping
 
-    addElasticSearchSync :: (IORef IndexName) -> Logger -> Logger
-    addElasticSearchSync indexRef logger@Logger {..} =
-      let loggerWaitForWrite' = do loggerWaitForWrite
-                                   indexName <- readIORef indexRef
-                                   void . runBH_ $ refreshIndex indexName
-      in logger { loggerWaitForWrite = loggerWaitForWrite' }
+    elasticSearchSync :: IORef IndexName -> IO ()
+    elasticSearchSync indexRef = do
+      indexName <- readIORef indexRef
+      void . runBH_ $ refreshIndex indexName
 
     checkElasticSearchConnection :: IO ()
     checkElasticSearchConnection = try (void $ runBH_ listIndices) >>= \case

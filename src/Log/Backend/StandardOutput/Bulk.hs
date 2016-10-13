@@ -16,5 +16,6 @@ import Log.Logger
 -- Implemented using 'mkBulkLogger', see the note attached to that
 -- function.
 bulkStdoutLogger :: IO Logger
-bulkStdoutLogger = mkBulkLogger "stdout-bulk" $
-                   mapM_ (T.putStrLn . showLogMessage Nothing)
+bulkStdoutLogger = mkBulkLogger "stdout-bulk"
+                   (mapM_ $ T.putStrLn . showLogMessage Nothing)
+                   (return ())

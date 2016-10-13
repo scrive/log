@@ -43,16 +43,20 @@ newtype LogT m a = LogT { unLogT :: InnerLogT m a }
            ,MonadIO, MonadMask, MonadPlus, MonadThrow, MonadTrans)
 
 -- | Run a 'LogT' computation.
-runLogT :: Text     -- ^ Application component name to use.
+--
+-- Makes sure that the log is fully serialised on exit, even if the
+-- computation raises an exception.
+runLogT :: (MonadMask m, MonadIO m)
+        => Text     -- ^ Application component name to use.
         -> Logger   -- ^ The logging back-end to use.
         -> LogT m a -- ^ The 'LogT' computation to run.
         -> m a
-runLogT component logger m = runReaderT (unLogT m) LoggerEnv {
+runLogT component logger m = (runReaderT (unLogT m) LoggerEnv {
   leLogger = logger
 , leComponent = component
 , leDomain = []
 , leData = []
-}
+}) `finally` (liftIO $ waitForLogger logger)
 
 -- | Transform the computation inside a 'LogT'.
 mapLogT :: (m a -> n b) -> LogT m a -> LogT n b

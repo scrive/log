@@ -6,7 +6,6 @@ import Log.Backend.StandardOutput.Bulk
 import Log.Backend.ElasticSearch
 import Test.ElasticSearch
 
-import Control.Concurrent.Async
 import Data.List
 import System.Environment
 import System.Process
@@ -20,18 +19,14 @@ main = do
   case args of
     ["test-simple-stdout"] -> do
       logger <- stdoutLogger
-      a <- async (runLogT "log-test-integration" logger $ logTrace_ "kaboozle")
-      wait a
+      runLogT "log-test-integration" logger $ logTrace_ "kaboozle"
     ["test-bulk-stdout"] -> do
       logger <- bulkStdoutLogger
-      a <- async (runLogT "log-test-integration" logger $ logTrace_ "kaboozle")
-      wait a
+      runLogT "log-test-integration" logger $ logTrace_ "kaboozle"
     ["test-elasticsearch"] -> do
-      a <- async $ do
-        let config = defaultElasticSearchConfig
-        logger <- elasticSearchLogger config randomIO
-        runLogT "log-test-integration" logger $ logTrace_ "kaboozle"
-      wait a
+      let config = defaultElasticSearchConfig
+      logger <- elasticSearchLogger config randomIO
+      runLogT "log-test-integration" logger $ logTrace_ "kaboozle"
     _ -> runTests
 
 runTests :: IO ()

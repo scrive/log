@@ -33,7 +33,8 @@ newtype InvalidEncodingRecoveryAttempt = Attempt Int
 -- function.
 pgLogger :: ConnectionSourceM IO -> IO Logger
 pgLogger cs = mkBulkLogger loggerName
-            $ mapM_ (serialize $ Attempt 1) . chunksOf 1000
+              (mapM_ (serialize $ Attempt 1) . chunksOf 1000)
+              (return ())
   where
     loggerName :: IsString s => s
     loggerName = "PostgreSQL"

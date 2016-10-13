@@ -113,7 +113,6 @@ test-suite log-test
 test-suite log-test-integration
   type:               exitcode-stdio-1.0
   build-depends:      aeson,
-                      async,
                       base,
                       bloodhound,
                       bytestring,
