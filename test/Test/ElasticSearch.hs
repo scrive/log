@@ -10,7 +10,6 @@ import Log.Backend.ElasticSearch
 
 import Control.Monad
 import Data.Aeson
-import Data.Either (Either(..))
 import Data.Text (Text)
 import Data.Time
 import Database.Bloodhound
