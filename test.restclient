@@ -10,7 +10,7 @@
 # for details on how to use restclient.el.
 
 :url  = localhost:9200
-:date = 2016-10-04
+:date = 2016-10-13
 
 # Check that Elasticsearch is working.
 GET http://:url
@@ -89,4 +89,7 @@ POST http://:url/logs-:date/log/
 
 
 # Find a log entry
-GET http://:url/logs-:date/_search?q=foo
+GET http://:url/logs-:date/_search?q=kaboozle
+
+# Refresh the index
+POST http://:url/logs-:date/_refresh
