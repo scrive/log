@@ -46,7 +46,7 @@ before_install:
  - export PATH=/opt/ghc/$GHCVER/bin:/opt/cabal/$CABALVER/bin:$PATH
 
 install:
- - wget --no-check-certificate https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-$ELASTICSEARCH.tar.gz
+ - travis_retry wget --no-check-certificate https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-$ELASTICSEARCH.tar.gz
  - tar xzf elasticsearch-$ELASTICSEARCH.tar.gz
  - echo "path.repo = [\"/tmp\"]" >> ./elasticsearch-$ELASTICSEARCH/elasticsearch.yml
  - if [ "x$ELASTICSEARCH" = "x1.5.2" ]; then ES_VERSION_ARG=-v; else ES_VERSION_ARG=--version; fi
@@ -63,7 +63,7 @@ install:
 # Here starts the actual work to be performed for the package under test;
 # any command which exits with a non-zero exit code causes the build to fail.
 script:
- - curl -X GET http://localhost:9200
+ - travis_retry curl -X GET http://localhost:9200
  - if [ -f configure.ac ]; then autoreconf -i; fi
  # this builds all libraries and executables (including tests/benchmarks)
  - cabal new-build ${TEST} ${BENCH}
