@@ -116,6 +116,7 @@ test-suite log-test-integration
                       base,
                       bloodhound,
                       bytestring,
+                      exceptions,
                       http-client,
                       http-types,
                       log,
@@ -124,7 +125,8 @@ test-suite log-test-integration
                       tasty,
                       tasty-hunit,
                       time,
-                      text
+                      text,
+                      transformers
   hs-source-dirs:     test
   main-is:            IntegrationTest.hs
   other-modules:      Test.ElasticSearch

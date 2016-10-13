@@ -6,6 +6,8 @@ import Log.Backend.StandardOutput.Bulk
 import Log.Backend.ElasticSearch
 import Test.ElasticSearch
 
+import Control.Monad.Catch
+import Control.Monad.IO.Class
 import Data.List
 import System.Environment
 import System.Process
@@ -20,13 +22,16 @@ main = do
     ["test-simple-stdout"] -> do
       logger <- stdoutLogger
       runLogT "log-test-integration" logger $ logTrace_ "kaboozle"
+        `finally` (liftIO $ waitForLogger logger)
     ["test-bulk-stdout"] -> do
       logger <- bulkStdoutLogger
       runLogT "log-test-integration" logger $ logTrace_ "kaboozle"
+        `finally` (liftIO $ waitForLogger logger)
     ["test-elasticsearch"] -> do
       let config = defaultElasticSearchConfig
       logger <- elasticSearchLogger config randomIO
       runLogT "log-test-integration" logger $ logTrace_ "kaboozle"
+        `finally` (liftIO $ waitForLogger logger)
     _ -> runTests
 
 runTests :: IO ()

@@ -44,19 +44,22 @@ newtype LogT m a = LogT { unLogT :: InnerLogT m a }
 
 -- | Run a 'LogT' computation.
 --
--- Makes sure that the log is fully serialised on exit, even if the
--- computation raises an exception.
-runLogT :: (MonadMask m, MonadIO m)
-        => Text     -- ^ Application component name to use.
+-- Note that in the case of asynchronous/bulk loggers 'runLogT'
+-- doesn't guarantee that all messages are actually written to the log
+-- once it finishes. Add a @`finally` waitForLogger logger@ call to
+-- the top level of your application to fix this. See the example in
+-- 'mkBulkLogger'.
+runLogT :: Text     -- ^ Application component name to use.
         -> Logger   -- ^ The logging back-end to use.
         -> LogT m a -- ^ The 'LogT' computation to run.
         -> m a
-runLogT component logger m = (runReaderT (unLogT m) LoggerEnv {
+runLogT component logger m = runReaderT (unLogT m) LoggerEnv {
   leLogger = logger
 , leComponent = component
 , leDomain = []
 , leData = []
-}) `finally` (liftIO $ waitForLogger logger)
+} -- We can't do synchronisation here, since 'runLogT' can be invoked
+  -- quite often from the application (e.g. on every request).
 
 -- | Transform the computation inside a 'LogT'.
 mapLogT :: (m a -> n b) -> LogT m a -> LogT n b
