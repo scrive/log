@@ -26,7 +26,10 @@ mkLogger name exec = mkLoggerImpl
   name exec (return ())
 
 -- | Start an asynchronous logger thread that consumes all queued
--- messages once per second.
+-- messages once per second. To make sure that the messages get
+-- written out in the presence of exceptions, use high-level wrappers
+-- like 'withElasticSearchLogger' or 'withBulkStdOutLogger' instead of
+-- this function directly.
 --
 -- Note: some messages can be lost when the main thread shuts down
 -- without making sure that all logger threads have written out all
@@ -34,8 +37,9 @@ mkLogger name exec = mkLoggerImpl
 -- to clean up by the RTS. This is apparently a feature:
 -- <https://mail.haskell.org/pipermail/haskell-cafe/2014-February/112754.html>
 --
--- To work around this, add calls to @`finally` waitForLogger logger@
--- where appropriate in your application.
+-- To work around this issue, make sure that the main thread doesn't
+-- exit until all its children have terminated. The 'async' package
+-- makes this easy.
 --
 -- Problematic example:
 --
@@ -45,11 +49,11 @@ mkLogger name exec = mkLoggerImpl
 -- main :: IO ()
 -- main = do
 --    logger <- elasticSearchLogger
---    a <- async (runLogT "main" logger $ logTrace_ "foo")
---    wait a
---    -- If there's an exception in the child thread, the
---    -- main thread will exit and the logger thread
---    -- will be aborted without a chance to do cleanup.
+--    a <- async (withElasticSearchLogger $ \logger ->
+--                runLogT "main" logger $ logTrace_ "foo")
+--    -- Main thread exits without waiting for the child
+--    -- to finish and without giving the child a chance
+--    -- to do proper cleanup.
 -- @
 --
 -- Fixed example:
@@ -60,11 +64,12 @@ mkLogger name exec = mkLoggerImpl
 -- main :: IO ()
 -- main = do
 --    logger <- elasticSearchLogger
---    a <- async (runLogT "main" logger $ logTrace_ "foo")
---    wait a `finally` waitForLogger logger
---    -- If there's an exception in the child thread, the
---    -- main thread will force the logger thread to do cleanup
---    -- before exiting.
+--    a <- async (withElasticSearchLogger $ \logger ->
+--                runLogT "main" logger $ logTrace_ "foo")
+--    wait a
+--    -- Main thread waits for the child to finish, giving
+--    -- it a chance to shut down properly. This works even
+--    -- in the presence of exceptions in the child thread.
 -- @
 mkBulkLogger :: T.Text -> ([LogMessage] -> IO ()) -> IO () -> IO Logger
 mkBulkLogger = mkLoggerImpl

@@ -1,5 +1,5 @@
 -- | PostgreSQL logging back-end.
-module Log.Backend.PostgreSQL (pgLogger) where
+module Log.Backend.PostgreSQL (pgLogger, withPgLogger) where
 
 import Control.Applicative
 import Control.Concurrent
@@ -26,11 +26,21 @@ import Log.Logger
 newtype InvalidEncodingRecoveryAttempt = Attempt Int
   deriving Enum
 
+-- | Create a 'pgLogger' for the duration of the given action, and
+-- shut it down afterwards, making sure that all buffered messages are
+-- actually written to the DB.
+withPgLogger :: ConnectionSourceM IO -> (Logger -> IO r) -> IO r
+withPgLogger cs act = do
+  logger <- pgLogger cs
+  (act logger) `finally` (waitForLogger logger)
+
+{-# DEPRECATED pgLogger "Use 'withPgLogger' instead!" #-}
+
 -- | Start an asynchronous logger thread that inserts log messages
 -- into a PostgreSQL database.
 --
--- Implemented using 'mkBulkLogger', see the note attached to that
--- function.
+-- Please use 'withPglogger' instead, which is more exception-safe
+-- (see the note attached to 'mkBulkLogger').
 pgLogger :: ConnectionSourceM IO -> IO Logger
 pgLogger cs = mkBulkLogger loggerName
               (mapM_ (serialize $ Attempt 1) . chunksOf 1000)

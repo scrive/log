@@ -1,6 +1,7 @@
 -- | Elasticsearch logging back-end.
 module Log.Backend.ElasticSearch (
     ElasticSearchConfig(..)
+  , withElasticSearchLogger
   , elasticSearchLogger
 
   ) where
@@ -45,12 +46,22 @@ data ElasticSearchConfig = ElasticSearchConfig {
   } deriving (Eq, Show)
 
 ----------------------------------------
+-- | Create an 'elasticSearchLogger' for the duration of the given
+-- action, and shut it down afterwards, making sure that all buffered
+-- messages are actually written to the Elasticsearch store.
+withElasticSearchLogger :: ElasticSearchConfig -> IO Word32 -> (Logger -> IO r)
+                        -> IO r
+withElasticSearchLogger conf randGen act = do
+  logger <- elasticSearchLogger conf randGen
+  (act logger) `finally` (waitForLogger logger)
+
+{-# DEPRECATED elasticSearchLogger "Use 'withElasticSearchLogger' instead!" #-}
 
 -- | Start an asynchronous logger thread that stores messages using
 -- Elasticsearch.
 --
--- Implemented using 'mkBulkLogger', see the note attached to that
--- function.
+-- Please use 'withElasticSearchLogger' instead, which is more
+-- exception-safe (see the note attached to 'mkBulkLogger').
 elasticSearchLogger ::
   ElasticSearchConfig -- ^ Configuration.
   -> IO Word32        -- ^ Generate a random 32-bit word for use in

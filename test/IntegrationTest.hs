@@ -6,8 +6,6 @@ import Log.Backend.StandardOutput.Bulk
 import Log.Backend.ElasticSearch
 import Test.ElasticSearch
 
-import Control.Monad.Catch
-import Control.Monad.IO.Class
 import Data.List
 import System.Environment
 import System.Process
@@ -20,18 +18,15 @@ main = do
   args <- getArgs
   case args of
     ["test-simple-stdout"] -> do
-      logger <- stdoutLogger
-      runLogT "log-test-integration" logger $ logTrace_ "kaboozle"
-        `finally` (liftIO $ waitForLogger logger)
+      withSimpleStdOutLogger $ \logger ->
+        runLogT "log-test-integration" logger $ logTrace_ "kaboozle"
     ["test-bulk-stdout"] -> do
-      logger <- bulkStdoutLogger
-      runLogT "log-test-integration" logger $ logTrace_ "kaboozle"
-        `finally` (liftIO $ waitForLogger logger)
+      withBulkStdOutLogger $ \logger ->
+        runLogT "log-test-integration" logger $ logTrace_ "kaboozle"
     ["test-elasticsearch"] -> do
       let config = defaultElasticSearchConfig
-      logger <- elasticSearchLogger config randomIO
-      runLogT "log-test-integration" logger $ logTrace_ "kaboozle"
-        `finally` (liftIO $ waitForLogger logger)
+      withElasticSearchLogger config randomIO $ \logger ->
+        runLogT "log-test-integration" logger $ logTrace_ "kaboozle"
     _ -> runTests
 
 runTests :: IO ()
@@ -56,5 +51,4 @@ runTests = do
         hits <- getNumHits testConfig "kaboozle"
         assertBool "Elasticsearch returned zero hits for 'kaboozle'"
           $ (hits > 0)
-
     ]

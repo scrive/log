@@ -46,9 +46,8 @@ newtype LogT m a = LogT { unLogT :: InnerLogT m a }
 --
 -- Note that in the case of asynchronous/bulk loggers 'runLogT'
 -- doesn't guarantee that all messages are actually written to the log
--- once it finishes. Add a @`finally` waitForLogger logger@ call to
--- the top level of your application to fix this. See the example in
--- 'mkBulkLogger'.
+-- once it finishes. Use 'withPGLogger' or 'withElasticSearchLogger'
+-- for that.
 runLogT :: Text     -- ^ Application component name to use.
         -> Logger   -- ^ The logging back-end to use.
         -> LogT m a -- ^ The 'LogT' computation to run.

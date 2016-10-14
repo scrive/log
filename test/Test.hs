@@ -36,6 +36,6 @@ tests config logger = testGroup "Unit Tests" [
 main :: IO ()
 main = do
   let config = defaultElasticSearchConfig
-  logger <- elasticSearchLogger config randomIO
   testConfig <- defaultElasticSearchTestConfig config
-  defaultMain $ tests testConfig logger
+  withElasticSearchLogger config randomIO $ \logger ->
+    defaultMain $ tests testConfig logger
