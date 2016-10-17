@@ -5,11 +5,13 @@ module Log.Logger (
   , mkBulkLogger
   , execLogger
   , waitForLogger
+  , shutdownLogger
   ) where
 
 import Control.Applicative
 import Control.Concurrent
 import Control.Concurrent.STM
+import Control.Exception
 import Control.Monad
 import Data.Monoid
 import Prelude
@@ -113,15 +115,29 @@ mkLoggerImpl :: IO queue
              -> IO Logger
 mkLoggerImpl newQueue isQueueEmpty readQueue writeQueue afterExecDo
   name exec sync = do
-  (queue, inProgress) <- (,) <$> newQueue <*> newTVarIO False
-  void $ forkFinally (forever $ loop queue inProgress)
+  queue      <- newQueue
+  inProgress <- newTVarIO False
+  isRunning  <- newTVarIO True
+  tid <- forkFinally (forever $ loop queue inProgress)
                      (\_ -> cleanup queue inProgress)
   return Logger {
-    loggerWriteMessage = atomically . writeQueue queue,
-    loggerWaitForWrite = do atomically $ waitForWrite queue inProgress
-                            sync
+    loggerWriteMessage = \msg -> atomically $ do
+        checkIsRunning isRunning
+        writeQueue queue msg,
+    loggerWaitForWrite = do
+        atomically $ waitForWrite queue inProgress
+        sync,
+    loggerShutdown     = do
+        killThread tid
+        atomically $ writeTVar isRunning False
     }
   where
+    checkIsRunning isRunning' = do
+      isRunning <- readTVar isRunning'
+      when (not isRunning) $
+        throwSTM (AssertionFailed $ "Log.Logger.mkLoggerImpl: "
+                   ++ "attempt to write to a shut down logger")
+
     loop queue inProgress = do
       step queue inProgress
       afterExecDo

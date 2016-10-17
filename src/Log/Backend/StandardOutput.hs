@@ -19,7 +19,7 @@ import Log.Logger
 withSimpleStdOutLogger :: (Logger -> IO r) -> IO r
 withSimpleStdOutLogger act = do
   logger <- stdoutLogger
-  (act logger) `finally` waitForLogger logger
+  (act logger) `finally` (do { waitForLogger logger; shutdownLogger logger; })
 
 {-# DEPRECATED simpleStdoutLogger "Use 'withSimpleStdoutLogger'" #-}
 
@@ -28,6 +28,7 @@ simpleStdoutLogger :: Logger
 simpleStdoutLogger = Logger {
     loggerWriteMessage = T.putStrLn . showLogMessage Nothing
   , loggerWaitForWrite = hFlush stdout
+  , loggerShutdown     = return ()
   }
 
 {-# DEPRECATED stdoutLogger "Use 'withSimpleStdoutLogger'" #-}

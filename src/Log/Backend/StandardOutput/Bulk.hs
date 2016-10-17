@@ -9,15 +9,15 @@ import Prelude
 import qualified Data.Text.IO as T
 
 import Log.Data
-import Log.Internal.Logger
 import Log.Logger
 
 -- | Create a 'bulkStdoutLogger' for the duration of the given action,
 -- and shut it down afterwards, making sure that all buffered messages
 -- are actually written to stdout.
 withBulkStdOutLogger :: (Logger -> IO r) -> IO r
-withBulkStdOutLogger act = do logger <- bulkStdoutLogger
-                              (act logger) `finally` (waitForLogger logger)
+withBulkStdOutLogger act = do
+  logger <- bulkStdoutLogger
+  (act logger) `finally` (do { waitForLogger logger; shutdownLogger logger; })
 
 {-# DEPRECATED bulkStdoutLogger "Use 'withBulkStdOutLogger' instead!" #-}
 

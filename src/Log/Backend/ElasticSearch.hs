@@ -53,7 +53,7 @@ withElasticSearchLogger :: ElasticSearchConfig -> IO Word32 -> (Logger -> IO r)
                         -> IO r
 withElasticSearchLogger conf randGen act = do
   logger <- elasticSearchLogger conf randGen
-  (act logger) `finally` (waitForLogger logger)
+  (act logger) `finally` (do { waitForLogger logger; shutdownLogger logger; })
 
 {-# DEPRECATED elasticSearchLogger "Use 'withElasticSearchLogger' instead!" #-}
 

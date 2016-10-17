@@ -4,6 +4,7 @@ module Log.Internal.Logger (
     Logger(..)
   , execLogger
   , waitForLogger
+  , shutdownLogger
   ) where
 
 import Data.Monoid
@@ -20,6 +21,10 @@ data Logger = Logger {
                      -- ^ Wait for the logger to output all messages
                      -- in its input queue (in the case logging is
                      -- done asynchronously).
+, loggerShutdown     :: !(IO ())
+                     -- ^ Kill the logger thread. Subsequent attempts
+                     -- to write messages to the logger will raise an
+                     -- exception.
 }
 
 -- | Execute logger to serialize a 'LogMessage'.
@@ -31,9 +36,15 @@ execLogger Logger{..} = loggerWriteMessage
 waitForLogger :: Logger -> IO ()
 waitForLogger Logger{..} = loggerWaitForWrite
 
+-- | Shutdown the logger thread associated with this 'Logger'
+-- object. Subsequent attempts to write messages via this 'Logger'
+-- will result in an exception.
+shutdownLogger :: Logger -> IO ()
+shutdownLogger Logger{..} = loggerShutdown
+
 -- | Composition of 'Logger' objects.
 instance Monoid Logger where
-  mempty = Logger (const $ return ()) (return ())
+  mempty = Logger (const $ return ()) (return ()) (return ())
   l1 `mappend` l2 = Logger {
     loggerWriteMessage = \msg -> do
       loggerWriteMessage l1 msg
@@ -41,4 +52,7 @@ instance Monoid Logger where
   , loggerWaitForWrite = do
       loggerWaitForWrite l1
       loggerWaitForWrite l2
+  , loggerShutdown     = do
+      loggerShutdown l1
+      loggerShutdown l2
   }
