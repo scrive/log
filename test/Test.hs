@@ -2,36 +2,13 @@ module Main where
 
 import Log
 import Log.Backend.ElasticSearch
+import Test.ElasticSearch
 
-import Data.Aeson
-import Data.Either (Either(..))
-import Data.Text (Text)
-import Data.Time
-import Database.Bloodhound
-import Network.HTTP.Client
 import System.Random
 import Test.Tasty
 import Test.Tasty.HUnit
-import qualified Data.Text as T
 
-data TestConfig = TestConfig {
-  testServer :: Server,
-  testIndex  :: IndexName
-  }
-
-mkTestConfig :: ElasticSearchConfig -> IO TestConfig
-mkTestConfig ElasticSearchConfig{..} = do
-  now <- getCurrentTime
-  let testServer  = Server esServer
-      testIndex = IndexName $ T.concat
-                  [ esIndex
-                  , "-"
-                  , T.pack $ formatTime defaultTimeLocale "%F" now
-                  ]
-  return TestConfig{..}
-
-
-tests :: TestConfig -> Logger -> TestTree
+tests :: ElasticSearchTestConfig -> Logger -> TestTree
 tests config logger = testGroup "Unit Tests" [
   testCase "After logging 'foo', 'foo' is there" $ do
       runLogT "log-test" logger $ do
@@ -56,27 +33,9 @@ tests config logger = testGroup "Unit Tests" [
       assertBool "expected zero hits for 'baz'"  (hits == 0)
   ]
 
-getNumHits :: TestConfig -> Text -> IO Int
-getNumHits TestConfig{..} query = do
-  let tquery = TermQuery (Term "message" query) Nothing
-      search = mkSearch (Just tquery) Nothing
-  reply <- withBH' $ searchByIndex testIndex search
-  let result = eitherDecode (responseBody reply)
-        :: Either String (SearchResult Value)
-  case result of
-    Left err -> assertString err >> return (-1)
-    Right res -> return . hitsTotal . searchHits $ res
-
-  where
-    withBH' = withBH defaultManagerSettings testServer
-
 main :: IO ()
 main = do
-  let config = ElasticSearchConfig {
-        esServer  = "http://localhost:9200",
-        esIndex   = "logs",
-        esMapping = "log"
-        }
-  logger <- elasticSearchLogger config randomIO
-  testConfig <- mkTestConfig config
-  defaultMain $ tests testConfig logger
+  let config = defaultElasticSearchConfig
+  testConfig <- defaultElasticSearchTestConfig config
+  withElasticSearchLogger config randomIO $ \logger ->
+    defaultMain $ tests testConfig logger

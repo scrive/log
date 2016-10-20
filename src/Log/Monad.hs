@@ -43,6 +43,11 @@ newtype LogT m a = LogT { unLogT :: InnerLogT m a }
            ,MonadIO, MonadMask, MonadPlus, MonadThrow, MonadTrans)
 
 -- | Run a 'LogT' computation.
+--
+-- Note that in the case of asynchronous/bulk loggers 'runLogT'
+-- doesn't guarantee that all messages are actually written to the log
+-- once it finishes. Use 'withPGLogger' or 'withElasticSearchLogger'
+-- for that.
 runLogT :: Text     -- ^ Application component name to use.
         -> Logger   -- ^ The logging back-end to use.
         -> LogT m a -- ^ The 'LogT' computation to run.
@@ -52,7 +57,8 @@ runLogT component logger m = runReaderT (unLogT m) LoggerEnv {
 , leComponent = component
 , leDomain = []
 , leData = []
-}
+} -- We can't do synchronisation here, since 'runLogT' can be invoked
+  -- quite often from the application (e.g. on every request).
 
 -- | Transform the computation inside a 'LogT'.
 mapLogT :: (m a -> n b) -> LogT m a -> LogT n b
