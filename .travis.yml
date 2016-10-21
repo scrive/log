@@ -67,6 +67,9 @@ install:
  - sed -i 's/^jobs:/-- jobs:/' ${HOME}/.cabal/config
  - cabal new-build ${TEST} ${BENCH} --dep -j2
 
+before_script:
+  - sleep 10 # Elasticsearch can be a bit slow to start.
+
 # Here starts the actual work to be performed for the package under test;
 # any command which exits with a non-zero exit code causes the build to fail.
 script:
