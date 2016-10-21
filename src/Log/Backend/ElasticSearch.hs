@@ -1,6 +1,7 @@
 -- | Elasticsearch logging back-end.
 module Log.Backend.ElasticSearch (
     ElasticSearchConfig(..)
+  , defaultElasticSearchConfig
   , withElasticSearchLogger
   , elasticSearchLogger
 
@@ -44,6 +45,15 @@ data ElasticSearchConfig = ElasticSearchConfig {
   , esIndex   :: !T.Text -- ^ Elasticsearch index name.
   , esMapping :: !T.Text -- ^ Elasticsearch mapping name.
   } deriving (Eq, Show)
+
+-- | Sensible defaults for 'ElasticSearchConfig'.
+defaultElasticSearchConfig :: ElasticSearchConfig
+defaultElasticSearchConfig = ElasticSearchConfig {
+  esServer  = "http://localhost:9200",
+  esIndex   = "logs",
+  esMapping = "log"
+  }
+
 
 ----------------------------------------
 -- | Create an 'elasticSearchLogger' for the duration of the given

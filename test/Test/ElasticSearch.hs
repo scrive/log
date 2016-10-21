@@ -18,13 +18,6 @@ import Test.Tasty.HUnit
 
 import qualified Data.Text as T
 
-defaultElasticSearchConfig :: ElasticSearchConfig
-defaultElasticSearchConfig = ElasticSearchConfig {
-  esServer  = "http://localhost:9200",
-  esIndex   = "logs",
-  esMapping = "log"
-  }
-
 data ElasticSearchTestConfig = ElasticSearchTestConfig {
   testServer :: Server,
   testIndex  :: IndexName
