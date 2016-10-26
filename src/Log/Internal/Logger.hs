@@ -7,7 +7,7 @@ module Log.Internal.Logger (
   , shutdownLogger
   ) where
 
-import Data.Monoid
+import Data.Semigroup
 import Prelude
 
 import Log.Data
@@ -42,10 +42,8 @@ waitForLogger Logger{..} = loggerWaitForWrite
 shutdownLogger :: Logger -> IO ()
 shutdownLogger Logger{..} = loggerShutdown
 
--- | Composition of 'Logger' objects.
-instance Monoid Logger where
-  mempty = Logger (const $ return ()) (return ()) (return ())
-  l1 `mappend` l2 = Logger {
+instance Semigroup Logger where
+  l1 <> l2 = Logger {
     loggerWriteMessage = \msg -> do
       loggerWriteMessage l1 msg
       loggerWriteMessage l2 msg
@@ -56,3 +54,8 @@ instance Monoid Logger where
       loggerShutdown l1
       loggerShutdown l2
   }
+
+-- | Composition of 'Logger' objects.
+instance Monoid Logger where
+  mempty  = Logger (const $ return ()) (return ()) (return ())
+  mappend = (<>)

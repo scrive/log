@@ -18,8 +18,8 @@ import Data.Aeson
 import Data.Aeson.Encode.Pretty
 import Data.Bits
 import Data.IORef
-import Data.Monoid
 import Data.Monoid.Utils
+import Data.Semigroup
 import Data.Time
 import Data.Time.Clock.POSIX
 import Data.Word
