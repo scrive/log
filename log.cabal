@@ -58,6 +58,7 @@ library
                        monad-time >= 0.2,
                        mtl,
                        old-locale,
+                       semigroups,
                        split,
                        stm >=2.4,
                        text,
