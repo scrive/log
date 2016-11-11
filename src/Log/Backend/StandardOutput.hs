@@ -21,7 +21,7 @@ withSimpleStdOutLogger act = do
   logger <- stdoutLogger
   (act logger) `finally` (do { waitForLogger logger; shutdownLogger logger; })
 
-{-# DEPRECATED simpleStdoutLogger "Use 'withSimpleStdoutLogger'" #-}
+{-# DEPRECATED simpleStdoutLogger "Use 'withSimpleStdOutLogger'" #-}
 
 -- | Simple, synchronous logger that prints messages to standard output.
 simpleStdoutLogger :: Logger
@@ -31,7 +31,7 @@ simpleStdoutLogger = Logger {
   , loggerShutdown     = return ()
   }
 
-{-# DEPRECATED stdoutLogger "Use 'withSimpleStdoutLogger'" #-}
+{-# DEPRECATED stdoutLogger "Use 'withSimpleStdOutLogger'" #-}
 
 -- | Create a logger that prints messages to standard output.
 stdoutLogger :: IO Logger
