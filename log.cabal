@@ -45,7 +45,7 @@ library
 
   build-depends:       base <5,
                        aeson >=0.6.2.0,
-                       aeson-pretty >=0.8,
+                       aeson-pretty >=0.8.2,
                        base64-bytestring,
                        bloodhound,
                        bytestring,
