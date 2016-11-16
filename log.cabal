@@ -1,5 +1,5 @@
 name:                log
-version:             0.5.4
+version:             0.5.5
 synopsis:            Structured logging solution with multiple backends
 
 description:         A library that provides a way to record structured
@@ -36,6 +36,7 @@ library
                        Log.Backend.PostgreSQL,
                        Log.Backend.StandardOutput,
                        Log.Backend.StandardOutput.Bulk,
+                       Log.Backend.Text,
                        Log.Class,
                        Log.Data,
                        Log.Internal.Logger,
@@ -44,7 +45,7 @@ library
 
   build-depends:       base <5,
                        aeson >=0.6.2.0,
-                       aeson-pretty >=0.8,
+                       aeson-pretty >=0.8.2,
                        base64-bytestring,
                        bloodhound,
                        bytestring,
