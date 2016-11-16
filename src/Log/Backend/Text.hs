@@ -22,7 +22,7 @@ withSimpleTextLogger act = do
   let logger = Logger
         { loggerWriteMessage = \msg -> do
             let msg' = B.fromText $ showLogMessage Nothing msg
-            modifyIORef builderRef (<> msg' <> B.fromText "\n")
+            modifyIORef' builderRef (<> msg' <> B.fromText "\n")
         , loggerWaitForWrite = return ()
         , loggerShutdown     = return ()
         }
