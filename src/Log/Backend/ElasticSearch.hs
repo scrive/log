@@ -12,7 +12,6 @@ import Control.Arrow (second)
 import Control.Concurrent
 import Control.Exception
 import Control.Monad
-import Control.Monad.Extra (unlessM)
 import Control.Monad.IO.Class
 import Data.Aeson
 import Data.Aeson.Encode.Pretty
@@ -246,3 +245,17 @@ decodeReply :: Reply -> Value
 decodeReply reply = case eitherDecode' $ responseBody reply of
   Right body -> body
   Left  err  -> object ["decoding_error" .= err]
+
+----------------------------------------
+
+-- Following are inlined from http://hackage.haskell.org/package/extra
+-- Copyright Neil Mitchell 2014-2016 distributed under BSD3 license (same as
+-- this package).
+
+-- | Like 'unless', but where the test can be monadic.
+unlessM :: Monad m => m Bool -> m () -> m ()
+unlessM b f = ifM b (return ()) f
+
+-- | Like @if@, but where the test can be monadic.
+ifM :: Monad m => m Bool -> m a -> m a -> m a
+ifM b t f = do b <- b; if b then t else f
