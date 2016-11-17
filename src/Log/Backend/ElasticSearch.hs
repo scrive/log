@@ -10,9 +10,9 @@ module Log.Backend.ElasticSearch (
 import Control.Applicative
 import Control.Arrow (second)
 import Control.Concurrent
-import Control.Conditional (unlessM)
 import Control.Exception
 import Control.Monad
+import Control.Monad.Extra (unlessM)
 import Control.Monad.IO.Class
 import Data.Aeson
 import Data.Aeson.Encode.Pretty

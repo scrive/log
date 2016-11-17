@@ -49,7 +49,7 @@ library
                        base64-bytestring,
                        bloodhound,
                        bytestring,
-                       cond,
+                       extra >=0.3 && <1.6,
                        deepseq,
                        exceptions >=0.6,
                        hpqtypes >=1.5,
