@@ -10,7 +10,6 @@ module Log.Backend.ElasticSearch (
 import Control.Applicative
 import Control.Arrow (second)
 import Control.Concurrent
-import Control.Conditional (unlessM)
 import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class
@@ -102,7 +101,8 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
         -- There is an obvious race condition in the presence of more than one
         -- logger instance running, but it's irrelevant as attempting to create
         -- index that already exists is harmless.
-        unlessM (indexExists index) $ do
+        indexExists' <- indexExists index
+        unless indexExists' $ do
           -- Bloodhound is weird and won't let us create index using default
           -- settings, so pass these as the default ones.
           let indexSettings = IndexSettings {
