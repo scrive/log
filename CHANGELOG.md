@@ -1,4 +1,4 @@
-# log-0.5.6 (2016-11-22)
+# log-0.5.7 (2016-11-22)
 * Remove the dependency on 'cond'.
 * Fix formatting in 'mkBulkLogger' haddocks (#16).
 * Generalise the types of 'logAttention', 'logInfo' and 'logTrace'
