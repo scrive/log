@@ -50,9 +50,9 @@ mkLogger name exec = mkLoggerImpl
 --
 -- main :: IO ()
 -- main = do
---    logger <- elasticSearchLogger
---    a <- async (withElasticSearchLogger $ \logger ->
---                runLogT "main" logger $ logTrace_ "foo")
+--    logger \<- 'Log.Backend.ElasticSearch.elasticSearchLogger'
+--    a \<- 'Control.Concurrent.Async.async' ('Log.Backend.ElasticSearch.withElasticSearchLogger' $ \\logger ->
+--                'Log.Monad.runLogT' "main" logger $ 'Log.Class.logTrace_' "foo")
 --    -- Main thread exits without waiting for the child
 --    -- to finish and without giving the child a chance
 --    -- to do proper cleanup.
@@ -65,10 +65,10 @@ mkLogger name exec = mkLoggerImpl
 --
 -- main :: IO ()
 -- main = do
---    logger <- elasticSearchLogger
---    a <- async (withElasticSearchLogger $ \logger ->
---                runLogT "main" logger $ logTrace_ "foo")
---    wait a
+--    logger \<- 'Log.Backend.ElasticSearch.elasticSearchLogger'
+--    a \<- 'Control.Concurrent.Async.async' ('Log.Backend.ElasticSearch.withElasticSearchLogger' $ \\logger ->
+--                'Log.Monad.runLogT' "main" logger $ 'Log.Class.logTrace_' "foo")
+--    'Control.Concurrent.Async.wait' a
 --    -- Main thread waits for the child to finish, giving
 --    -- it a chance to shut down properly. This works even
 --    -- in the presence of exceptions in the child thread.
