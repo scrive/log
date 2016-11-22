@@ -3,6 +3,7 @@ module Log.Logger (
     Logger
   , mkLogger
   , mkBulkLogger
+  , withLogger
   , execLogger
   , waitForLogger
   , shutdownLogger
@@ -30,8 +31,9 @@ mkLogger name exec = mkLoggerImpl
 -- | Start an asynchronous logger thread that consumes all queued
 -- messages once per second. To make sure that the messages get
 -- written out in the presence of exceptions, use high-level wrappers
--- like 'withElasticSearchLogger' or 'withBulkStdOutLogger' instead of
--- this function directly.
+-- like 'withLogger', 'Log.Backend.ElasticSearch.withElasticSearchLogger' or
+-- 'Log.Backend.StandardOutput.Bulk.withBulkStdOutLogger'
+-- instead of this function directly.
 --
 -- Note: some messages can be lost when the main thread shuts down
 -- without making sure that all logger threads have written out all
@@ -76,6 +78,13 @@ mkLogger name exec = mkLoggerImpl
 mkBulkLogger :: T.Text -> ([LogMessage] -> IO ()) -> IO () -> IO Logger
 mkBulkLogger = mkLoggerImpl
   newSQueueIO isEmptySQueue readSQueue writeSQueue (threadDelay 1000000)
+
+-- | 'bracket' like execution of an 'IO' action, verifying all messages
+-- are properly logged. See 'mkBulkLogger'.
+withLogger :: Logger -> (Logger -> IO r) -> IO r
+withLogger logger act = act logger `finally` cleanup
+  where
+    cleanup = waitForLogger logger >> shutdownLogger logger
 
 ----------------------------------------
 

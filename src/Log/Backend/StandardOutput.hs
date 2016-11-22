@@ -6,7 +6,6 @@ module Log.Backend.StandardOutput (
   ) where
 
 import Prelude
-import Control.Exception
 import qualified Data.Text.IO as T
 import System.IO
 
@@ -19,7 +18,7 @@ import Log.Logger
 withSimpleStdOutLogger :: (Logger -> IO r) -> IO r
 withSimpleStdOutLogger act = do
   logger <- stdoutLogger
-  (act logger) `finally` (do { waitForLogger logger; shutdownLogger logger; })
+  withLogger logger act
 
 {-# DEPRECATED simpleStdoutLogger "Use 'withSimpleStdOutLogger'" #-}
 
