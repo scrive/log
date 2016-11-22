@@ -32,7 +32,7 @@ newtype InvalidEncodingRecoveryAttempt = Attempt Int
 withPgLogger :: ConnectionSourceM IO -> (Logger -> IO r) -> IO r
 withPgLogger cs act = do
   logger <- pgLogger cs
-  (act logger) `finally` (do { waitForLogger logger; shutdownLogger logger; })
+  withLogger logger act
 
 {-# DEPRECATED pgLogger "Use 'withPgLogger' instead!" #-}
 

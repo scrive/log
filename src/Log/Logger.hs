@@ -3,6 +3,7 @@ module Log.Logger (
     Logger
   , mkLogger
   , mkBulkLogger
+  , withLogger
   , execLogger
   , waitForLogger
   , shutdownLogger
@@ -30,8 +31,9 @@ mkLogger name exec = mkLoggerImpl
 -- | Start an asynchronous logger thread that consumes all queued
 -- messages once per second. To make sure that the messages get
 -- written out in the presence of exceptions, use high-level wrappers
--- like 'withElasticSearchLogger' or 'withBulkStdOutLogger' instead of
--- this function directly.
+-- like 'withLogger', 'Log.Backend.ElasticSearch.withElasticSearchLogger' or
+-- 'Log.Backend.StandardOutput.Bulk.withBulkStdOutLogger'
+-- instead of this function directly.
 --
 -- Note: some messages can be lost when the main thread shuts down
 -- without making sure that all logger threads have written out all
@@ -50,9 +52,9 @@ mkLogger name exec = mkLoggerImpl
 --
 -- main :: IO ()
 -- main = do
---    logger <- elasticSearchLogger
---    a <- async (withElasticSearchLogger $ \logger ->
---                runLogT "main" logger $ logTrace_ "foo")
+--    logger \<- 'Log.Backend.ElasticSearch.elasticSearchLogger'
+--    a \<- 'Control.Concurrent.Async.async' ('Log.Backend.ElasticSearch.withElasticSearchLogger' $ \\logger ->
+--                'Log.Monad.runLogT' "main" logger $ 'Log.Class.logTrace_' "foo")
 --    -- Main thread exits without waiting for the child
 --    -- to finish and without giving the child a chance
 --    -- to do proper cleanup.
@@ -65,10 +67,10 @@ mkLogger name exec = mkLoggerImpl
 --
 -- main :: IO ()
 -- main = do
---    logger <- elasticSearchLogger
---    a <- async (withElasticSearchLogger $ \logger ->
---                runLogT "main" logger $ logTrace_ "foo")
---    wait a
+--    logger \<- 'Log.Backend.ElasticSearch.elasticSearchLogger'
+--    a \<- 'Control.Concurrent.Async.async' ('Log.Backend.ElasticSearch.withElasticSearchLogger' $ \\logger ->
+--                'Log.Monad.runLogT' "main" logger $ 'Log.Class.logTrace_' "foo")
+--    'Control.Concurrent.Async.wait' a
 --    -- Main thread waits for the child to finish, giving
 --    -- it a chance to shut down properly. This works even
 --    -- in the presence of exceptions in the child thread.
@@ -76,6 +78,13 @@ mkLogger name exec = mkLoggerImpl
 mkBulkLogger :: T.Text -> ([LogMessage] -> IO ()) -> IO () -> IO Logger
 mkBulkLogger = mkLoggerImpl
   newSQueueIO isEmptySQueue readSQueue writeSQueue (threadDelay 1000000)
+
+-- | 'bracket' like execution of an 'IO' action, verifying all messages
+-- are properly logged. See 'mkBulkLogger'.
+withLogger :: Logger -> (Logger -> IO r) -> IO r
+withLogger logger act = act logger `finally` cleanup
+  where
+    cleanup = waitForLogger logger >> shutdownLogger logger
 
 ----------------------------------------
 

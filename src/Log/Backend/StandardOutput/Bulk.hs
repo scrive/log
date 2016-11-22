@@ -4,7 +4,6 @@ module Log.Backend.StandardOutput.Bulk (
     bulkStdoutLogger
   ) where
 
-import Control.Exception
 import Prelude
 import qualified Data.Text.IO as T
 
@@ -17,7 +16,7 @@ import Log.Logger
 withBulkStdOutLogger :: (Logger -> IO r) -> IO r
 withBulkStdOutLogger act = do
   logger <- bulkStdoutLogger
-  (act logger) `finally` (do { waitForLogger logger; shutdownLogger logger; })
+  withLogger logger act
 
 {-# DEPRECATED bulkStdoutLogger "Use 'withBulkStdOutLogger' instead!" #-}
 
