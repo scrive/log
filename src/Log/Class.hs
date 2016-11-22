@@ -58,18 +58,18 @@ controlT f = liftWith f >>= restoreT . return
 
 -- | Log a message and its associated data using current time as the
 -- event time and the 'LogAttention' log level.
-logAttention :: MonadLog m => T.Text -> Value -> m ()
-logAttention = logNow LogAttention
+logAttention :: (MonadLog m, ToJSON a) => T.Text -> a -> m ()
+logAttention msg = logNow LogAttention msg . toJSON
 
 -- | Log a message and its associated data using current time as the
 -- event time and the 'LogInfo' log level.
-logInfo :: MonadLog m => T.Text -> Value -> m ()
-logInfo = logNow LogInfo
+logInfo :: (MonadLog m, ToJSON a) => T.Text -> a -> m ()
+logInfo msg = logNow LogInfo msg . toJSON
 
 -- | Log a message and its associated data using current time as the
 -- event time and the 'LogTrace' log level.
-logTrace :: MonadLog m => T.Text -> Value -> m ()
-logTrace = logNow LogTrace
+logTrace :: (MonadLog m, ToJSON a) => T.Text -> a -> m ()
+logTrace msg = logNow LogTrace msg . toJSON
 
 -- | Like 'logAttention', but without any additional associated data.
 logAttention_ :: MonadLog m => T.Text -> m ()
