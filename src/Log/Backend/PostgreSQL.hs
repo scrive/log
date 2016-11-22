@@ -22,6 +22,7 @@ import qualified Data.Vector as V
 
 import Log.Data
 import Log.Logger
+import Log.Internal.Logger
 
 newtype InvalidEncodingRecoveryAttempt = Attempt Int
   deriving Enum

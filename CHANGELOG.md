@@ -1,3 +1,6 @@
+# log-0.6 (2016-11-22)
+* Moved 'withLogger' to 'Log.Internal.Logger'.
+
 # log-0.5.7 (2016-11-22)
 * Remove the dependency on 'cond'.
 * Fix formatting in 'mkBulkLogger' haddocks (#16).

@@ -24,6 +24,7 @@ import Data.Time.Clock.POSIX
 import Data.Word
 import Database.Bloodhound hiding (Status)
 import Log
+import Log.Internal.Logger
 import Network.HTTP.Client
 import Prelude
 import TextShow

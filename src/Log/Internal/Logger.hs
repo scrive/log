@@ -5,9 +5,11 @@ module Log.Internal.Logger (
   , execLogger
   , waitForLogger
   , shutdownLogger
+  , withLogger
   ) where
 
 import Data.Semigroup
+import Control.Exception
 import Prelude
 
 import Log.Data
@@ -41,6 +43,13 @@ waitForLogger Logger{..} = loggerWaitForWrite
 -- will result in an exception.
 shutdownLogger :: Logger -> IO ()
 shutdownLogger Logger{..} = loggerShutdown
+
+-- | 'bracket'-like execution of an 'IO' action, verifying all messages
+-- are properly logged. See 'mkBulkLogger'.
+withLogger :: Logger -> (Logger -> IO r) -> IO r
+withLogger logger act = act logger `finally` cleanup
+  where
+    cleanup = waitForLogger logger >> shutdownLogger logger
 
 instance Semigroup Logger where
   l1 <> l2 = Logger {

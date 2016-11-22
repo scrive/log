@@ -9,6 +9,7 @@ import qualified Data.Text.IO as T
 
 import Log.Data
 import Log.Logger
+import Log.Internal.Logger
 
 -- | Create a 'bulkStdoutLogger' for the duration of the given action,
 -- and shut it down afterwards, making sure that all buffered messages
