@@ -29,7 +29,7 @@ main = do
         esIndex   = "logs",
         esMapping = "log"
         }
-  logger <- elasticSearchLogger config randomIO
-  runLogT "main" logger $ do
-    logTrace_ "foo"
+  withElasticSearchLogger config randomIO $ \logger -> do
+    runLogT "main" logger $ do
+      logTrace_ "foo"
 ```
