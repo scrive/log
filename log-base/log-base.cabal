@@ -1,0 +1,72 @@
+name:                log-base
+version:             0.7
+synopsis:            Structured logging solution (base package)
+
+description:         A library that provides a way to record structured log
+                     messages. Use this package in conjunction with
+                     'log-elasticsearch' or 'log-postgres', depending
+                     on which back end you need. Use the 'log' library
+                     if you need all back ends.
+
+
+homepage:            https://github.com/scrive/log
+license:             BSD3
+license-file:        LICENSE
+author:              Scrive AB
+maintainer:          Andrzej Rybczak <andrzej@rybczak.net>,
+                     Jonathan Jouty <jonathan@scrive.com>,
+                     Mikhail Glushenkov <mikhail@scrive.com>,
+                     Oleg Grenrus <oleg.grenrus@iki.fi>
+copyright:           Scrive AB
+category:            System
+build-type:          Simple
+cabal-version:       >=1.10
+tested-with:         GHC == 7.8.4, GHC == 7.10.3, GHC == 8.0.1
+
+Source-repository head
+  Type:     git
+  Location: https://github.com/scrive/log.git
+
+library
+  exposed-modules:     Log,
+                       Log.Backend.StandardOutput,
+                       Log.Backend.StandardOutput.Bulk,
+                       Log.Backend.Text,
+                       Log.Class,
+                       Log.Data,
+                       Log.Internal.Logger,
+                       Log.Logger,
+                       Log.Monad
+  build-depends:       base <5,
+                       aeson >=0.11.0.0,
+                       aeson-pretty >=0.8.2,
+                       bytestring,
+                       deepseq,
+                       exceptions >=0.6,
+                       monad-control >=0.3,
+                       monad-time >= 0.2,
+                       mtl,
+                       semigroups,
+                       stm >=2.4,
+                       text,
+                       time >= 1.5,
+                       transformers-base,
+                       unordered-containers
+  hs-source-dirs:      src
+
+  ghc-options:         -O2 -Wall -funbox-strict-fields
+
+  default-language:   Haskell2010
+  default-extensions: BangPatterns
+                    , FlexibleContexts
+                    , FlexibleInstances
+                    , GeneralizedNewtypeDeriving
+                    , LambdaCase
+                    , MultiParamTypeClasses
+                    , NoImplicitPrelude
+                    , OverloadedStrings
+                    , RankNTypes
+                    , RecordWildCards
+                    , ScopedTypeVariables
+                    , TypeFamilies
+                    , UndecidableInstances

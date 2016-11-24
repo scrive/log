@@ -1,5 +1,5 @@
 name:                log
-version:             0.6
+version:             0.7
 synopsis:            Structured logging solution with multiple backends
 
 description:         A library that provides a way to record structured
@@ -19,7 +19,8 @@ license-file:        LICENSE
 author:              Scrive AB
 maintainer:          Andrzej Rybczak <andrzej@rybczak.net>,
                      Jonathan Jouty <jonathan@scrive.com>,
-                     Mikhail Glushenkov <mikhail@scrive.com>
+                     Mikhail Glushenkov <mikhail@scrive.com>,
+                     Oleg Grenrus <oleg.grenrus@iki.fi>
 copyright:           Scrive AB
 category:            System
 build-type:          Simple
@@ -44,49 +45,16 @@ library
                        Log.Monad
 
   build-depends:       base <5,
-                       aeson >=0.11.0.0,
-                       aeson-pretty >=0.8.2,
-                       base64-bytestring,
-                       bloodhound >= 0.11.1,
-                       bytestring,
-                       deepseq,
-                       exceptions >=0.6,
-                       hpqtypes >=1.5,
-                       http-client,
-                       lifted-base,
-                       monad-control >=0.3,
-                       monad-time >= 0.2,
-                       mtl,
-                       old-locale,
-                       semigroups,
-                       split,
-                       stm >=2.4,
-                       text,
-                       text-show >= 2,
-                       time >= 1.5,
-                       transformers,
-                       transformers-base,
-                       unordered-containers,
-                       vector
+                       log-base >= 0.7,
+                       log-elasticsearch >= 0.7,
+                       log-postgres >= 0.7
 
   hs-source-dirs:      src
 
   ghc-options:         -O2 -Wall -funbox-strict-fields
 
   default-language:   Haskell2010
-  default-extensions: BangPatterns
-                    , FlexibleContexts
-                    , FlexibleInstances
-                    , GeneralizedNewtypeDeriving
-                    , LambdaCase
-                    , MultiParamTypeClasses
-                    , NoImplicitPrelude
-                    , OverloadedStrings
-                    , RankNTypes
-                    , RecordWildCards
-                    , ScopedTypeVariables
-                    , TypeFamilies
-                    , UndecidableInstances
+  default-extensions: PackageImports
 
 test-suite log-test
   type:               exitcode-stdio-1.0

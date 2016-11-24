@@ -79,20 +79,19 @@ script:
  - cabal new-build ${TEST} ${BENCH}
 
  # there's no 'cabal new-test' yet, so let's emulate for now
+ - cd log
  - SRC_BASENAME=$(cabal info . | awk '{print $2;exit}')
  - TESTS=( $(awk 'tolower($0) ~ /^test-suite / { print $2 }' *.cabal) );
    shopt -s globstar;
    RC=true; for T in ${TESTS[@]}; do echo "== $T ==";
-   if dist-newstyle/build/**/$SRC_BASENAME/**/build/$T/$T; then echo "= $T OK =";
+   if ../dist-newstyle/build/**/$SRC_BASENAME/**/build/$T/$T; then echo "= $T OK =";
    else echo "= $T FAILED ="; RC=false; fi; done; $RC
- - cabal sdist # test that a source-distribution can be generated
+ - cd ..
 
- # Check that the resulting source distribution can be built w/o and w tests
- - tar -C dist/ -xf dist/$SRC_BASENAME.tar.gz
- - "echo 'packages: .' > dist/$SRC_BASENAME/cabal.project"
- - cd dist/$SRC_BASENAME/
- - cabal new-build --disable-tests --disable-benchmarks
- - rm -rf ./dist-newstyle
- - cabal new-build ${TEST} ${BENCH}
+ # Check that a source distribution can be generated and built w/o and w tests
+ - (cd log-base && ../check_sdist.sh)
+ - (cd log-elasticsearch && ../check_sdist.sh)
+ - (cd log-postgres && ../check_sdist.sh)
+ - (cd log && ../check_sdist.sh)
 
 # EOF
