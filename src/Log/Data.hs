@@ -8,6 +8,7 @@ module Log.Data (
   ) where
 
 import Control.DeepSeq
+import Control.Applicative
 import Data.Aeson
 import Data.Aeson.Encode.Pretty
 import Data.Aeson.Types
@@ -16,22 +17,36 @@ import Data.Time
 import Prelude
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
+import qualified Data.Monoid as Monoid
 
 -- | Available log levels.
 data LogLevel = LogAttention | LogInfo | LogTrace
   deriving (Bounded, Eq, Ord, Show)
 
+-- | This function is partial.
 readLogLevel :: T.Text -> LogLevel
-readLogLevel "attention" = LogAttention
-readLogLevel "info"      = LogInfo
-readLogLevel "trace"     = LogTrace
-readLogLevel level       = error $ "readLogLevel: unknown level: "
-                           ++ T.unpack level
+readLogLevel = either error id . readLogLevelEither
+{-# INLINE readLogLevel #-}
+
+readLogLevelEither :: T.Text -> Either String LogLevel
+readLogLevelEither "attention" = Right LogAttention
+readLogLevelEither "info"      = Right LogInfo
+readLogLevelEither "trace"     = Right LogTrace
+readLogLevelEither level       = Left $ "readLogLevel: unknown level: "
+                                 ++ T.unpack level
 
 showLogLevel :: LogLevel -> T.Text
 showLogLevel LogAttention = "attention"
 showLogLevel LogInfo      = "info"
 showLogLevel LogTrace     = "trace"
+
+instance ToJSON LogLevel where
+  toJSON = toJSON . showLogLevel
+  toEncoding = toEncoding . showLogLevel
+
+instance FromJSON LogLevel where
+  parseJSON = withText "LogLevel" $
+    either fail pure . readLogLevelEither
 
 instance NFData LogLevel where
   rnf = (`seq` ())
@@ -80,10 +95,29 @@ instance ToJSON LogMessage where
       "component" .= lmComponent
     , "domain"    .= lmDomain
     , "time"      .= lmTime
-    , "level"     .= showLogLevel lmLevel
+    , "level"     .= lmLevel
     , "message"   .= lmMessage
     , "data"      .= lmData
     ]
+
+  toEncoding LogMessage{..} = pairs $ Monoid.mconcat [
+      "component" .= lmComponent
+    , "domain"    .= lmDomain
+    , "time"      .= lmTime
+    , "level"     .= lmLevel
+    , "message"   .= lmMessage
+    , "data"      .= lmData
+    ]
+
+instance FromJSON LogMessage where
+  parseJSON = withObject "LogMessage" $ \obj -> LogMessage
+    -- to suppress warnings
+    Control.Applicative.<$> obj .: "component"
+    <*> obj .: "domain"
+    <*> obj .: "time"
+    <*> obj .: "level"
+    <*> obj .: "message"
+    <*> obj .: "data"
 
 instance NFData LogMessage where
   rnf LogMessage{..} = rnf lmComponent
