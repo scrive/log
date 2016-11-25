@@ -1,0 +1,62 @@
+name:                log-postgres
+version:             0.7
+synopsis:            Structured logging solution (PostgreSQL back end)
+
+description:         PostgreSQL back end for the 'log' library.
+
+homepage:            https://github.com/scrive/log
+license:             BSD3
+license-file:        LICENSE
+author:              Scrive AB
+maintainer:          Andrzej Rybczak <andrzej@rybczak.net>,
+                     Jonathan Jouty <jonathan@scrive.com>,
+                     Mikhail Glushenkov <mikhail@scrive.com>,
+                     Oleg Grenrus <oleg.grenrus@iki.fi>
+copyright:           Scrive AB
+category:            System
+build-type:          Simple
+cabal-version:       >=1.10
+tested-with:         GHC == 7.8.4, GHC == 7.10.3, GHC == 8.0.1
+
+Source-repository head
+  Type:     git
+  Location: https://github.com/scrive/log.git
+
+library
+  exposed-modules:     Log.Backend.PostgreSQL
+  build-depends:       base <5,
+                       log-base >= 0.7,
+                       aeson >=0.11.0.0,
+                       aeson-pretty >=0.8.2,
+                       bytestring,
+                       base64-bytestring,
+                       deepseq,
+                       hpqtypes >=1.5,
+                       http-client,
+                       lifted-base,
+                       mtl,
+                       semigroups,
+                       split,
+                       text,
+                       text-show >= 2,
+                       time >= 1.5,
+                       unordered-containers,
+                       vector
+  hs-source-dirs:      src
+
+  ghc-options:         -O2 -Wall -funbox-strict-fields
+
+  default-language:   Haskell2010
+  default-extensions: BangPatterns
+                    , FlexibleContexts
+                    , FlexibleInstances
+                    , GeneralizedNewtypeDeriving
+                    , LambdaCase
+                    , MultiParamTypeClasses
+                    , NoImplicitPrelude
+                    , OverloadedStrings
+                    , RankNTypes
+                    , RecordWildCards
+                    , ScopedTypeVariables
+                    , TypeFamilies
+                    , UndecidableInstances

@@ -17,7 +17,6 @@ import Data.Aeson
 import Data.Aeson.Encode.Pretty
 import Data.Bits
 import Data.IORef
-import Data.Monoid.Utils
 import Data.Semigroup
 import Data.Time
 import Data.Time.Clock.POSIX
@@ -113,8 +112,8 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
           void $ createIndex indexSettings index
           reply <- putMapping index mapping LogsMapping
           when (not $ isSuccess reply) $ do
-            error $ "ElasticSearch: error while creating mapping:"
-              <+> T.unpack (T.decodeUtf8 . BSL.toStrict . jsonToBSL
+            error $ "ElasticSearch: error while creating mapping: "
+              <> T.unpack (T.decodeUtf8 . BSL.toStrict . jsonToBSL
                             $ decodeReply reply)
         liftIO $ writeIORef indexRef index
       let jsonMsgs = V.fromList $ map (toJsonMsg now) $ zip [1..] msgs
@@ -134,7 +133,7 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
             return (hasErrors, items)
       case result of
         Nothing -> liftIO . BSL.putStrLn
-          $ "ElasticSearch: unexpected response:" <+> jsonToBSL replyBody
+          $ "ElasticSearch: unexpected response: " <> jsonToBSL replyBody
         Just (hasErrors, items) -> when hasErrors $ do
           -- If any message failed to be inserted because of type mismatch, go
           -- back to them, replace their data with elastic search error and put
