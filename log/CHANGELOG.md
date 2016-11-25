@@ -1,6 +1,8 @@
 # log-0.7 (2016-11-25)
 * Split into four libraries (log, log-base, log-postgres,
   log-elasticsearch).
+* Improved documentation (#22).
+* Implement 'toEncoding' directly in 'ToJSON' instances (#21).
 
 # log-0.6 (2016-11-22)
 * Moved 'withLogger' to 'Log.Internal.Logger'.
