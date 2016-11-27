@@ -51,6 +51,8 @@ matrix:
 before_install:
  - unset CC
  - export PATH=/opt/ghc/$GHCVER/bin:/opt/cabal/$CABALVER/bin:$PATH
+ # TODO: cabal new-build {all} builds also dependencies tests/exes.
+ - COMPONENTS="log-base:lib:log-base log-elasticsearch:lib:log-elasticsearch log-postgres:lib:log-postgres log:lib:log log:log-test log:log-test-integration"
 
 install:
  - travis_retry wget --no-check-certificate https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-$ELASTICSEARCH.tar.gz
@@ -76,7 +78,7 @@ script:
  - travis_retry curl -X GET http://localhost:9200
  - if [ -f configure.ac ]; then autoreconf -i; fi
  # this builds all libraries and executables (including tests/benchmarks)
- - cabal new-build ${TEST} ${BENCH}
+ - cabal new-build ${TEST} ${BENCH} ${COMPONENTS}
 
  # there's no 'cabal new-test' yet, so let's emulate for now
  - cd log
