@@ -34,6 +34,7 @@ library
                        bloodhound >= 0.11.1,
                        deepseq,
                        http-client,
+                       http-client-tls,
                        semigroups,
                        text,
                        text-show >= 2,

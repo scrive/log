@@ -25,6 +25,7 @@ import Database.Bloodhound hiding (Status)
 import Log
 import Log.Internal.Logger
 import Network.HTTP.Client
+import Network.HTTP.Client.TLS (tlsManagerSettings)
 import Prelude
 import TextShow
 import qualified Data.ByteString as BS
@@ -182,7 +183,7 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
 
     runBH_ :: forall r. BH IO r -> IO r
     runBH_ f = do
-      mgr <- newManager defaultManagerSettings
+      mgr <- newManager tlsManagerSettings
       let hook = maybe return (uncurry basicAuthHook) esLogin
       let env = (mkBHEnv server mgr) { bhRequestHook = hook }
       runBH env f
