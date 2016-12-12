@@ -43,6 +43,7 @@ data ElasticSearchConfig = ElasticSearchConfig {
     esServer  :: !T.Text -- ^ Elasticsearch server address.
   , esIndex   :: !T.Text -- ^ Elasticsearch index name.
   , esMapping :: !T.Text -- ^ Elasticsearch mapping name.
+  , esLogin   :: Maybe (EsUsername, EsPassword)
   } deriving (Eq, Show)
 
 -- | Sensible defaults for 'ElasticSearchConfig'.
@@ -50,7 +51,8 @@ defaultElasticSearchConfig :: ElasticSearchConfig
 defaultElasticSearchConfig = ElasticSearchConfig {
   esServer  = "http://localhost:9200",
   esIndex   = "logs",
-  esMapping = "log"
+  esMapping = "log",
+  esLogin   = Nothing
   }
 
 
@@ -179,7 +181,12 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
     timeToDouble = realToFrac . utcTimeToPOSIXSeconds
 
     runBH_ :: forall r. BH IO r -> IO r
-    runBH_ = withBH defaultManagerSettings server
+    runBH_ f = do
+      mgr <- newManager defaultManagerSettings
+      let hook = maybe return (uncurry basicAuthHook) esLogin
+      let env = (mkBHEnv server mgr) { bhRequestHook = hook }
+      runBH env f
+
 
     jsonToBSL :: Value -> BSL.ByteString
     jsonToBSL = encodePretty' defConfig { confIndent = Spaces 2 }
