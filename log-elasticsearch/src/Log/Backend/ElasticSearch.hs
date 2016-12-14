@@ -17,6 +17,7 @@ import Data.Aeson
 import Data.Aeson.Encode.Pretty
 import Data.Bits
 import Data.IORef
+import Data.Maybe (isJust)
 import Data.Semigroup
 import Data.Time
 import Data.Time.Clock.POSIX
@@ -41,19 +42,21 @@ import qualified Data.Vector as V
 -- <https://www.elastic.co/guide/en/elasticsearch/reference/current/glossary.html>
 -- for the explanation of terms.
 data ElasticSearchConfig = ElasticSearchConfig {
-    esServer  :: !T.Text -- ^ Elasticsearch server address.
-  , esIndex   :: !T.Text -- ^ Elasticsearch index name.
-  , esMapping :: !T.Text -- ^ Elasticsearch mapping name.
-  , esLogin   :: Maybe (EsUsername, EsPassword)
+    esServer        :: !T.Text -- ^ Elasticsearch server address.
+  , esIndex         :: !T.Text -- ^ Elasticsearch index name.
+  , esMapping       :: !T.Text -- ^ Elasticsearch mapping name.
+  , esLogin         :: Maybe (EsUsername, EsPassword) -- ^ Elasticsearch basic authentication username and password
+  , esLoginInsecure :: !Bool   -- ^ Allow basic authentication over non-TLS connections.
   } deriving (Eq, Show)
 
 -- | Sensible defaults for 'ElasticSearchConfig'.
 defaultElasticSearchConfig :: ElasticSearchConfig
 defaultElasticSearchConfig = ElasticSearchConfig {
-  esServer  = "http://localhost:9200",
-  esIndex   = "logs",
-  esMapping = "log",
-  esLogin   = Nothing
+  esServer        = "http://localhost:9200",
+  esIndex         = "logs",
+  esMapping       = "log",
+  esLogin         = Nothing,
+  esLoginInsecure = False
   }
 
 
@@ -80,6 +83,7 @@ elasticSearchLogger ::
                       -- document IDs.
   -> IO Logger
 elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
+  checkElasticSearchLogin
   checkElasticSearchConnection
   indexRef <- newIORef $ IndexName T.empty
   mkBulkLogger "ElasticSearch" (\msgs -> do
@@ -161,6 +165,15 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
     elasticSearchSync indexRef = do
       indexName <- readIORef indexRef
       void . runBH_ $ refreshIndex indexName
+
+    checkElasticSearchLogin :: IO ()
+    checkElasticSearchLogin =
+      when (isJust esLogin
+            && not esLoginInsecure
+            && "http:" `T.isPrefixOf` esServer) $
+        error $ "ElasticSearch: insecure login: "
+          <> "Attempting to send login credentials over an insecure connection. "
+          <> "Set esLoginInsecure = True to disable this check."
 
     checkElasticSearchConnection :: IO ()
     checkElasticSearchConnection = try (void $ runBH_ listIndices) >>= \case
