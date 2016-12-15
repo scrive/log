@@ -170,7 +170,7 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
     checkElasticSearchLogin =
       when (isJust esLogin
             && not esLoginInsecure
-            && "http:" `T.isPrefixOf` esServer) $
+            && not ("https:" `T.isPrefixOf` esServer)) $
         error $ "ElasticSearch: insecure login: "
           <> "Attempting to send login credentials over an insecure connection. "
           <> "Set esLoginInsecure = True to disable this check."
