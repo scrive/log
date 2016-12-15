@@ -17,6 +17,7 @@ import Data.Aeson
 import Data.Aeson.Encode.Pretty
 import Data.Bits
 import Data.IORef
+import Data.Maybe (isJust)
 import Data.Semigroup
 import Data.Time
 import Data.Time.Clock.POSIX
@@ -25,6 +26,7 @@ import Database.Bloodhound hiding (Status)
 import Log
 import Log.Internal.Logger
 import Network.HTTP.Client
+import Network.HTTP.Client.TLS (tlsManagerSettings)
 import Prelude
 import TextShow
 import qualified Data.ByteString as BS
@@ -40,17 +42,21 @@ import qualified Data.Vector as V
 -- <https://www.elastic.co/guide/en/elasticsearch/reference/current/glossary.html>
 -- for the explanation of terms.
 data ElasticSearchConfig = ElasticSearchConfig {
-    esServer  :: !T.Text -- ^ Elasticsearch server address.
-  , esIndex   :: !T.Text -- ^ Elasticsearch index name.
-  , esMapping :: !T.Text -- ^ Elasticsearch mapping name.
+    esServer        :: !T.Text -- ^ Elasticsearch server address.
+  , esIndex         :: !T.Text -- ^ Elasticsearch index name.
+  , esMapping       :: !T.Text -- ^ Elasticsearch mapping name.
+  , esLogin         :: Maybe (EsUsername, EsPassword) -- ^ Elasticsearch basic authentication username and password
+  , esLoginInsecure :: !Bool   -- ^ Allow basic authentication over non-TLS connections.
   } deriving (Eq, Show)
 
 -- | Sensible defaults for 'ElasticSearchConfig'.
 defaultElasticSearchConfig :: ElasticSearchConfig
 defaultElasticSearchConfig = ElasticSearchConfig {
-  esServer  = "http://localhost:9200",
-  esIndex   = "logs",
-  esMapping = "log"
+  esServer        = "http://localhost:9200",
+  esIndex         = "logs",
+  esMapping       = "log",
+  esLogin         = Nothing,
+  esLoginInsecure = False
   }
 
 
@@ -77,6 +83,7 @@ elasticSearchLogger ::
                       -- document IDs.
   -> IO Logger
 elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
+  checkElasticSearchLogin
   checkElasticSearchConnection
   indexRef <- newIORef $ IndexName T.empty
   mkBulkLogger "ElasticSearch" (\msgs -> do
@@ -159,6 +166,15 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
       indexName <- readIORef indexRef
       void . runBH_ $ refreshIndex indexName
 
+    checkElasticSearchLogin :: IO ()
+    checkElasticSearchLogin =
+      when (isJust esLogin
+            && not esLoginInsecure
+            && "http:" `T.isPrefixOf` esServer) $
+        error $ "ElasticSearch: insecure login: "
+          <> "Attempting to send login credentials over an insecure connection. "
+          <> "Set esLoginInsecure = True to disable this check."
+
     checkElasticSearchConnection :: IO ()
     checkElasticSearchConnection = try (void $ runBH_ listIndices) >>= \case
       Left (ex::HttpException) -> error $ "ElasticSearch: unexpected error: "
@@ -179,7 +195,12 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
     timeToDouble = realToFrac . utcTimeToPOSIXSeconds
 
     runBH_ :: forall r. BH IO r -> IO r
-    runBH_ = withBH defaultManagerSettings server
+    runBH_ f = do
+      mgr <- newManager tlsManagerSettings
+      let hook = maybe return (uncurry basicAuthHook) esLogin
+      let env = (mkBHEnv server mgr) { bhRequestHook = hook }
+      runBH env f
+
 
     jsonToBSL :: Value -> BSL.ByteString
     jsonToBSL = encodePretty' defConfig { confIndent = Spaces 2 }
