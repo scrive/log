@@ -25,6 +25,8 @@ Source-repository head
 
 library
   exposed-modules:     Log.Backend.ElasticSearch
+                       Log.Backend.ElasticSearch.Internal
+                       Log.Backend.ElasticSearch.Lens
   build-depends:       base <5,
                        log-base >= 0.7,
                        aeson >=0.11.0.0,
