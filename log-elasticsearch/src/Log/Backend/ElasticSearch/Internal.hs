@@ -11,7 +11,7 @@ data ElasticSearchConfig = ElasticSearchConfig {
     esServer        :: !T.Text -- ^ Elasticsearch server address.
   , esIndex         :: !T.Text -- ^ Elasticsearch index name.
   , esMapping       :: !T.Text -- ^ Elasticsearch mapping name.
-  , esLogin         :: Maybe (EsUsername, EsPassword) -- ^ Elasticsearch basic authentication username and password
+  , esLogin         :: Maybe (EsUsername, EsPassword) -- ^ Elasticsearch basic authentication username and password.
   , esLoginInsecure :: !Bool   -- ^ Allow basic authentication over non-TLS connections.
   } deriving (Eq, Show)
 

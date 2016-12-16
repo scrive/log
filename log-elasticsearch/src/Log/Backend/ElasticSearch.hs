@@ -9,7 +9,6 @@ module Log.Backend.ElasticSearch (
   , defaultElasticSearchConfig
   , withElasticSearchLogger
   , elasticSearchLogger
-
   ) where
 
 import Control.Applicative
