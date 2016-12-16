@@ -1,10 +1,14 @@
 -- | Elasticsearch logging back-end.
 module Log.Backend.ElasticSearch (
-    ElasticSearchConfig(..)
+    ElasticSearchConfig
+  , esServer
+  , esIndex
+  , esMapping
+  , esLogin
+  , esLoginInsecure
   , defaultElasticSearchConfig
   , withElasticSearchLogger
   , elasticSearchLogger
-
   ) where
 
 import Control.Applicative
@@ -38,27 +42,7 @@ import qualified Data.Text.Encoding as T
 import qualified Data.Traversable as F
 import qualified Data.Vector as V
 
--- | Configuration for the Elasticsearch 'Logger'. See
--- <https://www.elastic.co/guide/en/elasticsearch/reference/current/glossary.html>
--- for the explanation of terms.
-data ElasticSearchConfig = ElasticSearchConfig {
-    esServer        :: !T.Text -- ^ Elasticsearch server address.
-  , esIndex         :: !T.Text -- ^ Elasticsearch index name.
-  , esMapping       :: !T.Text -- ^ Elasticsearch mapping name.
-  , esLogin         :: Maybe (EsUsername, EsPassword) -- ^ Elasticsearch basic authentication username and password
-  , esLoginInsecure :: !Bool   -- ^ Allow basic authentication over non-TLS connections.
-  } deriving (Eq, Show)
-
--- | Sensible defaults for 'ElasticSearchConfig'.
-defaultElasticSearchConfig :: ElasticSearchConfig
-defaultElasticSearchConfig = ElasticSearchConfig {
-  esServer        = "http://localhost:9200",
-  esIndex         = "logs",
-  esMapping       = "log",
-  esLogin         = Nothing,
-  esLoginInsecure = False
-  }
-
+import Log.Backend.ElasticSearch.Internal
 
 ----------------------------------------
 -- | Create an 'elasticSearchLogger' for the duration of the given

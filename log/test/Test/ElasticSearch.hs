@@ -25,11 +25,11 @@ data ElasticSearchTestConfig = ElasticSearchTestConfig {
 
 defaultElasticSearchTestConfig :: ElasticSearchConfig
                                -> IO ElasticSearchTestConfig
-defaultElasticSearchTestConfig ElasticSearchConfig{..} = do
+defaultElasticSearchTestConfig esc = do
   now <- getCurrentTime
-  let testServer = Server esServer
+  let testServer = Server (esServer esc)
       testIndex  = IndexName $ T.concat
-                   [ esIndex
+                   [ esIndex esc
                    , "-"
                    , T.pack $ formatTime defaultTimeLocale "%F" now
                    ]
