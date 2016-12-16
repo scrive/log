@@ -3,6 +3,9 @@
 language: c
 sudo: false
 
+jdk: 
+  - openjdk8
+
 git:
   submodules: false  # whether to recursively clone submodules
 
@@ -31,22 +34,22 @@ matrix:
   include:
     - env: CABALVER=head GHCVER=7.8.4 ELASTICSEARCH=1.5.2
       compiler: ": #GHC 7.8.4"
-      addons: {apt: {packages: [openjdk-jre,cabal-install-head,ghc-7.8.4], sources: [hvr-ghc]}}
+      addons: {apt: {packages: [cabal-install-head,ghc-7.8.4], sources: [hvr-ghc]}}
     - env: CABALVER=head GHCVER=7.8.4 ELASTICSEARCH=2.3.5
       compiler: ": #GHC 7.8.4"
-      addons: {apt: {packages: [openjdk-jre,cabal-install-head,ghc-7.8.4], sources: [hvr-ghc]}}
+      addons: {apt: {packages: [cabal-install-head,ghc-7.8.4], sources: [hvr-ghc]}}
     - env: CABALVER=head GHCVER=7.10.3 ELASTICSEARCH=1.5.2
       compiler: ": #GHC 7.10.3"
-      addons: {apt: {packages: [openjdk-jre,cabal-install-head,ghc-7.10.3], sources: [hvr-ghc]}}
+      addons: {apt: {packages: [cabal-install-head,ghc-7.10.3], sources: [hvr-ghc]}}
     - env: CABALVER=head GHCVER=7.10.3 ELASTICSEARCH=2.3.5
       compiler: ": #GHC 7.10.3"
-      addons: {apt: {packages: [openjdk-jre,cabal-install-head,ghc-7.10.3], sources: [hvr-ghc]}}
+      addons: {apt: {packages: [cabal-install-head,ghc-7.10.3], sources: [hvr-ghc]}}
     - env: CABALVER=head GHCVER=8.0.1 ELASTICSEARCH=1.5.2
       compiler: ": #GHC 8.0.1"
-      addons: {apt: {packages: [openjdk-jre,cabal-install-head,ghc-8.0.1], sources: [hvr-ghc]}}
+      addons: {apt: {packages: [cabal-install-head,ghc-8.0.1], sources: [hvr-ghc]}}
     - env: CABALVER=head GHCVER=8.0.1 ELASTICSEARCH=2.3.5
       compiler: ": #GHC 8.0.1"
-      addons: {apt: {packages: [openjdk-jre,cabal-install-head,ghc-8.0.1], sources: [hvr-ghc]}}
+      addons: {apt: {packages: [cabal-install-head,ghc-8.0.1], sources: [hvr-ghc]}}
 
 before_install:
  - unset CC
