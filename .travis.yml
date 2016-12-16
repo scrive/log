@@ -3,9 +3,6 @@
 language: c
 sudo: false
 
-jdk: 
-  - openjdk8
-
 git:
   submodules: false  # whether to recursively clone submodules
 
