@@ -13,6 +13,9 @@ import Control.Applicative
 import Control.DeepSeq
 import Control.Monad.Base
 import Control.Monad.Catch
+import Control.Monad.Error.Class
+import Control.Monad.State.Class
+import Control.Monad.Writer.Class
 import Control.Monad.Reader
 import Control.Monad.Trans.Control
 import Data.Aeson
@@ -40,7 +43,12 @@ type InnerLogT = ReaderT LoggerEnv
 -- | Monad transformer that adds logging capabilities to the underlying monad.
 newtype LogT m a = LogT { unLogT :: InnerLogT m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadBase b, MonadCatch
-           ,MonadIO, MonadMask, MonadPlus, MonadThrow, MonadTrans)
+           ,MonadIO, MonadMask, MonadPlus, MonadThrow, MonadTrans
+           ,MonadError e, MonadWriter w, MonadState s)
+
+instance MonadReader r m => MonadReader r (LogT m) where
+    ask   = lift ask
+    local = mapLogT . local
 
 -- | Run a 'LogT' computation.
 --
