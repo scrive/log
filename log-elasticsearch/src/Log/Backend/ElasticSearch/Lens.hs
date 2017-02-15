@@ -15,7 +15,7 @@ import Database.Bloodhound hiding (Status)
 import Prelude
 import qualified Data.Text as T
 import qualified Log.Backend.ElasticSearch as I
-import qualified Log.Backend.ElasticSearch.Internal as I
+import qualified Log.Backend.ElasticSearch.Internal ()
 
 type Lens' s a = forall f. Functor f => (a -> f a) -> s -> f s
 
