@@ -33,7 +33,7 @@ library
                        aeson-pretty >=0.8.2,
                        bytestring,
                        base64-bytestring,
-                       bloodhound >= 0.11.1,
+                       bloodhound >= 0.11.1 && < 0.13,
                        deepseq,
                        http-client,
                        http-client-tls,
