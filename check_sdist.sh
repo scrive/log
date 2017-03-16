@@ -2,7 +2,7 @@
 
 cabal sdist
 SRC_BASENAME=$(cabal info . | awk '{print $2;exit}')
-SRC_NAME=`echo $SRC_BASENAME | sed 's/-[0-9]\.[0-9]*//'`
+SRC_NAME=`echo $SRC_BASENAME | sed 's/-[0-9][\.0-9]*//'`
 tar -C dist/ -xf dist/$SRC_BASENAME.tar.gz
 echo 'packages: ., ../../../log-base, ../../../log-elasticsearch, ../../../log-postgres' > "dist/$SRC_BASENAME/cabal.project"
 cd dist/$SRC_BASENAME/
