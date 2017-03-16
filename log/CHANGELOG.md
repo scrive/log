@@ -1,3 +1,8 @@
+# log-0.8 (2017-03-16)
+* Added a few MTL class instances (#28).
+* Made ElasticSearchConfig an abstract type (#27).
+* Added support for HTTPS and basic auth to log-elasticsearch (#26).
+
 # log-0.7 (2016-11-25)
 * Split into four libraries (log, log-base, log-postgres,
   log-elasticsearch).
