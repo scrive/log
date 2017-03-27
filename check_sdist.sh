@@ -3,6 +3,7 @@
 set -euxo pipefail
 
 SRC_BASENAME=$(cabal info . | awk '{print $2;exit}')
+TESTS=( $(awk 'tolower($0) ~ /^test-suite / { print $2 }' *.cabal) )
 
 if [ -f configure.ac ]; then autoreconf -i; fi
 rm -rf dist/
@@ -21,4 +22,4 @@ cabal new-build -w ${HC} --disable-tests --disable-benchmarks all
 
 # build & run tests
 cabal new-build -w ${HC} ${TEST} ${BENCH} all
-if [ "x$TEST" = "x--enable-tests" ]; then cabal new-test -w ${HC} ${TEST} all; fi
+if [[ "x$TEST" = "x--enable-tests" && "x$TESTS" != "x" ]]; then cabal new-test -w ${HC} ${TEST} .; fi
