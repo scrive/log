@@ -22,4 +22,4 @@ cabal new-build -w ${HC} --disable-tests --disable-benchmarks all
 
 # build & run tests
 cabal new-build -w ${HC} ${TEST} ${BENCH} all
-if [[ "x$TEST" = "x--enable-tests" && "${TESTS:=x}" == "x" ]]; then cabal new-test -w ${HC} ${TEST} .; fi
+if [[ "x$TEST" = "x--enable-tests" && "${TESTS:=x}" != "x" ]]; then cabal new-test -w ${HC} ${TEST} .; fi
