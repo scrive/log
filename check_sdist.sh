@@ -1,6 +1,6 @@
 #! /bin/sh
 
-set -euxo pipefail
+set -eux
 
 if [ -f configure.ac ]; then autoreconf -i; fi
 rm -rf dist/
