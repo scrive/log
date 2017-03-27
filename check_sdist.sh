@@ -3,7 +3,7 @@
 set -euxo pipefail
 
 SRC_BASENAME=$(cabal info . | awk '{print $2;exit}')
-TESTS=( $(awk 'tolower($0) ~ /^test-suite / { print $2 }' *.cabal) )
+export TESTS=( $(awk 'tolower($0) ~ /^test-suite / { print $2 }' *.cabal) )
 
 if [ -f configure.ac ]; then autoreconf -i; fi
 rm -rf dist/
