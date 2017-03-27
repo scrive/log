@@ -1,6 +1,12 @@
-module Log.Backend.ElasticSearch.Internal where
+module Log.Backend.ElasticSearch.Internal
+  (ElasticSearchConfig(..)
+  ,defaultElasticSearchConfig
+  ,EsUsername(..)
+  ,EsPassword(..))
+where
 
 import Database.Bloodhound hiding (Status)
+import Database.Bloodhound.Types
 import Prelude
 import qualified Data.Text as T
 
