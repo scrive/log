@@ -6,7 +6,6 @@ module Log.Backend.ElasticSearch.Internal
 where
 
 import Database.Bloodhound hiding (Status)
-import Database.Bloodhound.Types
 import Prelude
 import qualified Data.Text as T
 
