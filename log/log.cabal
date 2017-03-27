@@ -47,9 +47,9 @@ library
                        Log.Monad
 
   build-depends:       base <5,
-                       log-base >= 0.7,
-                       log-elasticsearch >= 0.8,
-                       log-postgres >= 0.7
+                       log-base >= 0.7 && < 0.9,
+                       log-elasticsearch >= 0.8 && < 0.9,
+                       log-postgres >= 0.7 && < 0.9
 
   hs-source-dirs:      src
 
