@@ -6,8 +6,7 @@ if [ -f configure.ac ]; then autoreconf -i; fi
 rm -rf dist/
 cabal sdist # test that a source-distribution can be generated
 cd dist/
-SRCTAR=(${PKGNAME}-*.tar.gz)
-SRC_BASENAME="${SRCTAR/%.tar.gz}"
+SRC_BASENAME=$(cabal info . | awk '{print $2;exit}')
 tar -xvf "./$SRC_BASENAME.tar.gz"
 cd "$SRC_BASENAME/"
 ## from here on, CWD is inside the extracted source-tarball
