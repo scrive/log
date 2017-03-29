@@ -27,7 +27,7 @@ module Log (
     module Log.Class
     -- | 'Log.Data.LogMessage' and 'Log.Data.LogLevel' data definitions.
   , module Log.Data
-    -- | 'Log.Logger.Logger' objects used to perform logging operations in ''Log.Monad.LogT'.
+    -- | 'Log.Logger.Logger' objects used to perform logging operations in 'Log.Monad.LogT'.
   , module Log.Logger
     -- | 'Log.Monad.LogT' monad transformer that adds logging capabilities to
     -- the underlying monad.
