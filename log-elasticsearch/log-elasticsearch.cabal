@@ -27,6 +27,9 @@ library
   exposed-modules:     Log.Backend.ElasticSearch.V1
                        Log.Backend.ElasticSearch.V1.Internal
                        Log.Backend.ElasticSearch.V1.Lens
+                       Log.Backend.ElasticSearch.V5
+                       Log.Backend.ElasticSearch.V5.Internal
+                       Log.Backend.ElasticSearch.V5.Lens
                        Log.Backend.ElasticSearch
                        Log.Backend.ElasticSearch.Lens
   build-depends:       base <5,
