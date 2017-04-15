@@ -1,6 +1,6 @@
 {-# LANGUAGE RankNTypes #-}
 -- | Lensified version of "Log.Backend.ElasticSearch".
-module Log.Backend.ElasticSearch.Lens (
+module Log.Backend.ElasticSearch.V1.Lens (
     I.ElasticSearchConfig
   , esServer
   , esIndex
@@ -11,11 +11,11 @@ module Log.Backend.ElasticSearch.Lens (
   , I.withElasticSearchLogger
   ) where
 
-import Database.Bloodhound hiding (Status)
+import Database.V1.Bloodhound hiding (Status)
 import Prelude
 import qualified Data.Text as T
-import qualified Log.Backend.ElasticSearch as I
-import qualified Log.Backend.ElasticSearch.Internal ()
+import qualified Log.Backend.ElasticSearch.V1 as I
+import qualified Log.Backend.ElasticSearch.V1.Internal ()
 
 type Lens' s a = forall f. Functor f => (a -> f a) -> s -> f s
 

@@ -1,5 +1,5 @@
 -- | Elasticsearch logging back-end.
-module Log.Backend.ElasticSearch (
+module Log.Backend.ElasticSearch.V1 (
     ElasticSearchConfig
   , esServer
   , esIndex
@@ -26,7 +26,7 @@ import Data.Semigroup
 import Data.Time
 import Data.Time.Clock.POSIX
 import Data.Word
-import Database.Bloodhound hiding (Status)
+import Database.V1.Bloodhound hiding (Status)
 import Log
 import Log.Internal.Logger
 import Network.HTTP.Client
@@ -42,7 +42,7 @@ import qualified Data.Text.Encoding as T
 import qualified Data.Traversable as F
 import qualified Data.Vector as V
 
-import Log.Backend.ElasticSearch.Internal
+import Log.Backend.ElasticSearch.V1.Internal
 
 ----------------------------------------
 -- | Create an 'elasticSearchLogger' for the duration of the given
