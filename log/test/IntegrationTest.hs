@@ -3,7 +3,7 @@ module Main where
 import Log
 import Log.Backend.StandardOutput
 import Log.Backend.StandardOutput.Bulk
-import Log.Backend.ElasticSearch
+import Log.Backend.ElasticSearch.V5
 import Test.ElasticSearch
 
 import Data.List

@@ -6,13 +6,13 @@ module Test.ElasticSearch
   ,refreshTestIndex)
 where
 
-import Log.Backend.ElasticSearch
+import Log.Backend.ElasticSearch.V5
 
 import Control.Monad
 import Data.Aeson
 import Data.Text (Text)
 import Data.Time
-import Database.Bloodhound
+import Database.V5.Bloodhound
 import Network.HTTP.Client
 import Test.Tasty.HUnit
 

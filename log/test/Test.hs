@@ -1,7 +1,7 @@
 module Main where
 
 import Log
-import Log.Backend.ElasticSearch
+import Log.Backend.ElasticSearch.V5
 import Test.ElasticSearch
 
 import System.Random
