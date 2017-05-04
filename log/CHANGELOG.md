@@ -1,3 +1,9 @@
+# log-0.9.0.0 (2017-05-04)
+* Updated the Elasticsearch back-end to work with bloodhound-0.14.0.0 (#30).
+* The following modules are now deprecated: Log.Backend.ElasticSearch,
+  Log.Backend.ElasticSearch.Internal,
+  Log.Backend.ElasticSearch.Lens. Use V1/V5 variants directly (#30).
+
 # log-0.8 (2017-03-16)
 * Added a few MTL class instances (#28).
 * Made ElasticSearchConfig an abstract type (#27).

@@ -1,5 +1,5 @@
 name:                log
-version:             0.8
+version:             0.9.0.0
 synopsis:            Structured logging solution with multiple backends
 
 description:         A library that provides a way to record structured
@@ -33,6 +33,9 @@ Source-repository head
 
 library
   exposed-modules:     Log,
+                       Log.Backend.ElasticSearch,
+                       Log.Backend.ElasticSearch.Internal,
+                       Log.Backend.ElasticSearch.Lens,
                        Log.Backend.ElasticSearch.V1,
                        Log.Backend.ElasticSearch.V1.Internal,
                        Log.Backend.ElasticSearch.V1.Lens,
@@ -51,7 +54,7 @@ library
 
   build-depends:       base <5,
                        log-base >= 0.7 && < 0.9,
-                       log-elasticsearch >= 0.8 && < 0.9,
+                       log-elasticsearch >= 0.9 && < 0.10,
                        log-postgres >= 0.7 && < 0.9
 
   hs-source-dirs:      src

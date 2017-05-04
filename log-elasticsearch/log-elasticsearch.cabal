@@ -1,5 +1,5 @@
 name:                log-elasticsearch
-version:             0.8.1
+version:             0.9.0.0
 synopsis:            Structured logging solution (Elasticsearch back end)
 
 description:         Elasticsearch back end for the 'log' library.
@@ -32,6 +32,7 @@ library
                        Log.Backend.ElasticSearch.V5.Lens
                        Log.Backend.ElasticSearch
                        Log.Backend.ElasticSearch.Lens
+                       Log.Backend.ElasticSearch.Internal
   build-depends:       base <5,
                        log-base >= 0.7,
                        aeson >=0.11.0.0,
