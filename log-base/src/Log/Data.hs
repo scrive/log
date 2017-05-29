@@ -55,7 +55,7 @@ instance NFData LogLevel where
 data LogMessage = LogMessage {
   -- | Component of an application.
   lmComponent :: !T.Text
-  -- | Aplication log domain.
+  -- | Application log domain.
 , lmDomain    :: ![T.Text]
   -- | Time of the logged event.
 , lmTime      :: !UTCTime
