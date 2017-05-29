@@ -21,13 +21,13 @@ you only need one of those, use `log-base` and `log-elasticsearch` or
 module Main where
 
 import Log
-import Log.Backend.ElasticSearch
+import Log.Backend.ElasticSearch.V5
 
 import System.Random
 
 main :: IO ()
 main = do
-  let config = ElasticSearchConfig {
+  let config = defaultElasticSearchConfig {
         esServer  = "http://localhost:9200",
         esIndex   = "logs",
         esMapping = "log"
