@@ -28,11 +28,12 @@ mkLogger name exec = mkLoggerImpl
   name exec (return ())
 
 -- | Start an asynchronous logger thread that consumes all queued
--- messages once per second. To make sure that the messages get
--- written out in the presence of exceptions, use high-level wrappers
--- like 'withLogger', 'Log.Backend.ElasticSearch.withElasticSearchLogger' or
--- 'Log.Backend.StandardOutput.Bulk.withBulkStdOutLogger'
--- instead of this function directly.
+-- messages once per second. Uses a bounded queue internally to avoid
+-- space leaks. To make sure that the messages get written out in the
+-- presence of exceptions, use high-level wrappers like 'withLogger',
+-- 'Log.Backend.ElasticSearch.withElasticSearchLogger' or
+-- 'Log.Backend.StandardOutput.Bulk.withBulkStdOutLogger' instead of
+-- this function directly.
 --
 -- Note: some messages can be lost when the main thread shuts down
 -- without making sure that all logger threads have written out all
