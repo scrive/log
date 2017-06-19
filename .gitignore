@@ -4,4 +4,5 @@ dist/
 TAGS
 cabal.project.local
 cabal.project.freeze
+.ghc.environment.*
 cabal.sandbox.config
