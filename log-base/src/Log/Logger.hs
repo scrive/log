@@ -28,11 +28,12 @@ mkLogger name exec = mkLoggerImpl
   name exec (return ())
 
 -- | Start an asynchronous logger thread that consumes all queued
--- messages once per second. To make sure that the messages get
--- written out in the presence of exceptions, use high-level wrappers
--- like 'withLogger', 'Log.Backend.ElasticSearch.withElasticSearchLogger' or
--- 'Log.Backend.StandardOutput.Bulk.withBulkStdOutLogger'
--- instead of this function directly.
+-- messages once per second. Uses a bounded queue internally to avoid
+-- space leaks. To make sure that the messages get written out in the
+-- presence of exceptions, use high-level wrappers like 'withLogger',
+-- 'Log.Backend.ElasticSearch.withElasticSearchLogger' or
+-- 'Log.Backend.StandardOutput.Bulk.withBulkStdOutLogger' instead of
+-- this function directly.
 --
 -- Note: some messages can be lost when the main thread shuts down
 -- without making sure that all logger threads have written out all
@@ -76,32 +77,48 @@ mkLogger name exec = mkLoggerImpl
 -- @
 mkBulkLogger :: T.Text -> ([LogMessage] -> IO ()) -> IO () -> IO Logger
 mkBulkLogger = mkLoggerImpl
-  newSQueueIO isEmptySQueue readSQueue writeSQueue (threadDelay 1000000)
+  (newSBQueueIO sbDefaultCapacity) isEmptySBQueue readSBQueue writeSBQueue
+  (threadDelay 1000000)
 
 ----------------------------------------
 
--- | A simple STM based queue.
-newtype SQueue a = SQueue (TVar [a])
+-- | A simple STM based bounded queue.
+data SBQueue a = SBQueue !(TVar [a]) !(TVar Int) !Int
 
--- | Create an instance of 'SQueue'.
-newSQueueIO :: IO (SQueue a)
-newSQueueIO = SQueue <$> newTVarIO []
+-- | Default capacity of a 'SBQueue'. This corresponds to
+-- approximately 200 MiB memory residency when the queue is full.
+sbDefaultCapacity :: Int
+sbDefaultCapacity = 1000000
 
--- | Check if an 'SQueue' is empty.
-isEmptySQueue :: SQueue a -> STM Bool
-isEmptySQueue (SQueue queue) = null <$> readTVar queue
+-- | Create an instance of 'SBQueue' with a given capacity.
+newSBQueueIO :: Int -> IO (SBQueue a)
+newSBQueueIO capacity = SBQueue <$> newTVarIO [] <*> newTVarIO 0 <*> pure capacity
 
--- | Read all the values stored in an 'SQueue'.
-readSQueue :: SQueue a -> STM [a]
-readSQueue (SQueue queue) = do
+-- | Check if an 'SBQueue' is empty.
+isEmptySBQueue :: SBQueue a -> STM Bool
+isEmptySBQueue (SBQueue queue count _capacity) = do
+  isEmpty  <- null <$> readTVar queue
+  numElems <- readTVar count
+  assert (if isEmpty then numElems == 0 else numElems > 0) $
+    return isEmpty
+
+-- | Read all the values stored in an 'SBQueue'.
+readSBQueue :: SBQueue a -> STM [a]
+readSBQueue (SBQueue queue count _capacity) = do
   elems <- readTVar queue
   when (null elems) retry
   writeTVar queue []
+  writeTVar count 0
   return $ reverse elems
 
--- | Write a value to an 'SQueue'.
-writeSQueue :: SQueue a -> a -> STM ()
-writeSQueue (SQueue queue) a = modifyTVar queue (a :)
+-- | Write a value to an 'SBQueue'.
+writeSBQueue :: SBQueue a -> a -> STM ()
+writeSBQueue (SBQueue queue count capacity) a = do
+  numElems <- readTVar count
+  if numElems < capacity
+    then do modifyTVar queue (a :)
+            modifyTVar count (+1)
+    else return ()
 
 ----------------------------------------
 

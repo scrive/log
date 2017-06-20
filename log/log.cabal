@@ -1,5 +1,5 @@
 name:                log
-version:             0.9.0.0
+version:             0.9.0.1
 synopsis:            Structured logging solution with multiple backends
 
 description:         A library that provides a way to record structured
@@ -25,6 +25,7 @@ copyright:           Scrive AB
 category:            System
 build-type:          Simple
 cabal-version:       >=1.10
+extra-source-files:  CHANGELOG.md, README.md
 tested-with:         GHC == 7.8.4, GHC == 7.10.3, GHC == 8.0.2
 
 Source-repository head
@@ -112,3 +113,22 @@ test-suite log-test-integration
   default-extensions: BangPatterns
                     , OverloadedStrings
                     , RecordWildCards
+
+benchmark log-bench
+  type:               exitcode-stdio-1.0
+  build-depends:      base,
+                      ekg,
+                      log,
+                      hpqtypes,
+                      random,
+                      text,
+                      text-show,
+                      transformers,
+                      transformers-base
+  hs-source-dirs:     bench
+  main-is:            Bench.hs
+  ghc-options:        -Wall -threaded "-with-rtsopts=-T -sstderr"
+  default-language:   Haskell2010
+  default-extensions: OverloadedStrings,
+                      FlexibleContexts,
+                      ScopedTypeVariables

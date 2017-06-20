@@ -32,6 +32,7 @@ import Log.Internal.Logger
 import Network.HTTP.Client
 import Network.HTTP.Client.TLS (tlsManagerSettings)
 import Prelude
+import System.IO
 import TextShow
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Base64 as B64
@@ -161,9 +162,9 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
 
     checkElasticSearchConnection :: IO ()
     checkElasticSearchConnection = try (void $ runBH_ listIndices) >>= \case
-      Left (ex::HttpException) -> error $ "ElasticSearch: unexpected error: "
-                                  <> show ex
-                                  <> " (is ElasticSearch server running?)"
+      Left (ex::HttpException) ->
+        hPutStrLn stderr $ "ElasticSearch: unexpected error: " <> show ex
+          <> " (is ElasticSearch server running?)"
       Right () -> return ()
 
     retryOnException :: forall r. IO r -> IO r

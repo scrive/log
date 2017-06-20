@@ -1,5 +1,5 @@
 name:                log-postgres
-version:             0.7
+version:             0.7.0.1
 synopsis:            Structured logging solution (PostgreSQL back end)
 
 description:         PostgreSQL back end for the 'log' library.
@@ -17,6 +17,7 @@ copyright:           Scrive AB
 category:            System
 build-type:          Simple
 cabal-version:       >=1.10
+extra-source-files:  CHANGELOG.md, README.md
 tested-with:         GHC == 7.8.4, GHC == 7.10.3, GHC == 8.0.2
 
 Source-repository head

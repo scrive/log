@@ -1,3 +1,6 @@
+# log-elasticsearch-0.9.0.1  (2017-06-19)
+* 'withElasticSearchLogger' no longer fails when the Elasticsearch server is down.
+
 # log-elasticsearch-0.9.0.0 (2017-05-04)
 * Now works with bloodhound-0.14.0.0 (#30).
 
