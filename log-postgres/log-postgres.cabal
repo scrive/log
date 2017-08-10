@@ -26,7 +26,7 @@ Source-repository head
 
 library
   exposed-modules:     Log.Backend.PostgreSQL
-  build-depends:       base <5,
+  build-depends:       base >= 4.8 && <5,
                        log-base >= 0.7,
                        aeson >=0.11.0.0,
                        aeson-pretty >=0.8.2,
