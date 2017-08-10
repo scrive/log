@@ -1,4 +1,4 @@
-# log-base-0.7.2 (TBD)
+# log-base-0.7.2.0 (2017-08-10)
 * Add 'MFunctor LogT' instance
 
 # log-base-0.7.1.1 (2017-06-19)

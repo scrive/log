@@ -1,7 +1,7 @@
-# log-elasticsearch-0.9.1
+# log-elasticsearch-0.9.1.0 (2017-08-10)
 * Add 'toEncoding' to 'ToJSON LogsMapping' instance
 
-# log-elasticsearch-0.9.0.1  (2017-06-19)
+# log-elasticsearch-0.9.0.1 (2017-06-19)
 * 'withElasticSearchLogger' no longer fails when the Elasticsearch server is down.
 
 # log-elasticsearch-0.9.0.0 (2017-05-04)
