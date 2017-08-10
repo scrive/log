@@ -1,4 +1,4 @@
-# log [![Hackage version](https://img.shields.io/hackage/v/log.svg?label=Hackage)](https://hackage.haskell.org/package/log) [![Build Status](https://secure.travis-ci.org/scrive/log.svg?branch=master)](http://travis-ci.org/scrive/log)
+# log [![Hackage version](https://img.shields.io/hackage/v/log-base.svg?label=Hackage)](https://hackage.haskell.org/package/log-base) [![Build Status](https://secure.travis-ci.org/scrive/log.svg?branch=master)](http://travis-ci.org/scrive/log)
 
 A set of libraries that provide a way to record structured log
 messages with multiple back ends.
