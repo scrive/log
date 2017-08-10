@@ -1,1 +1,1 @@
-packages: log-base, log-elasticsearch, log-postgres, log
+packages: log-base, log-elasticsearch, log-postgres
