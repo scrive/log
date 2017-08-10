@@ -1,5 +1,5 @@
 name:                log-base
-version:             0.7.1.1
+version:             0.7.2
 synopsis:            Structured logging solution (base package)
 
 description:         A library that provides a way to record structured log
@@ -44,6 +44,7 @@ library
                        bytestring,
                        deepseq,
                        exceptions >=0.6,
+                       mmorph >=1.0.9 && <1.2,
                        monad-control >=0.3,
                        monad-time >= 0.2,
                        mtl,

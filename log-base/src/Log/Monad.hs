@@ -14,10 +14,11 @@ import Control.DeepSeq
 import Control.Monad.Base
 import Control.Monad.Catch
 import Control.Monad.Error.Class
-import Control.Monad.State.Class
-import Control.Monad.Writer.Class
+import Control.Monad.Morph (MFunctor (..))
 import Control.Monad.Reader
+import Control.Monad.State.Class
 import Control.Monad.Trans.Control
+import Control.Monad.Writer.Class
 import Data.Aeson
 import Data.Aeson.Types
 import Data.Text (Text)
@@ -71,6 +72,12 @@ runLogT component logger m = runReaderT (unLogT m) LoggerEnv {
 -- | Transform the computation inside a 'LogT'.
 mapLogT :: (m a -> n b) -> LogT m a -> LogT n b
 mapLogT f = LogT . mapReaderT f . unLogT
+
+-- | @'hoist' = 'mapLogT'@
+--
+-- @since 0.7.2
+instance MFunctor LogT where
+    hoist = mapLogT
 
 instance MonadTransControl LogT where
 #if MIN_VERSION_monad_control(1,0,0)
