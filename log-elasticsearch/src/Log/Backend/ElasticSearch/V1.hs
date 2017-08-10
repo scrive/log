@@ -34,6 +34,7 @@ import Network.HTTP.Client.TLS (tlsManagerSettings)
 import Prelude
 import System.IO
 import TextShow
+import qualified Data.Aeson.Encoding as Aeson
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Base64 as B64
 import qualified Data.ByteString.Lazy.Char8 as BSL
@@ -239,6 +240,34 @@ instance ToJSON LogsMapping where
             "type" .= ("string"::T.Text)
           ]
         ]
+    ]
+
+  toEncoding LogsMapping = Aeson.pairs $ mconcat
+    [ Aeson.pair "properties" $ Aeson.pairs $ mconcat
+      [ Aeson.pair "insertion_order"  $ Aeson.pairs $ mconcat
+        [ "type" .= ("integer"::T.Text)
+        ]
+      , Aeson.pair "insertion_time" $ Aeson.pairs $ mconcat
+        [ "type"   .= ("date"::T.Text)
+        , "format" .= ("date_time"::T.Text)
+        ]
+      , Aeson.pair "time" $ Aeson.pairs $ mconcat
+        [ "type"   .= ("date"::T.Text)
+        , "format" .= ("date_time"::T.Text)
+        ]
+      , Aeson.pair "domain" $ Aeson.pairs $ mconcat
+        [ "type" .= ("string"::T.Text)
+        ]
+      , Aeson.pair "level" $ Aeson.pairs $ mconcat
+        [ "type" .= ("string"::T.Text)
+        ]
+      , Aeson.pair "component" $ Aeson.pairs $ mconcat
+        [ "type" .= ("string"::T.Text)
+        ]
+      , Aeson.pair "message" $ Aeson.pairs $ mconcat
+        [ "type" .= ("string"::T.Text)
+        ]
+      ]
     ]
 
 ----------------------------------------
