@@ -1,4 +1,7 @@
-# log-base-0.7.2 (2017-06-19)
+# log-base-0.7.2 (TBD)
+* Add 'MFunctor LogT' instance
+
+# log-base-0.7.1.1 (2017-06-19)
 * mkBulkLogger now uses a bounded queue to interact with the logger thread.
 
 # log-base-0.7.1 (2017-03-16)
