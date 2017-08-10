@@ -1,8 +1,8 @@
 name:                log-elasticsearch
-version:             0.9.1
+version:             0.9.1.0
 synopsis:            Structured logging solution (Elasticsearch back end)
 
-description:         Elasticsearch back end for the 'log' library.
+description:         Elasticsearch back end for the 'log' library suite.
                      Depends on 'log-base'.
 
 homepage:            https://github.com/scrive/log

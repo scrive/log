@@ -1,12 +1,11 @@
 name:                log-base
-version:             0.7.2
+version:             0.7.2.0
 synopsis:            Structured logging solution (base package)
 
 description:         A library that provides a way to record structured log
                      messages. Use this package in conjunction with
                      'log-elasticsearch' or 'log-postgres', depending
-                     on which back end you need. Use the 'log' library
-                     if you need all back ends.
+                     on which back end you need.
 
 
 homepage:            https://github.com/scrive/log
