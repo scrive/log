@@ -14,7 +14,7 @@ import Log.Internal.Logger
 
 -- | Create a 'bulkStdoutLogger' for the duration of the given action,
 -- and shut it down afterwards, making sure that all buffered messages
--- are actually written to stdout.
+-- are actually written to stdout. Flushes 'stdout' on each bulk write.
 withBulkStdOutLogger :: (Logger -> IO r) -> IO r
 withBulkStdOutLogger act = do
   logger <- bulkStdoutLogger
