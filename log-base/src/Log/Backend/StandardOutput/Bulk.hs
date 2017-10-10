@@ -6,6 +6,7 @@ module Log.Backend.StandardOutput.Bulk (
 
 import Prelude
 import qualified Data.Text.IO as T
+import System.IO (hFlush, stdout)
 
 import Log.Data
 import Log.Logger
@@ -13,7 +14,7 @@ import Log.Internal.Logger
 
 -- | Create a 'bulkStdoutLogger' for the duration of the given action,
 -- and shut it down afterwards, making sure that all buffered messages
--- are actually written to stdout.
+-- are actually written to stdout. Flushes 'stdout' on each bulk write.
 withBulkStdOutLogger :: (Logger -> IO r) -> IO r
 withBulkStdOutLogger act = do
   logger <- bulkStdoutLogger
@@ -28,5 +29,6 @@ withBulkStdOutLogger act = do
 -- (see the note attached to 'mkBulkLogger').
 bulkStdoutLogger :: IO Logger
 bulkStdoutLogger = mkBulkLogger "stdout-bulk"
-                   (mapM_ $ T.putStrLn . showLogMessage Nothing)
-                   (return ())
+                   (\msgs -> mapM_ (T.putStrLn . showLogMessage Nothing) msgs
+                             >> hFlush stdout)
+                   (hFlush stdout)

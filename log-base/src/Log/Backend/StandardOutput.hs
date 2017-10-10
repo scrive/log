@@ -22,10 +22,14 @@ withSimpleStdOutLogger act = do
 
 {-# DEPRECATED simpleStdoutLogger "Use 'withSimpleStdOutLogger'" #-}
 
--- | Simple, synchronous logger that prints messages to standard output.
+-- | Simple, synchronous logger that prints messages to standard
+-- output. Flushes 'stdout' on each call to 'loggerWriteMessage'. Use
+-- 'Log.Backend.StandardOutput.Bulk.withBulkStdOutLogger' if you want
+-- buffering.
 simpleStdoutLogger :: Logger
 simpleStdoutLogger = Logger {
-    loggerWriteMessage = T.putStrLn . showLogMessage Nothing
+    loggerWriteMessage = \msg -> (T.putStrLn . showLogMessage Nothing $ msg)
+                                 >> hFlush stdout
   , loggerWaitForWrite = hFlush stdout
   , loggerShutdown     = return ()
   }
