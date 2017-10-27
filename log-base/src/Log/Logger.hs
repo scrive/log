@@ -80,6 +80,8 @@ mkBulkLogger :: T.Text -> ([LogMessage] -> IO ()) -> IO () -> IO Logger
 mkBulkLogger = mkBulkLogger' sbDefaultCapacity 1000000
 
 -- | Like 'mkBulkLogger', but with configurable queue size and thread delay.
+--
+-- @since 0.7.4.0
 mkBulkLogger'
     :: Int                      -- ^ queue capacity (default 1000000)
     -> Int                      -- ^ thread delay (microseconds, default 1000000)
