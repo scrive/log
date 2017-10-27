@@ -3,6 +3,7 @@ module Log.Logger (
     Logger
   , mkLogger
   , mkBulkLogger
+  , mkBulkLogger'
   , execLogger
   , waitForLogger
   , shutdownLogger
@@ -76,9 +77,19 @@ mkLogger name exec = mkLoggerImpl
 --    -- in the presence of exceptions in the child thread.
 -- @
 mkBulkLogger :: T.Text -> ([LogMessage] -> IO ()) -> IO () -> IO Logger
-mkBulkLogger = mkLoggerImpl
-  (newSBQueueIO sbDefaultCapacity) isEmptySBQueue readSBQueue writeSBQueue
-  (threadDelay 1000000)
+mkBulkLogger = mkBulkLogger' sbDefaultCapacity 1000000
+
+-- | Like 'mkBulkLogger', but with configurable queue size and thread delay.
+mkBulkLogger'
+    :: Int                      -- ^ queue capacity (default 1000000)
+    -> Int                      -- ^ thread delay (microseconds, default 1000000)
+    -> T.Text                   -- ^ logger name
+    -> ([LogMessage] -> IO ())  -- ^ write
+    -> IO ()                    -- ^ flush
+    -> IO Logger
+mkBulkLogger' cap dur = mkLoggerImpl
+  (newSBQueueIO cap) isEmptySBQueue readSBQueue writeSBQueue
+  (threadDelay dur)
 
 ----------------------------------------
 

@@ -1,3 +1,6 @@
+# log-base-0.7.4.0 (2017-10-27)
+* Add `mkBulkLogger'` ([#40](https://github.com/scrive/log/pull/40).
+
 # log-base-0.7.3.0 (2017-10-10)
 * `BasicStdOutLogger` now flushes stdout on each write. `BulkStdOutLogger`
   now flushes stdout on each bulk write ([#38](https://github.com/scrive/log/issues/38)).
