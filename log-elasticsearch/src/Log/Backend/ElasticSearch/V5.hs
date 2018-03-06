@@ -95,11 +95,10 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
         -- index that already exists is harmless.
         indexExists' <- indexExists index
         unless indexExists' $ do
-          -- Bloodhound is weird and won't let us create index using default
-          -- settings, so pass these as the default ones.
+          -- Note that Bloodhound won't let us create index using default settings
           let indexSettings = IndexSettings {
-                  indexShards   = ShardCount 4
-                , indexReplicas = ReplicaCount 1
+                  indexShards   = ShardCount esShardCount
+                , indexReplicas = ReplicaCount esReplicaCount
                 }
           void $ createIndex indexSettings index
           reply <- putMapping index mapping LogsMapping

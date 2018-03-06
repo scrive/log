@@ -1,3 +1,7 @@
+# log-elasticsearch-0.10.0.0 (2018-03-06)
+* Add config parameters for number of shards and replicas to 'ElasticSearchConfig'
+  (and make default of 4 shards and 1 replica explicit in 'defaultElasticSearchConfig').
+
 # log-elasticsearch-0.9.1.0 (2017-08-10)
 * Add 'toEncoding' to 'ToJSON LogsMapping' instance
 
