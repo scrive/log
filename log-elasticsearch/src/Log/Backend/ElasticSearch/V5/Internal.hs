@@ -15,6 +15,8 @@ import qualified Data.Text as T
 data ElasticSearchConfig = ElasticSearchConfig {
     esServer        :: !T.Text -- ^ Elasticsearch server address.
   , esIndex         :: !T.Text -- ^ Elasticsearch index name.
+  , esShardCount    :: !Int    -- ^ Elasticsearch shard count for the named index.
+  , esReplicaCount  :: !Int    -- ^ Elasticsearch replica count for the named index.
   , esMapping       :: !T.Text -- ^ Elasticsearch mapping name.
   , esLogin         :: Maybe (EsUsername, EsPassword) -- ^ Elasticsearch basic authentication username and password.
   , esLoginInsecure :: !Bool   -- ^ Allow basic authentication over non-TLS connections.
@@ -25,6 +27,8 @@ defaultElasticSearchConfig :: ElasticSearchConfig
 defaultElasticSearchConfig = ElasticSearchConfig {
   esServer        = "http://localhost:9200",
   esIndex         = "logs",
+  esShardCount    = 4,
+  esReplicaCount  = 1,
   esMapping       = "log",
   esLogin         = Nothing,
   esLoginInsecure = False
