@@ -1,3 +1,6 @@
+# log-elasticsearch-0.10.1.0 (2018-03-23)
+* expose `checkElasticSearchConnection` and `checkElasticSearchLogin`
+	
 # log-elasticsearch-0.10.0.0 (2018-03-06)
 * Add config parameters for number of shards and replicas to 'ElasticSearchConfig'
   (and make default of 4 shards and 1 replica explicit in 'defaultElasticSearchConfig').
