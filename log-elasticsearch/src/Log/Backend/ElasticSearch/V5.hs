@@ -36,6 +36,7 @@ import Network.HTTP.Client.TLS (tlsManagerSettings)
 import Prelude
 import System.IO
 import TextShow
+import qualified Data.Aeson.Encoding as Aeson
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Base64 as B64
 import qualified Data.ByteString.Lazy.Char8 as BSL
@@ -69,13 +70,13 @@ elasticSearchLogger ::
   -> IO Word32        -- ^ Generate a random 32-bit word for use in
                       -- document IDs.
   -> IO Logger
-elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
+elasticSearchLogger esConf@ElasticSearchConfig{..} genRandomWord = do
 
-  checkElasticSearchLogin ElasticSearchConfig{..} >>= \case
+  checkElasticSearchLogin esConf >>= \case
     Left (ex :: IOException) -> error . show $ ex
     Right _ -> return ()
 
-  checkElasticSearchConnection ElasticSearchConfig{..} >>= \case
+  checkElasticSearchConnection esConf >>= \case
       Left (ex :: HttpException) ->
         hPutStrLn stderr $
                   "ElasticSearch: unexpected error: " <>
@@ -94,7 +95,7 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
     baseID <- (<>)
       <$> (littleEndianRep <$> liftIO genRandomWord)
       <*> pure (littleEndianRep . floor $ timeToDouble now)
-    retryOnException . runBH_ ElasticSearchConfig{..} $ do
+    retryOnException . runBH_ esConf $ do
       -- Elasticsearch index names are additionally indexed by date so that each
       -- day is logged to a separate index to make log management easier.
       let index = IndexName $ T.concat [
@@ -108,7 +109,8 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
         -- index that already exists is harmless.
         indexExists' <- indexExists index
         unless indexExists' $ do
-          -- Note that Bloodhound won't let us create index using default settings
+          -- Note that Bloodhound won't let us create index using
+          -- default settings.
           let indexSettings = IndexSettings {
                   indexShards   = ShardCount esShardCount
                 , indexReplicas = ReplicaCount esReplicaCount
@@ -160,7 +162,7 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
     elasticSearchSync :: IORef IndexName -> IO ()
     elasticSearchSync indexRef = do
       indexName <- readIORef indexRef
-      void . runBH_ ElasticSearchConfig{..} $ refreshIndex indexName
+      void . runBH_ esConf $ refreshIndex indexName
 
     retryOnException :: forall r. IO r -> IO r
     retryOnException m = try m >>= \case
@@ -228,6 +230,34 @@ instance ToJSON LogsMapping where
         ]
     ]
 
+  toEncoding LogsMapping = Aeson.pairs $ mconcat
+    [ Aeson.pair "properties" $ Aeson.pairs $ mconcat
+      [ Aeson.pair "insertion_order"  $ Aeson.pairs $ mconcat
+        [ "type" .= ("integer"::T.Text)
+        ]
+      , Aeson.pair "insertion_time" $ Aeson.pairs $ mconcat
+        [ "type"   .= ("date"::T.Text)
+        , "format" .= ("date_time"::T.Text)
+        ]
+      , Aeson.pair "time" $ Aeson.pairs $ mconcat
+        [ "type"   .= ("date"::T.Text)
+        , "format" .= ("date_time"::T.Text)
+        ]
+      , Aeson.pair "domain" $ Aeson.pairs $ mconcat
+        [ "type" .= ("string"::T.Text)
+        ]
+      , Aeson.pair "level" $ Aeson.pairs $ mconcat
+        [ "type" .= ("string"::T.Text)
+        ]
+      , Aeson.pair "component" $ Aeson.pairs $ mconcat
+        [ "type" .= ("string"::T.Text)
+        ]
+      , Aeson.pair "message" $ Aeson.pairs $ mconcat
+        [ "type" .= ("string"::T.Text)
+        ]
+      ]
+    ]
+
 ----------------------------------------
 
 littleEndianRep :: Word32 -> BS.ByteString
@@ -251,8 +281,8 @@ checkElasticSearchLogin ElasticSearchConfig{..} =
         <> "Set esLoginInsecure = True to disable this check."
 
 checkElasticSearchConnection :: ElasticSearchConfig -> IO (Either HttpException ())
-checkElasticSearchConnection ElasticSearchConfig{..} =
-    try (void $ runBH_ ElasticSearchConfig{..} listIndices)
+checkElasticSearchConnection esConf =
+    try (void $ runBH_ esConf listIndices)
 
 runBH_ :: forall r. ElasticSearchConfig -> BH IO r -> IO r
 runBH_ ElasticSearchConfig{..} f = do
