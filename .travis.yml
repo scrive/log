@@ -87,8 +87,8 @@ install:
  - rm -fv cabal.project.local
  - "echo 'packages: log-base, log-postgres, log-elasticsearch' > cabal.project"
  - rm -f cabal.project.freeze
- - cabal new-build -w ${HC} ${TEST} ${BENCH} --dep -j2 all
- - cabal new-build -w ${HC} --disable-tests --disable-benchmarks --dep -j2 all
+ - cabal new-build -w ${HC} ${TEST} ${BENCH} --dep -j1 all
+ - cabal new-build -w ${HC} --disable-tests --disable-benchmarks --dep -j1 all
 
 # Here starts the actual work to be performed for the package under test;
 # any command which exits with a non-zero exit code causes the build to fail.
