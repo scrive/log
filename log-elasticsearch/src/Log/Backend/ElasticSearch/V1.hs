@@ -6,6 +6,8 @@ module Log.Backend.ElasticSearch.V1 (
   , esMapping
   , esLogin
   , esLoginInsecure
+  , checkElasticSearchLogin
+  , checkElasticSearchConnection
   , defaultElasticSearchConfig
   , withElasticSearchLogger
   , elasticSearchLogger
@@ -68,9 +70,20 @@ elasticSearchLogger ::
   -> IO Word32        -- ^ Generate a random 32-bit word for use in
                       -- document IDs.
   -> IO Logger
-elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
-  checkElasticSearchLogin
-  checkElasticSearchConnection
+elasticSearchLogger esConf@ElasticSearchConfig{..} genRandomWord = do
+
+  checkElasticSearchLogin esConf >>= \case
+    Left (ex :: IOException) -> error . show $ ex
+    Right _ -> return ()
+
+  checkElasticSearchConnection esConf >>= \case
+      Left (ex :: HttpException) ->
+        hPutStrLn stderr $
+                  "ElasticSearch: unexpected error: " <>
+                  show ex <>
+                  " (is ElasticSearch server running?)"
+      Right () -> return ()
+
   indexRef <- newIORef $ IndexName T.empty
   mkBulkLogger "ElasticSearch" (\msgs -> do
     now <- getCurrentTime
@@ -82,7 +95,7 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
     baseID <- (<>)
       <$> (littleEndianRep <$> liftIO genRandomWord)
       <*> pure (littleEndianRep . floor $ timeToDouble now)
-    retryOnException . runBH_ $ do
+    retryOnException . runBH_ esConf $ do
       -- Elasticsearch index names are additionally indexed by date so that each
       -- day is logged to a separate index to make log management easier.
       let index = IndexName $ T.concat [
@@ -96,7 +109,8 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
         -- index that already exists is harmless.
         indexExists' <- indexExists index
         unless indexExists' $ do
-          -- Note that Bloodhound won't let us create index using default settings
+          -- Note that Bloodhound won't let us create index using
+          -- default settings.
           let indexSettings = IndexSettings {
                   indexShards   = ShardCount esShardCount
                 , indexReplicas = ReplicaCount esReplicaCount
@@ -143,29 +157,12 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
           void $ bulk (V.map (toBulk index baseID) dummyMsgs))
     (elasticSearchSync indexRef)
   where
-    server  = Server esServer
     mapping = MappingName esMapping
 
     elasticSearchSync :: IORef IndexName -> IO ()
     elasticSearchSync indexRef = do
       indexName <- readIORef indexRef
-      void . runBH_ $ refreshIndex indexName
-
-    checkElasticSearchLogin :: IO ()
-    checkElasticSearchLogin =
-      when (isJust esLogin
-            && not esLoginInsecure
-            && not ("https:" `T.isPrefixOf` esServer)) $
-        error $ "ElasticSearch: insecure login: "
-          <> "Attempting to send login credentials over an insecure connection. "
-          <> "Set esLoginInsecure = True to disable this check."
-
-    checkElasticSearchConnection :: IO ()
-    checkElasticSearchConnection = try (void $ runBH_ listIndices) >>= \case
-      Left (ex::HttpException) ->
-        hPutStrLn stderr $ "ElasticSearch: unexpected error: " <> show ex
-          <> " (is ElasticSearch server running?)"
-      Right () -> return ()
+      void . runBH_ esConf $ refreshIndex indexName
 
     retryOnException :: forall r. IO r -> IO r
     retryOnException m = try m >>= \case
@@ -178,14 +175,6 @@ elasticSearchLogger ElasticSearchConfig{..} genRandomWord = do
 
     timeToDouble :: UTCTime -> Double
     timeToDouble = realToFrac . utcTimeToPOSIXSeconds
-
-    runBH_ :: forall r. BH IO r -> IO r
-    runBH_ f = do
-      mgr <- newManager tlsManagerSettings
-      let hook = maybe return (uncurry basicAuthHook) esLogin
-      let env = (mkBHEnv server mgr) { bhRequestHook = hook }
-      runBH env f
-
 
     jsonToBSL :: Value -> BSL.ByteString
     jsonToBSL = encodePretty' defConfig { confIndent = Spaces 2 }
@@ -280,3 +269,24 @@ decodeReply :: Reply -> Value
 decodeReply reply = case eitherDecode' $ responseBody reply of
   Right body -> body
   Left  err  -> object ["decoding_error" .= err]
+
+checkElasticSearchLogin :: ElasticSearchConfig -> IO (Either IOException ())
+checkElasticSearchLogin ElasticSearchConfig{..} =
+  try $
+    when (isJust esLogin
+          && not esLoginInsecure
+          && not ("https:" `T.isPrefixOf` esServer)) $
+      error $ "ElasticSearch: insecure login: "
+        <> "Attempting to send login credentials over an insecure connection. "
+        <> "Set esLoginInsecure = True to disable this check."
+
+checkElasticSearchConnection :: ElasticSearchConfig -> IO (Either HttpException ())
+checkElasticSearchConnection esConf =
+    try (void $ runBH_ esConf listIndices)
+
+runBH_ :: forall r. ElasticSearchConfig -> BH IO r -> IO r
+runBH_ ElasticSearchConfig{..} f = do
+  mgr <- newManager tlsManagerSettings
+  let hook = maybe return (uncurry basicAuthHook) esLogin
+  let env = (mkBHEnv (Server esServer) mgr) { bhRequestHook = hook }
+  runBH env f
