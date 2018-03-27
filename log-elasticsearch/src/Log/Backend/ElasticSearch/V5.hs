@@ -270,6 +270,9 @@ decodeReply reply = case eitherDecode' $ responseBody reply of
   Right body -> body
   Left  err  -> object ["decoding_error" .= err]
 
+-- | Check that login credentials are specified properly.
+--
+-- @since 0.10.1.0
 checkElasticSearchLogin :: ElasticSearchConfig -> IO (Either IOException ())
 checkElasticSearchLogin ElasticSearchConfig{..} =
   try $
@@ -280,6 +283,9 @@ checkElasticSearchLogin ElasticSearchConfig{..} =
         <> "Attempting to send login credentials over an insecure connection. "
         <> "Set esLoginInsecure = True to disable this check."
 
+-- | Check that we can connect to the ES server.
+--
+-- @since 0.10.1.0
 checkElasticSearchConnection :: ElasticSearchConfig -> IO (Either HttpException ())
 checkElasticSearchConnection esConf =
     try (void $ runBH_ esConf listIndices)
