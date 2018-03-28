@@ -27,6 +27,18 @@ esServer f esc = fmap (\x -> esc { I.esServer = x }) $ f (I.esServer esc)
 esIndex :: Lens' I.ElasticSearchConfig T.Text
 esIndex f esc = fmap (\x -> esc { I.esIndex = x }) $ f (I.esIndex esc)
 
+-- | Elasticsearch shard count for the named index.
+--
+-- @since 0.10.0.0
+esShardCount :: Lens' I.ElasticSearchConfig Int
+esShardCount f esc = fmap (\x -> esc { I.esShardCount = x }) $ f (I.esShardCount esc)
+
+-- | Elasticsearch replica count for the named index.
+--
+-- @since 0.10.0.0
+esReplicaCount :: Lens' I.ElasticSearchConfig Int
+esShardCount f esc = fmap (\x -> esc { I.esReplicaCount = x }) $ f (I.esReplicaCount esc)
+
 -- | Elasticsearch mapping name.
 esMapping :: Lens' I.ElasticSearchConfig T.Text
 esMapping f esc = fmap (\x -> esc { I.esMapping = x }) $ f (I.esMapping esc)
