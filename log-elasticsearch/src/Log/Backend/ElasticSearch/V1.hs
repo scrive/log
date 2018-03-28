@@ -3,6 +3,8 @@ module Log.Backend.ElasticSearch.V1 (
     ElasticSearchConfig
   , esServer
   , esIndex
+  , esShardCount
+  , esReplicaCount
   , esMapping
   , esLogin
   , esLoginInsecure

@@ -4,6 +4,8 @@ module Log.Backend.ElasticSearch.V5.Lens (
     I.ElasticSearchConfig
   , esServer
   , esIndex
+  , esShardCount
+  , esReplicaCount
   , esMapping
   , esLogin
   , esLoginInsecure
@@ -37,7 +39,7 @@ esShardCount f esc = fmap (\x -> esc { I.esShardCount = x }) $ f (I.esShardCount
 --
 -- @since 0.10.0.0
 esReplicaCount :: Lens' I.ElasticSearchConfig Int
-esShardCount f esc = fmap (\x -> esc { I.esReplicaCount = x }) $ f (I.esReplicaCount esc)
+esReplicaCount f esc = fmap (\x -> esc { I.esReplicaCount = x }) $ f (I.esReplicaCount esc)
 
 -- | Elasticsearch mapping name.
 esMapping :: Lens' I.ElasticSearchConfig T.Text
