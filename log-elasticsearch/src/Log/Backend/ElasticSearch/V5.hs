@@ -274,7 +274,7 @@ decodeReply reply = case eitherDecode' $ responseBody reply of
 
 -- | Check that login credentials are specified properly.
 --
--- @since 0.10.1.0
+-- @since 0.10.0.0
 checkElasticSearchLogin :: ElasticSearchConfig -> IO (Either IOException ())
 checkElasticSearchLogin ElasticSearchConfig{..} =
   try $
@@ -287,7 +287,7 @@ checkElasticSearchLogin ElasticSearchConfig{..} =
 
 -- | Check that we can connect to the ES server.
 --
--- @since 0.10.1.0
+-- @since 0.10.0.0
 checkElasticSearchConnection :: ElasticSearchConfig -> IO (Either HttpException ())
 checkElasticSearchConnection esConf =
     try (void $ runBH_ esConf listIndices)
