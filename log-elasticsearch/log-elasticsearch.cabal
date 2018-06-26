@@ -40,7 +40,7 @@ library
                        aeson-pretty >=0.8.2,
                        bytestring,
                        base64-bytestring,
-                       bloodhound >= 0.13 && < 0.16,
+                       bloodhound >= 0.13 && < 0.17,
                        deepseq,
                        http-client,
                        http-client-tls,
