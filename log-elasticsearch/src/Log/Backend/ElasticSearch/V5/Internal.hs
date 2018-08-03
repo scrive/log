@@ -15,15 +15,20 @@ import qualified Data.Text as T
 data ElasticSearchConfig = ElasticSearchConfig {
     esServer        :: !T.Text -- ^ Elasticsearch server address.
   , esIndex         :: !T.Text -- ^ Elasticsearch index name.
-  , esShardCount    :: !Int    -- ^ Elasticsearch shard count for the named index.
-                               --
-                               -- @since 0.10.0.0
-  , esReplicaCount  :: !Int    -- ^ Elasticsearch replica count for the named index.
-                               --
-                               -- @since 0.10.0.0
-  , esMapping       :: !T.Text -- ^ Elasticsearch mapping name.
-  , esLogin         :: Maybe (EsUsername, EsPassword) -- ^ Elasticsearch basic authentication username and password.
-  , esLoginInsecure :: !Bool   -- ^ Allow basic authentication over non-TLS connections.
+  , esShardCount    :: !Int
+    -- ^ Elasticsearch shard count for the named index.
+    --
+    -- @since 0.10.0.0
+  , esReplicaCount  :: !Int
+    -- ^ Elasticsearch replica count for the named index.
+    --
+    -- @since 0.10.0.0
+  , esMapping       :: !T.Text
+    -- ^ Elasticsearch mapping name.
+  , esLogin         :: Maybe (EsUsername, EsPassword)
+    -- ^ Elasticsearch basic authentication username and password.
+  , esLoginInsecure :: !Bool
+    -- ^ Allow basic authentication over non-TLS connections.
   } deriving (Eq, Show)
 
 -- | Sensible defaults for 'ElasticSearchConfig'.
