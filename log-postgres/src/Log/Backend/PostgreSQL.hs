@@ -8,7 +8,6 @@ import Control.Monad.State.Lazy
 import Data.Aeson
 import Data.List.Split
 import Data.Monoid.Utils
-import Data.Semigroup
 import Data.String
 import Data.Typeable
 import Database.PostgreSQL.PQTypes
