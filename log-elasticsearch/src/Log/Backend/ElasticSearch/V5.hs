@@ -218,20 +218,16 @@ instance ToJSON LogsMapping where
           , "format" .= ("date_time"::T.Text)
           ]
         , "domain" .= object [
-            "type" .= ("text"::T.Text)
-          , "index" .= True
+            "type" .= ("string"::T.Text)
           ]
         , "level" .= object [
-            "type" .= ("text"::T.Text)
-          , "index" .= True
+            "type" .= ("string"::T.Text)
           ]
         , "component" .= object [
-            "type" .= ("text"::T.Text)
-          , "index" .= True
+            "type" .= ("string"::T.Text)
           ]
         , "message" .= object [
-            "type" .= ("text"::T.Text)
-          , "index" .= True
+            "type" .= ("string"::T.Text)
           ]
         ]
     ]
@@ -250,20 +246,16 @@ instance ToJSON LogsMapping where
         , "format" .= ("date_time"::T.Text)
         ]
       , Aeson.pair "domain" $ Aeson.pairs $ mconcat
-        [ "type" .= ("text"::T.Text)
-        , "index" .= True
+        [ "type" .= ("string"::T.Text)
         ]
       , Aeson.pair "level" $ Aeson.pairs $ mconcat
-        [ "type" .= ("text"::T.Text)
-        , "index" .= True
+        [ "type" .= ("string"::T.Text)
         ]
       , Aeson.pair "component" $ Aeson.pairs $ mconcat
-        [ "type" .= ("text"::T.Text)
-        , "index" .= True
+        [ "type" .= ("string"::T.Text)
         ]
       , Aeson.pair "message" $ Aeson.pairs $ mconcat
-        [ "type" .= ("text"::T.Text)
-        , "index" .= True
+        [ "type" .= ("string"::T.Text)
         ]
       ]
     ]
