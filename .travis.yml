@@ -127,6 +127,7 @@ install:
   - rm -fv cabal.project cabal.project.local
   - grep -Ev -- '^\s*--' ${HOME}/.cabal/config | grep -Ev '^\s*$'
   - "printf 'packages: \"log-base\" \"log-elasticsearch\" \"log-postgres\"\\n' > cabal.project"
+  - "echo 'allow-newer: bloodhound:containers' >> cabal.project"
   - touch cabal.project.local
   - "if ! $NOINSTALLEDCONSTRAINTS; then for pkg in $($HCPKG list --simple-output); do echo $pkg  | grep -vw -- log-base | grep -vw -- log-elasticsearch | grep -vw -- log-postgres | sed 's/^/constraints: /' | sed 's/-[^-]*$/ installed/' >> cabal.project.local; done; fi"
   - cat cabal.project || true
@@ -155,6 +156,7 @@ script:
   - cd ${DISTDIR} || false
   - find . -maxdepth 1 -name '*.tar.gz' -exec tar -xvf '{}' \;
   - "printf 'packages: log-base-*/*.cabal log-elasticsearch-*/*.cabal log-postgres-*/*.cabal\\n' > cabal.project"
+  - "echo 'allow-newer: bloodhound:containers' >> cabal.project"
   - touch cabal.project.local
   - "if ! $NOINSTALLEDCONSTRAINTS; then for pkg in $($HCPKG list --simple-output); do echo $pkg  | grep -vw -- log-base | grep -vw -- log-elasticsearch | grep -vw -- log-postgres | sed 's/^/constraints: /' | sed 's/-[^-]*$/ installed/' >> cabal.project.local; done; fi"
   - cat cabal.project || true
