@@ -39,7 +39,7 @@ before_cache:
 env:
   - ELASTICSEARCH=1.5.2
   - ELASTICSEARCH=2.3.5
-  - ELASTICSEARCH=5.1.2
+  - ELASTICSEARCH=5.1.2 ES_JAVA_OPTS="-Xms500m -Xmx750m"
 
 matrix:
   include:
