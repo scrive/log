@@ -1,4 +1,4 @@
-# log-elasticsearch-0.10.0.1 (2019-01-14)
+# log-elasticsearch-0.10.0.1 (2019-01-24)
 * Compatibility with ES 6.x by using "text" instead of deprecated "string"
 
 # log-elasticsearch-0.10.0.0 (2018-03-28)
