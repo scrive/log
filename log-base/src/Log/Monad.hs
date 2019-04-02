@@ -14,6 +14,7 @@ import Control.DeepSeq
 import Control.Monad.Base
 import Control.Monad.Catch
 import Control.Monad.Error.Class
+import Control.Monad.IO.Unlift
 import Control.Monad.Morph (MFunctor (..))
 import Control.Monad.Reader
 import Control.Monad.State.Class
@@ -104,6 +105,11 @@ instance MonadBaseControl b m => MonadBaseControl b (LogT m) where
 #endif
   {-# INLINE liftBaseWith #-}
   {-# INLINE restoreM #-}
+
+instance MonadUnliftIO m => MonadUnliftIO (LogT m) where
+  askUnliftIO = do (UnliftIO runInIO) <- LogT $ askUnliftIO
+                   return (UnliftIO $ runInIO . unLogT)
+
 
 instance (MonadBase IO m, MonadTime m) => MonadLog (LogT m) where
   logMessage time level message data_ = LogT $ ReaderT logMsg

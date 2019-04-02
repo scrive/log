@@ -53,6 +53,7 @@ library
                        text,
                        time >= 1.5,
                        transformers-base,
+                       unliftio-core,
                        unordered-containers
   hs-source-dirs:      src
 
