@@ -23,6 +23,7 @@ import Prelude
 import qualified Data.Text as T
 
 import Log.Data
+import Log.Logger
 
 -- | Represents the family of monads with logging capabilities. Each
 -- 'MonadLog' carries with it some associated state (the logging
@@ -39,6 +40,9 @@ class MonadTime m => MonadLog m where
   localData   :: [Pair] -> m a -> m a
   -- | Extend the current application domain locally.
   localDomain :: T.Text -> m a -> m a
+  -- | Get current 'LoggerEnv' object. Useful for construction of logging
+  -- functions that work in a different monad, see 'getLoggerIO' as an example.
+  getLoggerEnv :: m LoggerEnv
 
 -- | Generic, overlapping instance.
 instance (
@@ -49,6 +53,7 @@ instance (
     logMessage time level message = lift . logMessage time level message
     localData data_ m = controlT $ \run -> localData data_ (run m)
     localDomain domain m = controlT $ \run -> localDomain domain (run m)
+    getLoggerEnv = lift getLoggerEnv
 
 controlT :: (MonadTransControl t, Monad (t m), Monad m)
          => (Run t -> m (StT t a)) -> t m a

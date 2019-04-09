@@ -7,6 +7,8 @@ module Log.Monad (
   , LogT(..)
   , runLogT
   , mapLogT
+  , logMessageIO
+  , getLoggerIO
   ) where
 
 import Control.Applicative
@@ -21,7 +23,6 @@ import Control.Monad.State.Class
 import Control.Monad.Trans.Control
 import Control.Monad.Writer.Class
 import Data.Aeson
-import Data.Aeson.Types
 import Data.Text (Text)
 import Prelude
 import qualified Control.Exception as E
@@ -30,15 +31,6 @@ import qualified Data.HashMap.Strict as H
 import Log.Class
 import Log.Data
 import Log.Logger
-
--- | The state that every 'LogT' carries around.
-data LoggerEnv = LoggerEnv {
-  leLogger    :: !Logger -- ^ The 'Logger' to use.
-, leComponent :: !Text   -- ^ Current application component.
-, leDomain    :: ![Text] -- ^ Current application domain.
-, leData      :: ![Pair] -- ^ Additional data to be merged with the
-                         -- log message\'s data.
-}
 
 type InnerLogT = ReaderT LoggerEnv
 
@@ -74,6 +66,30 @@ runLogT component logger m = runReaderT (unLogT m) LoggerEnv {
 mapLogT :: (m a -> n b) -> LogT m a -> LogT n b
 mapLogT f = LogT . mapReaderT f . unLogT
 
+-- | Base implementation of 'logMessage' for use with a specific
+-- 'LoggerEnv'. Useful for reimplementation of 'MonadLog' instance.
+logMessageIO :: LoggerEnv -> UTCTime -> LogLevel -> Text -> Value -> IO ()
+logMessageIO LoggerEnv{..} time level message data_ =
+  execLogger leLogger =<< E.evaluate (force lm)
+  where
+    lm = LogMessage
+      { lmComponent = leComponent
+      , lmDomain = leDomain
+      , lmTime = time
+      , lmLevel = level
+      , lmMessage = message
+      , lmData = case data_ of
+          Object obj -> Object . H.union obj $ H.fromList leData
+          _ | null leData -> data_
+            | otherwise -> object $ ("_data", data_) : leData
+      }
+
+-- | Return an IO action that logs messages using the current 'MonadLog'
+-- context. Useful for interfacing with libraries such as @aws@ or @amazonka@
+-- that accept logging callbacks operating in IO.
+getLoggerIO :: MonadLog m => m (UTCTime -> LogLevel -> Text -> Value -> IO ())
+getLoggerIO = logMessageIO <$> getLoggerEnv
+
 -- | @'hoist' = 'mapLogT'@
 --
 -- @since 0.7.2
@@ -107,30 +123,18 @@ instance MonadBaseControl b m => MonadBaseControl b (LogT m) where
   {-# INLINE restoreM #-}
 
 instance MonadUnliftIO m => MonadUnliftIO (LogT m) where
-  askUnliftIO = do (UnliftIO runInIO) <- LogT $ askUnliftIO
-                   return (UnliftIO $ runInIO . unLogT)
-
+  askUnliftIO = do
+    UnliftIO runInIO <- LogT askUnliftIO
+    return $ UnliftIO $ runInIO . unLogT
 
 instance (MonadBase IO m, MonadTime m) => MonadLog (LogT m) where
-  logMessage time level message data_ = LogT $ ReaderT logMsg
-    where
-      logMsg LoggerEnv{..} = liftBase $ do
-        execLogger leLogger =<< E.evaluate (force lm)
-        where
-          lm = LogMessage {
-            lmComponent = leComponent
-          , lmDomain = leDomain
-          , lmTime = time
-          , lmLevel = level
-          , lmMessage = message
-          , lmData = case data_ of
-            Object obj -> Object . H.union obj $ H.fromList leData
-            _ | null leData -> data_
-              | otherwise -> object $ ("_data", data_) : leData
-          }
+  logMessage time level message data_ = LogT . ReaderT $ \logEnv ->
+    liftBase $ logMessageIO logEnv time level message data_
 
   localData data_ =
     LogT . local (\e -> e { leData = data_ ++ leData e }) . unLogT
 
   localDomain domain =
     LogT . local (\e -> e { leDomain = leDomain e ++ [domain] }) . unLogT
+
+  getLoggerEnv = LogT ask

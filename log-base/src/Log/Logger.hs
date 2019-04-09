@@ -1,6 +1,7 @@
 -- | The 'Logger' type of logging back-ends.
-module Log.Logger (
-    Logger
+module Log.Logger
+  ( LoggerEnv(..)
+  , Logger
   , mkLogger
   , mkBulkLogger
   , mkBulkLogger'
@@ -16,11 +17,21 @@ import Control.Exception
 import Control.Monad
 import Data.Semigroup
 import Prelude
+import qualified Data.Aeson.Types as A
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 
 import Log.Data
 import Log.Internal.Logger
+
+-- | The state that every 'LogT' carries around.
+data LoggerEnv = LoggerEnv
+  { leLogger    :: !Logger   -- ^ The 'Logger' to use.
+  , leComponent :: !T.Text   -- ^ Current application component.
+  , leDomain    :: ![T.Text] -- ^ Current application domain.
+  , leData      :: ![A.Pair] -- ^ Additional data to be merged with the log
+                             -- message\'s data.
+  }
 
 -- | Start a logger thread that consumes one queued message at a time.
 mkLogger :: T.Text -> (LogMessage -> IO ()) -> IO Logger
