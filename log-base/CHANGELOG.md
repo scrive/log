@@ -1,4 +1,4 @@
-# log-base-0.8.0.0 (2019-04-02)
+# log-base-0.8.0.0 (2019-04-09)
 * Add `getLoggerEnv` function to `MonadLog` class, add `getLoggerIO` utility.
 
 # log-base-0.7.4.0 (2017-10-27)
