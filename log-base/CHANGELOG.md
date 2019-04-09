@@ -1,8 +1,11 @@
 # log-base-0.8.0.0 (2019-04-09)
-* Add `getLoggerEnv` function to `MonadLog` class, add `getLoggerIO` utility.
+* Add `getLoggerEnv` function to `MonadLog` class, add `getLoggerIO`
+  utility ([#46](https://github.com/scrive/log/pull/46)).
+* Add a `MonadUnliftIO` instance for `LogT`
+  ([#47](https://github.com/scrive/log/pull/47)).
 
 # log-base-0.7.4.0 (2017-10-27)
-* Add `mkBulkLogger'` ([#40](https://github.com/scrive/log/pull/40).
+* Add `mkBulkLogger'` ([#40](https://github.com/scrive/log/pull/40)).
 
 # log-base-0.7.3.0 (2017-10-10)
 * `BasicStdOutLogger` now flushes stdout on each write. `BulkStdOutLogger`
