@@ -13,7 +13,7 @@ import Data.Typeable
 import Database.PostgreSQL.PQTypes
 import Prelude
 import qualified Data.ByteString.Base64 as B64
-import qualified Data.Foldable as F
+import qualified Data.Foldable as Foldable
 import qualified Data.HashMap.Strict as H
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
@@ -118,10 +118,10 @@ pgLogger cs = mkBulkLogger loggerName
     addPair :: Value -> (T.Text, Value) -> Value
     addPair data_ (name, value) = case data_ of
       Object obj -> Object $ H.insert name value obj
-      _          -> object [
-          "_data" .= data_
-        , "_log"  .= value
-        ]
+      _          -> object
+                    [ "_data" .= data_
+                    , "_log"  .= value
+                    ]
 
     getEncodingQueryError :: DBException -> Maybe DetailedQueryError
     getEncodingQueryError DBException{..}
@@ -154,11 +154,14 @@ pgLogger cs = mkBulkLogger loggerName
       }
       where
         doValue :: Value -> m Value
-        doValue (Object obj) = Object <$> F.foldrM (\(name, value) acc -> H.insert
-          <$> doText name <*> doValue value <*> pure acc) H.empty (H.toList obj)
-        doValue (Array arr) = Array <$> V.mapM doValue arr
-        doValue (String s) = String <$> doText s
-        doValue v = return v
+        doValue (Object obj) =
+          Object <$> Foldable.foldrM
+          (\(name, value) acc ->
+             H.insert <$> doText name <*> doValue value <*> pure acc)
+          H.empty (H.toList obj)
+        doValue (Array arr)  = Array <$> V.mapM doValue arr
+        doValue (String s)   = String <$> doText s
+        doValue v            = return v
 
     sqlifyMessage :: (Int, LogMessage) -> SQL
     sqlifyMessage (n, LogMessage{..}) = mconcat [
