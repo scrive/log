@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 module Log.Backend.ElasticSearch.V1.Internal
   (ElasticSearchConfig(..)
   ,defaultElasticSearchConfig
@@ -6,6 +7,7 @@ module Log.Backend.ElasticSearch.V1.Internal
 where
 
 import Database.V1.Bloodhound hiding (Status)
+import GHC.Generics (Generic)
 import Prelude
 import qualified Data.Text as T
 
@@ -15,16 +17,21 @@ import qualified Data.Text as T
 data ElasticSearchConfig = ElasticSearchConfig {
     esServer        :: !T.Text -- ^ Elasticsearch server address.
   , esIndex         :: !T.Text -- ^ Elasticsearch index name.
-  , esShardCount    :: !Int    -- ^ Elasticsearch shard count for the named index.
-                               --
-                               -- @since 0.10.0.0
-  , esReplicaCount  :: !Int    -- ^ Elasticsearch replica count for the named index.
-                               --
-                               -- @since 0.10.0.0
-  , esMapping       :: !T.Text -- ^ Elasticsearch mapping name.
-  , esLogin         :: Maybe (EsUsername, EsPassword) -- ^ Elasticsearch basic authentication username and password.
-  , esLoginInsecure :: !Bool   -- ^ Allow basic authentication over non-TLS connections.
-  } deriving (Eq, Show)
+  , esShardCount    :: !Int
+    -- ^ Elasticsearch shard count for the named index.
+    --
+    -- @since 0.10.0.0
+  , esReplicaCount  :: !Int
+    -- ^ Elasticsearch replica count for the named index.
+    --
+    -- @since 0.10.0.0
+  , esMapping       :: !T.Text
+    -- ^ Elasticsearch mapping name.
+  , esLogin         :: Maybe (EsUsername, EsPassword)
+    -- ^ Elasticsearch basic authentication username and password.
+  , esLoginInsecure :: !Bool
+    -- ^ Allow basic authentication over non-TLS connections.
+  } deriving (Eq, Show, Generic)
 
 -- | Sensible defaults for 'ElasticSearchConfig'.
 defaultElasticSearchConfig :: ElasticSearchConfig

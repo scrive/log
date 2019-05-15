@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 module Log.Backend.ElasticSearch.V5.Internal
   (ElasticSearchConfig(..)
   ,defaultElasticSearchConfig
@@ -6,6 +7,7 @@ module Log.Backend.ElasticSearch.V5.Internal
 where
 
 import Database.V5.Bloodhound hiding (Status)
+import GHC.Generics (Generic)
 import Prelude
 import qualified Data.Text as T
 
@@ -29,7 +31,7 @@ data ElasticSearchConfig = ElasticSearchConfig {
     -- ^ Elasticsearch basic authentication username and password.
   , esLoginInsecure :: !Bool
     -- ^ Allow basic authentication over non-TLS connections.
-  } deriving (Eq, Show)
+  } deriving (Eq, Show, Generic)
 
 -- | Sensible defaults for 'ElasticSearchConfig'.
 defaultElasticSearchConfig :: ElasticSearchConfig

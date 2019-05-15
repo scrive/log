@@ -1,3 +1,6 @@
+# log-elasticsearch-0.10.1.0 (2019-05-15)
+* Add a Generic instance for ElasticSearchConfig.
+
 # log-elasticsearch-0.10.0.1 (2019-01-24)
 * Compatibility with ES 6.x by using "text" instead of deprecated "string"
 
