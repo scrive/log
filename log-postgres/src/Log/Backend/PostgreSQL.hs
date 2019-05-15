@@ -5,7 +5,7 @@ import Control.Applicative
 import Control.Concurrent
 import Control.Exception.Lifted
 import Control.Monad.State.Lazy
-import Data.Aeson
+import Data.Aeson ((.=), Value(..), object, encode)
 import Data.List.Split
 import Data.Monoid.Utils
 import Data.String

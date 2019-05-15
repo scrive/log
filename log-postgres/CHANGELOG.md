@@ -1,3 +1,6 @@
+# log-postgres-0.7.1.0 (2019-05-15)
+* Support latest aeson.
+
 # log-postgres-0.7.0.2 (2017-08-10)
 * Update package description.
 
