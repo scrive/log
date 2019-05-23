@@ -27,14 +27,14 @@ Source-repository head
 
 library
   exposed-modules:    Log.Backend.PostgreSQL
-  build-depends:      base                  >= 4.8  && < 4.12 || ^>= 4.12
+  build-depends:      base                  >= 4.9  && < 4.12 || ^>= 4.12
                     , log-base              >= 0.7  && < 0.8  || ^>= 0.8
                     , aeson                 >= 1.0  && < 1.4  || ^>= 1.4
                     , hpqtypes             ^>= 1.7
                     , bytestring           ^>= 0.10
                     , deepseq              ^>= 1.4
                     , text                 ^>= 1.2
-                    , time                  >= 1.5  && < 1.9  || ^>= 1.9
+                    , time                  >= 1.6  && < 1.9  || ^>= 1.9
                     , unordered-containers ^>= 0.2
                     , vector               ^>= 0.12
                     , aeson-pretty         ^>= 0.8
