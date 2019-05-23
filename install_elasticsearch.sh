@@ -1,6 +1,6 @@
 #! /bin/sh
 
-if [ "x$ELASTICSEARCH" = "x5.1.2" ]; then
+if [ "x$ELASTICSEARCH" = "x5.6.15" ]; then
     ELASTICSEARCH_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$ELASTICSEARCH.tar.gz;
 else
     ELASTICSEARCH_URL=https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-$ELASTICSEARCH.tar.gz;
