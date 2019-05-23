@@ -178,6 +178,6 @@ pgLogger cs = mkBulkLogger loggerName
       ]
 
     ts :: TransactionSettings
-    ts = def {
+    ts = defaultTransactionSettings {
       tsAutoTransaction = False
     }
