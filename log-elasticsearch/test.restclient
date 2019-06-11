@@ -10,7 +10,7 @@
 # for details on how to use restclient.el.
 
 :url  = localhost:9200
-:date = 2016-10-13
+:date = 2019-06-11
 
 # Check that Elasticsearch is working.
 GET http://:url
