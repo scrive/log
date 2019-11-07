@@ -1,6 +1,6 @@
 cabal-version:       2.0
 name:                log-postgres
-version:             0.7.1.1
+version:             0.7.1.2
 synopsis:            Structured logging solution (PostgreSQL back end)
 
 description:         PostgreSQL back end for the 'log' library suite.
@@ -38,7 +38,7 @@ library
                     , vector               ^>= 0.12
                     , aeson-pretty         ^>= 0.8
                     , base64-bytestring    ^>= 1.0
-                    , hpqtypes             ^>= 1.8
+                    , hpqtypes             ^>= 1.7  || ^>= 1.8
                     , mtl                  ^>= 2.2
                     , lifted-base          ^>= 0.2
                     , semigroups            >= 0.16 && < 0.19 || ^>= 0.19
