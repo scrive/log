@@ -37,7 +37,6 @@ import Network.HTTP.Client
 import Network.HTTP.Client.TLS (tlsManagerSettings)
 import Prelude
 import System.IO
-import TextShow
 import qualified Data.Aeson.Encoding as Aeson
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Base64 as B64
@@ -144,19 +143,33 @@ elasticSearchLogger esConf@ElasticSearchConfig{..} genRandomWord = do
           $ "ElasticSearch: unexpected response: " <> jsonToBSL replyBody
         Just (hasErrors, items) -> when hasErrors $ do
           -- If any message failed to be inserted because of type mismatch, go
-          -- back to them, replace their data with elastic search error and put
-          -- old data into its own namespace to work around insertion errors.
+          -- back to them, log the insertion failure and add type suffix to each
+          -- of the keys in their "data" fields to work around type errors.
           let failed = V.findIndices (H.member "error") items
-          dummyMsgs <- V.forM failed $ \n -> do
-            dataNamespace <- liftIO genRandomWord
-            let modifyData oldData = object [
-                    "__es_error" .= H.lookup "error" (items V.! n)
-                  , "__es_modified" .= True
-                  , ("__data_" <> showt dataNamespace) .= oldData
-                  ]
-            return . second (H.adjust modifyData "data") $ jsonMsgs V.! n
+              newMsgs = (`V.map` failed) $ \n ->
+                let modifyData :: Bool -> Value -> Value
+                    modifyData addError (Object hm) = Object $
+                      let newData = H.foldlWithKey' keyAddValueTypeSuffix H.empty hm
+                      in if addError
+                         then newData `H.union` H.fromList
+                              [ "__es_error" .= H.lookup "error" (items V.! n)
+                              , "__es_modified" .= True
+                              ]
+                         else newData
+                    modifyData _ v = v
+
+                    keyAddValueTypeSuffix acc k v = H.insert
+                      (case v of
+                          Object{} -> k <> "_object"
+                          Array{}  -> k <> "_array"
+                          String{} -> k <> "_string"
+                          Number{} -> k <> "_number"
+                          Bool{}   -> k <> "_bool"
+                          Null{}   -> k <> "_null"
+                      ) (modifyData False v) acc
+                in second (H.adjust (modifyData True) "data") $ jsonMsgs V.! n
           -- Attempt to put modified messages and ignore any further errors.
-          void $ bulk (V.map (toBulk index baseID) dummyMsgs))
+          void $ bulk (V.map (toBulk index baseID) newMsgs))
     (elasticSearchSync indexRef)
   where
     mapping = MappingName esMapping

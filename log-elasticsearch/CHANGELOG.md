@@ -1,3 +1,6 @@
+# log-elasticsearch-0.10.2.0 (2020-02-03)
+* Modify data keys in deterministic manner in case of ES insertion failure
+
 # log-elasticsearch-0.10.1.0 (2019-05-15)
 * Add a Generic instance for ElasticSearchConfig.
 
