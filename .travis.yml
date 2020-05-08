@@ -2,9 +2,13 @@
 #
 #   haskell-ci 'cabal.project'
 #
+# To regenerate the script (for example after adjusting tested-with) run
+#
+#   haskell-ci regenerate
+#
 # For more information, see https://github.com/haskell-CI/haskell-ci
 #
-# version: 0.9.20200402
+# version: 0.10
 #
 version: ~> 1.0
 language: c
@@ -33,20 +37,23 @@ jobs:
       addons: {"apt":{"sources":[{"sourceline":"deb http://ppa.launchpad.net/hvr/ghc/ubuntu xenial main","key_url":"https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x063dab2bdc0b3f9fcebc378bff3aeacef6f88286"}],"packages":["ghc-8.10.1","cabal-install-3.2"]}}
       os: linux
     - compiler: ghc-8.8.3
-      addons: {"apt":{"sources":[{"sourceline":"deb http://ppa.launchpad.net/hvr/ghc/ubuntu xenial main","key_url":"https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x063dab2bdc0b3f9fcebc378bff3aeacef6f88286"}],"packages":["ghc-8.8.3","cabal-install-3.0"]}}
+      addons: {"apt":{"sources":[{"sourceline":"deb http://ppa.launchpad.net/hvr/ghc/ubuntu xenial main","key_url":"https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x063dab2bdc0b3f9fcebc378bff3aeacef6f88286"}],"packages":["ghc-8.8.3","cabal-install-3.2"]}}
       os: linux
     - compiler: ghc-8.6.5
-      addons: {"apt":{"sources":[{"sourceline":"deb http://ppa.launchpad.net/hvr/ghc/ubuntu xenial main","key_url":"https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x063dab2bdc0b3f9fcebc378bff3aeacef6f88286"}],"packages":["ghc-8.6.5","cabal-install-3.0"]}}
+      addons: {"apt":{"sources":[{"sourceline":"deb http://ppa.launchpad.net/hvr/ghc/ubuntu xenial main","key_url":"https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x063dab2bdc0b3f9fcebc378bff3aeacef6f88286"}],"packages":["ghc-8.6.5","cabal-install-3.2"]}}
       os: linux
     - compiler: ghc-8.4.4
-      addons: {"apt":{"sources":[{"sourceline":"deb http://ppa.launchpad.net/hvr/ghc/ubuntu xenial main","key_url":"https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x063dab2bdc0b3f9fcebc378bff3aeacef6f88286"}],"packages":["ghc-8.4.4","cabal-install-3.0"]}}
+      addons: {"apt":{"sources":[{"sourceline":"deb http://ppa.launchpad.net/hvr/ghc/ubuntu xenial main","key_url":"https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x063dab2bdc0b3f9fcebc378bff3aeacef6f88286"}],"packages":["ghc-8.4.4","cabal-install-3.2"]}}
       os: linux
     - compiler: ghc-8.2.2
-      addons: {"apt":{"sources":[{"sourceline":"deb http://ppa.launchpad.net/hvr/ghc/ubuntu xenial main","key_url":"https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x063dab2bdc0b3f9fcebc378bff3aeacef6f88286"}],"packages":["ghc-8.2.2","cabal-install-3.0"]}}
+      addons: {"apt":{"sources":[{"sourceline":"deb http://ppa.launchpad.net/hvr/ghc/ubuntu xenial main","key_url":"https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x063dab2bdc0b3f9fcebc378bff3aeacef6f88286"}],"packages":["ghc-8.2.2","cabal-install-3.2"]}}
       os: linux
     - compiler: ghc-8.0.2
-      addons: {"apt":{"sources":[{"sourceline":"deb http://ppa.launchpad.net/hvr/ghc/ubuntu xenial main","key_url":"https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x063dab2bdc0b3f9fcebc378bff3aeacef6f88286"}],"packages":["ghc-8.0.2","cabal-install-3.0"]}}
+      addons: {"apt":{"sources":[{"sourceline":"deb http://ppa.launchpad.net/hvr/ghc/ubuntu xenial main","key_url":"https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x063dab2bdc0b3f9fcebc378bff3aeacef6f88286"}],"packages":["ghc-8.0.2","cabal-install-3.2"]}}
       os: linux
+  allow_failures:
+    - compiler: ghc-8.10.1
+    - compiler: ghc-8.8.3
 before_install:
   - HC=$(echo "/opt/$CC/bin/ghc" | sed 's/-/\//')
   - WITHCOMPILER="-w $HC"
@@ -97,12 +104,12 @@ install:
     echo "packages: log-base" >> cabal.project
     echo "packages: log-elasticsearch" >> cabal.project
     echo "packages: log-postgres" >> cabal.project
-  - echo 'package log-base' >> cabal.project
-  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
-  - echo 'package log-elasticsearch' >> cabal.project
-  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
-  - echo 'package log-postgres' >> cabal.project
-  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
+  - if [ $HCNUMVER -ge 80200 ] ; then echo 'package log-base' >> cabal.project ; fi
+  - "if [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
+  - if [ $HCNUMVER -ge 80200 ] ; then echo 'package log-elasticsearch' >> cabal.project ; fi
+  - "if [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
+  - if [ $HCNUMVER -ge 80200 ] ; then echo 'package log-postgres' >> cabal.project ; fi
+  - "if [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
   - |
     echo "allow-newer: bloodhound:containers" >> cabal.project
     echo "allow-newer: bloodhound:time"       >> cabal.project
@@ -136,12 +143,12 @@ script:
     echo "packages: ${PKGDIR_log_base}" >> cabal.project
     echo "packages: ${PKGDIR_log_elasticsearch}" >> cabal.project
     echo "packages: ${PKGDIR_log_postgres}" >> cabal.project
-  - echo 'package log-base' >> cabal.project
-  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
-  - echo 'package log-elasticsearch' >> cabal.project
-  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
-  - echo 'package log-postgres' >> cabal.project
-  - "echo '  ghc-options: -Werror=missing-methods' >> cabal.project"
+  - if [ $HCNUMVER -ge 80200 ] ; then echo 'package log-base' >> cabal.project ; fi
+  - "if [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
+  - if [ $HCNUMVER -ge 80200 ] ; then echo 'package log-elasticsearch' >> cabal.project ; fi
+  - "if [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
+  - if [ $HCNUMVER -ge 80200 ] ; then echo 'package log-postgres' >> cabal.project ; fi
+  - "if [ $HCNUMVER -ge 80200 ] ; then echo '  ghc-options: -Werror=missing-methods' >> cabal.project ; fi"
   - |
     echo "allow-newer: bloodhound:containers" >> cabal.project
     echo "allow-newer: bloodhound:time"       >> cabal.project
@@ -164,5 +171,5 @@ script:
   - rm -f cabal.project.local
   - ${CABAL} v2-build $WITHCOMPILER --disable-tests --disable-benchmarks all
 
-# REGENDATA ("0.9.20200402",["cabal.project"])
+# REGENDATA ("0.10",["cabal.project"])
 # EOF
