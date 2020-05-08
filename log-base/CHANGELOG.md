@@ -1,3 +1,6 @@
+# log-base-0.8.0.1 (2020-04-03)
+* Update version bounds.
+
 # log-base-0.8.0.0 (2019-04-09)
 * Add `getLoggerEnv` function to `MonadLog` class, add `getLoggerIO`
   utility ([#46](https://github.com/scrive/log/pull/46)).

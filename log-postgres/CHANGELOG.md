@@ -1,3 +1,6 @@
+# log-postgres-0.7.1.3 (2020-04-03)
+* Support latest hpqtypes.
+
 # log-postgres-0.7.1.1 (2019-05-23)
 * Support latest hpqtypes.
 

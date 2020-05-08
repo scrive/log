@@ -16,6 +16,7 @@ import Control.DeepSeq
 import Control.Monad.Base
 import Control.Monad.Catch
 import Control.Monad.Error.Class
+import Control.Monad.Fail (MonadFail)
 import Control.Monad.IO.Unlift
 import Control.Monad.Morph (MFunctor (..))
 import Control.Monad.Reader
@@ -37,7 +38,7 @@ type InnerLogT = ReaderT LoggerEnv
 -- | Monad transformer that adds logging capabilities to the underlying monad.
 newtype LogT m a = LogT { unLogT :: InnerLogT m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadBase b, MonadCatch
-           ,MonadIO, MonadMask, MonadPlus, MonadThrow, MonadTrans
+           ,MonadIO, MonadMask, MonadPlus, MonadThrow, MonadTrans, MonadFail
            ,MonadError e, MonadWriter w, MonadState s)
 
 instance MonadReader r m => MonadReader r (LogT m) where

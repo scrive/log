@@ -1,2 +1,2 @@
 packages: log-base, log-elasticsearch, log-postgres
-allow-newer: bloodhound:containers
+allow-newer: bloodhound:containers, bloodhound:time
