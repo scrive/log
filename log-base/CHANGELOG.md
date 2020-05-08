@@ -1,4 +1,4 @@
-# log-base-0.8.0.1 (2020-04-03)
+# log-base-0.8.0.1 (2020-05-08)
 * Update version bounds.
 
 # log-base-0.8.0.0 (2019-04-09)
