@@ -10,7 +10,6 @@ module Log.Data (
 import Control.DeepSeq
 import Control.Applicative
 import Data.Aeson
-import Data.Aeson.Encode.Pretty
 import Data.Aeson.Types
 import Data.ByteString.Lazy (toStrict)
 import Data.Time
@@ -86,9 +85,7 @@ showLogMessage mInsertionTime LogMessage{..} = T.concat $ [
     else [" ", textifyData lmData]
   where
     textifyData :: Value -> T.Text
-    textifyData = T.decodeUtf8 . toStrict . encodePretty' defConfig {
-      confIndent = Spaces 2
-    }
+    textifyData = T.decodeUtf8 . toStrict . encode
 
 instance ToJSON LogMessage where
   toJSON LogMessage{..} = object [
