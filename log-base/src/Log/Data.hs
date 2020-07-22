@@ -73,7 +73,7 @@ showLogMessage :: Maybe UTCTime -- ^ The time that message was added to the log.
 showLogMessage mInsertionTime LogMessage{..} = textifyData $ object [
     "timestamp" .= (T.pack $ formatTime defaultTimeLocale "%Y-%m-%d %H:%M:%S" lmTime)
   , "insertion_time" .=  (case mInsertionTime of
-      Nothing -> " "
+      Nothing -> ""
       Just it -> T.pack $ formatTime defaultTimeLocale " (%H:%M:%S) " it)
   , "level" .= (T.toUpper $ showLogLevel lmLevel)
   , "component" .=  (T.intercalate "/" $ lmComponent : lmDomain)
