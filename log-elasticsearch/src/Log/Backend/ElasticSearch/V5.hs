@@ -37,7 +37,6 @@ import Network.HTTP.Client
 import Network.HTTP.Client.TLS (tlsManagerSettings)
 import Prelude
 import System.IO
-import qualified Data.Aeson.Encoding as Aeson
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Base64 as B64
 import qualified Data.ByteString.Lazy.Char8 as BSL
@@ -117,11 +116,6 @@ elasticSearchLogger esConf@ElasticSearchConfig{..} genRandomWord = do
                 , indexReplicas = ReplicaCount esReplicaCount
                 }
           void $ createIndex indexSettings index
-          reply <- putMapping index mapping LogsMapping
-          when (not $ isSuccess reply) $ do
-            error $ "ElasticSearch: error while creating mapping: "
-              <> T.unpack (T.decodeUtf8 . BSL.toStrict . jsonToBSL
-                            $ decodeReply reply)
         liftIO $ writeIORef indexRef index
       let jsonMsgs = V.fromList $ map (toJsonMsg now) $ zip [1..] msgs
       reply <- bulk $ V.map (toBulk index baseID) jsonMsgs
@@ -214,64 +208,6 @@ elasticSearchLogger esConf@ElasticSearchConfig{..} genRandomWord = do
            -> BulkOperation
     toBulk index baseID (n, obj) =
       BulkIndex index mapping (mkDocId baseID n) $ Object obj
-
-data LogsMapping = LogsMapping
-instance ToJSON LogsMapping where
-  toJSON LogsMapping = object [
-    "properties" .= object [
-        "insertion_order" .= object [
-            "type" .= ("integer"::T.Text)
-          ]
-        , "insertion_time" .= object [
-            "type"   .= ("date"::T.Text)
-          , "format" .= ("date_time"::T.Text)
-          ]
-        , "time" .= object [
-            "type"   .= ("date"::T.Text)
-          , "format" .= ("date_time"::T.Text)
-          ]
-        , "domain" .= object [
-            "type" .= ("text"::T.Text)
-          ]
-        , "level" .= object [
-            "type" .= ("text"::T.Text)
-          ]
-        , "component" .= object [
-            "type" .= ("text"::T.Text)
-          ]
-        , "message" .= object [
-            "type" .= ("text"::T.Text)
-          ]
-        ]
-    ]
-
-  toEncoding LogsMapping = Aeson.pairs $ mconcat
-    [ Aeson.pair "properties" $ Aeson.pairs $ mconcat
-      [ Aeson.pair "insertion_order"  $ Aeson.pairs $ mconcat
-        [ "type" .= ("integer"::T.Text)
-        ]
-      , Aeson.pair "insertion_time" $ Aeson.pairs $ mconcat
-        [ "type"   .= ("date"::T.Text)
-        , "format" .= ("date_time"::T.Text)
-        ]
-      , Aeson.pair "time" $ Aeson.pairs $ mconcat
-        [ "type"   .= ("date"::T.Text)
-        , "format" .= ("date_time"::T.Text)
-        ]
-      , Aeson.pair "domain" $ Aeson.pairs $ mconcat
-        [ "type" .= ("text"::T.Text)
-        ]
-      , Aeson.pair "level" $ Aeson.pairs $ mconcat
-        [ "type" .= ("text"::T.Text)
-        ]
-      , Aeson.pair "component" $ Aeson.pairs $ mconcat
-        [ "type" .= ("text"::T.Text)
-        ]
-      , Aeson.pair "message" $ Aeson.pairs $ mconcat
-        [ "type" .= ("text"::T.Text)
-        ]
-      ]
-    ]
 
 ----------------------------------------
 

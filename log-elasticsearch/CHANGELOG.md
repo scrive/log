@@ -1,3 +1,6 @@
+# log-elasticsearch-0.10.3.0 (2020-08-10)
+* ElasticSearch 7.x compatibility
+
 # log-elasticsearch-0.10.2.0 (2020-02-03)
 * Modify data keys in deterministic manner in case of ES insertion failure
 
