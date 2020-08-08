@@ -5,11 +5,13 @@ module Log.Data (
   , readLogLevel
   , LogMessage(..)
   , showLogMessage
+  , showJsonLineLogMessage
   ) where
 
 import Control.DeepSeq
 import Control.Applicative
 import Data.Aeson
+import Data.Aeson.Encode.Pretty
 import Data.Aeson.Types
 import Data.ByteString.Lazy (toStrict)
 import Data.Time
@@ -70,7 +72,30 @@ data LogMessage = LogMessage {
 showLogMessage :: Maybe UTCTime -- ^ The time that message was added to the log.
                -> LogMessage    -- ^ The actual message.
                -> T.Text
-showLogMessage mInsertionTime LogMessage{..} = textifyData $ object [
+showLogMessage mInsertionTime LogMessage{..} = T.concat $ [
+    T.pack $ formatTime defaultTimeLocale "%Y-%m-%d %H:%M:%S" lmTime
+  , case mInsertionTime of
+      Nothing -> " "
+      Just it -> T.pack $ formatTime defaultTimeLocale " (%H:%M:%S) " it
+  , T.toUpper $ showLogLevel lmLevel
+  , " "
+  , T.intercalate "/" $ lmComponent : lmDomain
+  , ": "
+  , lmMessage
+  ] ++ if lmData == emptyObject
+    then []
+    else [" ", textifyData lmData]
+  where
+    textifyData :: Value -> T.Text
+    textifyData = T.decodeUtf8 . toStrict . encodePretty' defConfig {
+      confIndent = Spaces 2
+    }
+
+-- | Render a 'LogMessage' to 'Text' as a JsonLine.
+showJsonLineLogMessage :: Maybe UTCTime -- ^ The time that message was added to the log.
+               -> LogMessage    -- ^ The actual message.
+               -> T.Text
+showJsonLineLogMessage mInsertionTime LogMessage{..} = textifyData $ object [
     "timestamp" .= (T.pack $ formatTime defaultTimeLocale "%Y-%m-%d %H:%M:%S" lmTime)
   , "insertion_time" .=  (case mInsertionTime of
       Nothing -> ""

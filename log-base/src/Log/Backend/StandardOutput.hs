@@ -3,6 +3,7 @@ module Log.Backend.StandardOutput (
     simpleStdoutLogger
   , stdoutLogger
   , withSimpleStdOutLogger
+  , withSimpleJsonLineStdOutLogger
   ) where
 
 import Prelude
@@ -18,6 +19,15 @@ import Log.Logger
 withSimpleStdOutLogger :: (Logger -> IO r) -> IO r
 withSimpleStdOutLogger act = do
   logger <- stdoutLogger
+  withLogger logger act
+
+-- | Create a simple jsonline logger for the duration of the given
+-- action, making sure that stdout is flushed afterwards.
+withSimpleJsonLineStdOutLogger :: (Logger -> IO r) -> IO r
+withSimpleJsonLineStdOutLogger act = do
+  logger <- mkLogger "jsonlines-stdout" $
+                      (\msg -> (T.putStrLn . showJsonLineLogMessage Nothing $ msg)
+                                >> hFlush stdout)
   withLogger logger act
 
 {-# DEPRECATED simpleStdoutLogger "Use 'withSimpleStdOutLogger'" #-}
