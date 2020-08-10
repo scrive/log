@@ -124,9 +124,8 @@ instance MonadBaseControl b m => MonadBaseControl b (LogT m) where
   {-# INLINE restoreM #-}
 
 instance MonadUnliftIO m => MonadUnliftIO (LogT m) where
-  askUnliftIO = do
-    UnliftIO runInIO <- LogT askUnliftIO
-    return $ UnliftIO $ runInIO . unLogT
+  withRunInIO inner = LogT $ withRunInIO $ \run -> inner (run . unLogT)
+  {-# INLINE withRunInIO #-}
 
 instance (MonadBase IO m, MonadTime m) => MonadLog (LogT m) where
   logMessage time level message data_ = LogT . ReaderT $ \logEnv ->
