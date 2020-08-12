@@ -25,25 +25,20 @@ Source-repository head
   Location: https://github.com/scrive/log.git
 
 library
-  exposed-modules:     Log.Backend.ElasticSearch.V1
-                       Log.Backend.ElasticSearch.V1.Internal
-                       Log.Backend.ElasticSearch.V1.Lens
-                       Log.Backend.ElasticSearch.V5
-                       Log.Backend.ElasticSearch.V5.Internal
-                       Log.Backend.ElasticSearch.V5.Lens
-                       Log.Backend.ElasticSearch
-                       Log.Backend.ElasticSearch.Lens
+  exposed-modules:     Log.Backend.ElasticSearch
                        Log.Backend.ElasticSearch.Internal
+                       Log.Backend.ElasticSearch.Lens
   build-depends:       base >= 4.8 && <5,
                        log-base >= 0.7,
                        aeson >=1.0.0.0,
                        aeson-pretty >=0.8.2,
                        bytestring,
                        base64-bytestring,
-                       bloodhound >= 0.13 && < 0.17,
                        deepseq,
                        http-client,
                        http-client-tls,
+                       http-types,
+                       network-uri,
                        semigroups,
                        text,
                        text-show >= 2,
