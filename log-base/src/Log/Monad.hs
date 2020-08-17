@@ -80,10 +80,22 @@ logMessageIO LoggerEnv{..} time level message data_ =
       , lmLevel = level
       , lmMessage = message
       , lmData = case data_ of
-          Object obj -> Object . H.union obj $ H.fromList leData
-          _ | null leData -> data_
-            | otherwise -> object $ ("_data", data_) : leData
+          -- If lmData is not an object, we make it so and put previous data as
+          -- the singleton value with key reflecting its type. It's required for
+          -- ElasticSearch as ES needs fields with the same name to be of the
+          -- same type in all log messages.
+          Object obj      -> Object . H.union obj $ H.fromList leData
+          _ | null leData -> object [dataTyped data_ .= data_]
+            | otherwise   -> object $ (dataTyped data_, data_) : leData
       }
+
+    dataTyped = \case
+      Object{} -> "__data_object"
+      Array{}  -> "__data_array"
+      String{} -> "__data_string"
+      Number{} -> "__data_number"
+      Bool{}   -> "__data_bool"
+      Null{}   -> "__data_null"
 
 -- | Return an IO action that logs messages using the current 'MonadLog'
 -- context. Useful for interfacing with libraries such as @aws@ or @amazonka@
