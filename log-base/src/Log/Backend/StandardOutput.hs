@@ -17,7 +17,7 @@ import Log.Logger
 -- action, making sure that stdout is flushed afterwards.
 withSimpleStdOutLogger :: (Logger -> IO r) -> IO r
 withSimpleStdOutLogger act = do
-  logger <- stdoutLogger
+  logger <- simpleStdoutLogger
   withLogger logger act
 
 {-# DEPRECATED simpleStdoutLogger "Use 'withSimpleStdOutLogger'" #-}
