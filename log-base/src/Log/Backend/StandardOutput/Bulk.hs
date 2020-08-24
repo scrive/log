@@ -29,6 +29,7 @@ withBulkStdOutLogger act = do
 -- (see the note attached to 'mkBulkLogger').
 bulkStdoutLogger :: IO Logger
 bulkStdoutLogger = mkBulkLogger "stdout-bulk"
-                   (\msgs -> mapM_ (T.putStrLn . showLogMessage Nothing) msgs
-                             >> hFlush stdout)
-                   (hFlush stdout)
+  (\msgs -> do
+      mapM_ (T.putStrLn . showLogMessage Nothing) msgs
+      hFlush stdout
+  ) (return ())

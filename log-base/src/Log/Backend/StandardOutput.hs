@@ -27,10 +27,11 @@ withSimpleStdOutLogger act = do
 -- 'Log.Backend.StandardOutput.Bulk.withBulkStdOutLogger' if you want
 -- buffering.
 simpleStdoutLogger :: Logger
-simpleStdoutLogger = Logger {
-    loggerWriteMessage = \msg -> (T.putStrLn . showLogMessage Nothing $ msg)
-                                 >> hFlush stdout
-  , loggerWaitForWrite = hFlush stdout
+simpleStdoutLogger = Logger
+  { loggerWriteMessage = \msg -> do
+      T.putStrLn $ showLogMessage Nothing msg
+      hFlush stdout
+  , loggerWaitForWrite = return ()
   , loggerShutdown     = return ()
   }
 
@@ -38,4 +39,6 @@ simpleStdoutLogger = Logger {
 
 -- | Create a logger that prints messages to standard output.
 stdoutLogger :: IO Logger
-stdoutLogger = mkLogger "stdout" $ T.putStrLn . showLogMessage Nothing
+stdoutLogger = mkLogger "stdout" $ \msg -> do
+  T.putStrLn $ showLogMessage Nothing msg
+  hFlush stdout
