@@ -1,5 +1,5 @@
 name:                log-elasticsearch
-version:             0.10.2.0
+version:             0.11.0.0
 synopsis:            Structured logging solution (Elasticsearch back end)
 
 description:         Elasticsearch back end for the 'log' library suite.
@@ -18,32 +18,27 @@ category:            System
 build-type:          Simple
 cabal-version:       >=1.10
 extra-source-files:  CHANGELOG.md, README.md
-tested-with:         GHC ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.3 || ==8.10.1
+tested-with:         GHC ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.2
 
 Source-repository head
   Type:     git
   Location: https://github.com/scrive/log.git
 
 library
-  exposed-modules:     Log.Backend.ElasticSearch.V1
-                       Log.Backend.ElasticSearch.V1.Internal
-                       Log.Backend.ElasticSearch.V1.Lens
-                       Log.Backend.ElasticSearch.V5
-                       Log.Backend.ElasticSearch.V5.Internal
-                       Log.Backend.ElasticSearch.V5.Lens
-                       Log.Backend.ElasticSearch
-                       Log.Backend.ElasticSearch.Lens
+  exposed-modules:     Log.Backend.ElasticSearch
                        Log.Backend.ElasticSearch.Internal
+                       Log.Backend.ElasticSearch.Lens
   build-depends:       base >= 4.8 && <5,
                        log-base >= 0.7,
                        aeson >=1.0.0.0,
                        aeson-pretty >=0.8.2,
                        bytestring,
                        base64-bytestring,
-                       bloodhound >= 0.13 && < 0.17,
                        deepseq,
                        http-client,
                        http-client-tls,
+                       http-types,
+                       network-uri,
                        semigroups,
                        text,
                        text-show >= 2,
@@ -53,7 +48,7 @@ library
                        vector
   hs-source-dirs:      src
 
-  ghc-options:         -O2 -Wall -funbox-strict-fields
+  ghc-options:         -Wall
 
   default-language:   Haskell2010
   default-extensions: BangPatterns
@@ -67,5 +62,6 @@ library
                     , RankNTypes
                     , RecordWildCards
                     , ScopedTypeVariables
+                    , TupleSections
                     , TypeFamilies
                     , UndecidableInstances
