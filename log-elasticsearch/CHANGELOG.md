@@ -1,4 +1,4 @@
-# log-elasticsearch-0.11.0.0 (2020-08-??)
+# log-elasticsearch-0.11.0.0 (2020-08-24)
 * Drop dependency on bloodhound
 * Unify V1 and V5 specific modules
 * Add support for ElasticSearch 7.x
