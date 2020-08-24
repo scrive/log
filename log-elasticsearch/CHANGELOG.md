@@ -1,3 +1,10 @@
+# log-elasticsearch-0.11.0.0 (2020-08-??)
+* Drop dependency on bloodhound
+* Unify V1 and V5 specific modules
+* Add support for ElasticSearch 7.x
+* Try harder to insert problematic messages into ElasticSearch
+* Support building with GHC 8.8.4 and GHC 8.10.2
+
 # log-elasticsearch-0.10.2.0 (2020-02-03)
 * Modify data keys in deterministic manner in case of ES insertion failure
 
