@@ -62,5 +62,6 @@ library
                     , RankNTypes
                     , RecordWildCards
                     , ScopedTypeVariables
+                    , TupleSections
                     , TypeFamilies
                     , UndecidableInstances

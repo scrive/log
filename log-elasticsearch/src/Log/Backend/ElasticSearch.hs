@@ -100,38 +100,24 @@ elasticSearchLogger esConf@ElasticSearchConfig{..} = do
             printEsError "error while creating index" $ responseBody reply
         writeIORef indexRef index
       let jsonMsgs = V.fromList $ map (toJsonMsg now) $ zip [1..] msgs
-      reply <- bulkIndex version env esConf index jsonMsgs
+      reply <- responseBody <$> bulkIndex version env esConf index jsonMsgs
       -- Try to parse parts of reply to get information about log messages that
       -- failed to be inserted for some reason.
-      let replyBody = responseBody reply
-          result = do
-            Object response <- return replyBody
-            Bool hasErrors  <- "errors" `H.lookup` response
-            Array jsonItems <- "items"  `H.lookup` response
-            items <- F.forM jsonItems $ \v -> do
-              Object item   <- return v
-              Object index_ <- "index" `H.lookup` item
-                -- ES <= 2.x returns 'create' for some reason, so consider both.
-                <|> "create" `H.lookup` item
-              return index_
-            guard $ V.length items == V.length jsonMsgs
-            return (hasErrors, items)
-      case result of
-        Nothing -> printEsError "unexpected response" replyBody
-        Just (hasErrors, items) -> when hasErrors $ do
+      case checkForBulkErrors jsonMsgs reply of
+        Nothing -> printEsError "unexpected response" reply
+        Just (hasErrors, responses) -> when hasErrors $ do
           -- If any message failed to be inserted because of type mismatch, go
           -- back to them, log the insertion failure and add type suffix to each
           -- of the keys in their "data" fields to work around type errors.
-          let failed = V.findIndices (H.member "error") items
-              newMsgs = (`V.map` failed) $ \n ->
-                let modifyData :: Bool -> Value -> Value
-                    modifyData addError (Object hm) = Object $
+          let newMsgs =
+                let modifyData :: Maybe Value -> Value -> Value
+                    modifyData merr (Object hm) = Object $
                       let newData = H.foldlWithKey' keyAddValueTypeSuffix H.empty hm
-                      in if addError
-                         then newData `H.union` H.fromList
-                              [ "__es_error" .= H.lookup "error" (items V.! n)
-                              ]
-                         else newData
+                      in case merr of
+                        -- We have the error message, i.e. we're at the top
+                        -- level object, so add it to the data.
+                        Just err -> newData `H.union` H.singleton "__es_error" err
+                        Nothing  -> newData
                     modifyData _ v = v
 
                     keyAddValueTypeSuffix acc k v = H.insert
@@ -142,12 +128,53 @@ elasticSearchLogger esConf@ElasticSearchConfig{..} = do
                           Number{} -> k <> "_number"
                           Bool{}   -> k <> "_bool"
                           Null{}   -> k <> "_null"
-                      ) (modifyData False v) acc
-                in H.adjust (modifyData True) "data" $ jsonMsgs V.! n
-          -- Attempt to put modified messages and ignore any further errors.
-          void $ bulkIndex version env esConf index newMsgs)
+                      ) (modifyData Nothing v) acc
+                in adjustFailedMessagesWith modifyData jsonMsgs responses
+          -- Attempt to put modified messages.
+          newReply <- responseBody <$> bulkIndex version env esConf index newMsgs
+          case checkForBulkErrors newMsgs newReply of
+            Nothing -> printEsError "unexpected response" newReply
+            Just (newHasErrors, newResponses) -> when newHasErrors $ do
+              -- If some of the messages failed again (it might happen e.g. if
+              -- data contains an array with elements of different types), drop
+              -- their data field.
+              let newerMsgs =
+                    let modifyData :: Maybe Value -> Value -> Value
+                        modifyData (Just err) Object{} = object [ "__es_error" .= err ]
+                        modifyData _ v = v
+                    in adjustFailedMessagesWith modifyData newMsgs newResponses
+              -- Ignore any further errors.
+              void $ bulkIndex version env esConf index newerMsgs)
     (refreshIndex env =<< readIORef indexRef)
   where
+    -- Process reply of bulk indexing to get responses for each index operation
+    -- and check whether any insertion failed.
+    checkForBulkErrors
+      :: V.Vector a
+      -> Value
+      -> Maybe (Bool, V.Vector Object)
+    checkForBulkErrors jsonMsgs replyBody = do
+      Object response <- pure replyBody
+      Bool hasErrors  <- "errors" `H.lookup` response
+      Array jsonItems <- "items"  `H.lookup` response
+      items <- F.forM jsonItems $ \v -> do
+        Object item   <- pure v
+        Object index_ <- "index" `H.lookup` item
+          -- ES <= 2.x returns 'create' for some reason, so consider both.
+          <|> "create" `H.lookup` item
+        pure index_
+      guard $ V.length items == V.length jsonMsgs
+      pure (hasErrors, items)
+
+    adjustFailedMessagesWith
+      :: (Maybe err -> obj -> obj)
+      -> V.Vector (H.HashMap T.Text obj)
+      -> V.Vector (H.HashMap T.Text err)
+      -> V.Vector (H.HashMap T.Text obj)
+    adjustFailedMessagesWith f jsonMsgs responses =
+      let failed = V.imapMaybe (\n item -> (n, ) <$> "error" `H.lookup` item) responses
+      in (`V.map` failed) $ \(n, err) -> H.adjust (f $ Just err) "data" $ jsonMsgs V.! n
+
     printEsError msg body =
       T.putStrLn $ "elasticSearchLogger: " <> msg <> " " <> prettyJson body
 
