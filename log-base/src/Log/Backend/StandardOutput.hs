@@ -1,41 +1,46 @@
 -- | Stdout logging back-end.
-module Log.Backend.StandardOutput (
-    simpleStdoutLogger
-  , stdoutLogger
-  , withSimpleStdOutLogger
+module Log.Backend.StandardOutput
+  ( withSimpleStdOutLogger
+  , withStdOutLogger
+  , withJsonStdOutLogger
   ) where
 
+import Data.Aeson
 import Prelude
-import qualified Data.Text.IO as T
 import System.IO
+import qualified Data.Text.IO as T
+import qualified Data.ByteString.Lazy.Char8 as BSL
 
 import Log.Data
 import Log.Internal.Logger
 import Log.Logger
 
--- | Create a 'simpleStdoutlogger' for the duration of the given
--- action, making sure that stdout is flushed afterwards.
+-- | Create a simple, synchronous logger that prints messages to standard output
+-- and flushes 'stdout' on each call to 'loggerWriteMessage' for the duration of
+-- the given action.
 withSimpleStdOutLogger :: (Logger -> IO r) -> IO r
-withSimpleStdOutLogger act = do
-  logger <- stdoutLogger
-  withLogger logger act
-
-{-# DEPRECATED simpleStdoutLogger "Use 'withSimpleStdOutLogger'" #-}
-
--- | Simple, synchronous logger that prints messages to standard
--- output. Flushes 'stdout' on each call to 'loggerWriteMessage'. Use
--- 'Log.Backend.StandardOutput.Bulk.withBulkStdOutLogger' if you want
--- buffering.
-simpleStdoutLogger :: Logger
-simpleStdoutLogger = Logger {
-    loggerWriteMessage = \msg -> (T.putStrLn . showLogMessage Nothing $ msg)
-                                 >> hFlush stdout
-  , loggerWaitForWrite = hFlush stdout
+withSimpleStdOutLogger = withLogger $ Logger
+  { loggerWriteMessage = \msg -> do
+      T.putStrLn $ showLogMessage Nothing msg
+      hFlush stdout
+  , loggerWaitForWrite = return ()
   , loggerShutdown     = return ()
   }
 
-{-# DEPRECATED stdoutLogger "Use 'withSimpleStdOutLogger'" #-}
+-- | Create a logger that prints messages to standard output for the duration of
+-- the given action.
+withStdOutLogger :: (Logger -> IO r) -> IO r
+withStdOutLogger act = do
+  logger <- mkLogger "stdout" $ \msg -> do
+    T.putStrLn $ showLogMessage Nothing msg
+    hFlush stdout
+  withLogger logger act
 
--- | Create a logger that prints messages to standard output.
-stdoutLogger :: IO Logger
-stdoutLogger = mkLogger "stdout" $ T.putStrLn . showLogMessage Nothing
+-- | Create a logger that prints messages in the JSON format to standard output
+-- for the duration of the given action.
+withJsonStdOutLogger :: (Logger -> IO r) -> IO r
+withJsonStdOutLogger act = do
+  logger <- mkLogger "stdout-json" $ \msg -> do
+    BSL.putStrLn $ encode msg
+    hFlush stdout
+  withLogger logger act
