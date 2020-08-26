@@ -156,7 +156,8 @@ writeSBQueue (SBQueue queue count capacity) a = do
   numElems <- readTVar count
   if numElems < capacity
     then do modifyTVar queue (a :)
-            modifyTVar count (+1)
+            -- Strict modification of the queue size to avoid space leak
+            modifyTVar' count (+1)
     else return ()
 
 ----------------------------------------
