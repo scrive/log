@@ -1,6 +1,6 @@
 cabal-version:       2.0
 name:                log-postgres
-version:             0.7.1.3
+version:             0.7.1.4
 synopsis:            Structured logging solution (PostgreSQL back end)
 
 description:         PostgreSQL back end for the 'log' library suite.
@@ -27,24 +27,23 @@ Source-repository head
 library
   exposed-modules:    Log.Backend.PostgreSQL
   build-depends:      base                  >= 4.9  && < 5
-                    , log-base              >= 0.7  && < 0.8  || ^>= 0.8
                     , aeson                 >= 1.0  && < 1.4  || ^>= 1.4
+                    , aeson-pretty         ^>= 0.8
+                    , base64-bytestring    ^>= 1.0
                     , bytestring           ^>= 0.10
                     , deepseq              ^>= 1.4
+                    , hpqtypes              >= 1.7  && <= 2.0
+                    , http-client           >= 0.5  && < 0.6  || ^>= 0.6
+                    , lifted-base          ^>= 0.2
+                    , log-base              >= 0.7  && < 0.10
+                    , mtl                  ^>= 2.2
+                    , semigroups            >= 0.16 && < 0.19 || ^>= 0.19
+                    , split                ^>= 0.2
                     , text                 ^>= 1.2
+                    , text-show             >= 3.7  && < 3.8  || ^>= 3.8
                     , time                  >= 1.6  && < 1.9  || ^>= 1.9
                     , unordered-containers ^>= 0.2
                     , vector               ^>= 0.12
-                    , aeson-pretty         ^>= 0.8
-                    , base64-bytestring    ^>= 1.0
-                    , hpqtypes              >= 1.7  && <= 2.0
-                    , mtl                  ^>= 2.2
-                    , lifted-base          ^>= 0.2
-                    , semigroups            >= 0.16 && < 0.19 || ^>= 0.19
-                    , text-show             >= 3.7  && < 3.8  || ^>= 3.8
-                    , http-client           >= 0.5  && < 0.6  || ^>= 0.6
-                    , log-base              >= 0.7  && < 0.8  || ^>= 0.8
-                    , split                ^>= 0.2
 
   hs-source-dirs:     src
 
