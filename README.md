@@ -21,9 +21,7 @@ stdout back end. Additional back ends are provided by
 module Main where
 
 import Log
-import Log.Backend.ElasticSearch.V5
-
-import System.Random
+import Log.Backend.ElasticSearch
 
 main :: IO ()
 main = do
@@ -32,7 +30,7 @@ main = do
         esIndex   = "logs",
         esMapping = "log"
         }
-  withElasticSearchLogger config randomIO $ \logger ->
+  withElasticSearchLogger config $ \logger ->
     runLogT "main" logger $ do
       logTrace_ "foo"
 ```
