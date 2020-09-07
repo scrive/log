@@ -2,9 +2,11 @@
 * Always make data attached to a log message a json object
 * Add unliftio-core-0.2 compatiblity
 * Tidy up flushing stdout in stdout loggers
-* Use simpleStdoutLogger in withSimpleStdOutLogger instead of stdoutLogger
+* Use `simpleStdoutLogger` in `withSimpleStdOutLogger` instead of `stdoutLogger`
 * Remove deprecated functions
 * Add JSON loggers
+* Make `mkLogger` use bounded queue internally (similar to `mkBulkLogger`)
+* Get rid of a space leak in bounded queue used in `mkBulkLogger`
 
 # log-base-0.8.0.1 (2020-05-08)
 * Update version bounds.

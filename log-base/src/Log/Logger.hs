@@ -3,6 +3,7 @@ module Log.Logger
   ( LoggerEnv(..)
   , Logger
   , mkLogger
+  , mkLogger'
   , mkBulkLogger
   , mkBulkLogger'
   , execLogger
@@ -34,20 +35,33 @@ data LoggerEnv = LoggerEnv
   }
 
 -- | Start a logger thread that consumes one queued message at a time.
-mkLogger :: T.Text -> (LogMessage -> IO ()) -> IO Logger
-mkLogger name exec = mkLoggerImpl
-  newTQueueIO isEmptyTQueue readTQueue writeTQueue (return ())
-  name exec (return ())
-
--- | Start an asynchronous logger thread that consumes all queued
--- messages once per second. Uses a bounded queue internally to avoid
--- space leaks. To make sure that the messages get written out in the
--- presence of exceptions, use high-level wrappers like 'withLogger',
--- 'Log.Backend.ElasticSearch.withElasticSearchLogger' or
--- 'Log.Backend.StandardOutput.Bulk.withBulkStdOutLogger' instead of
--- this function directly.
 --
--- Note: some messages can be lost when the main thread shuts down
+-- /Note:/ a bounded queue of size 1000000 is used internally to avoid
+-- unrestricted memory consumption.
+mkLogger :: T.Text -> (LogMessage -> IO ()) -> IO Logger
+mkLogger = mkLogger' defaultQueueCapacity
+
+-- | Like 'mkBulkLogger', but with configurable queue size.
+--
+-- @since 0.9.0.0
+mkLogger' :: Int -> T.Text -> (LogMessage -> IO ()) -> IO Logger
+mkLogger' cap name exec = mkLoggerImpl
+  (newTBQueueIO $ fromIntegral cap) isEmptyTBQueue readTBQueue writeTBQueue
+  (return ()) name exec (return ())
+
+-- | Start an asynchronous logger thread that consumes all queued messages once
+-- per second.
+--
+-- /Note:/ a bounded queue of size 1000000 is used internally to avoid
+-- unrestricted memory consumption.
+--
+-- To make sure that the messages get written out in the presence of exceptions,
+-- use high-level wrappers like 'withLogger',
+-- 'Log.Backend.ElasticSearch.withElasticSearchLogger' or
+-- 'Log.Backend.StandardOutput.Bulk.withBulkStdOutLogger' instead of this
+-- function directly.
+--
+-- /Note:/ some messages can be lost when the main thread shuts down
 -- without making sure that all logger threads have written out all
 -- messages, because in that case child threads are not given a chance
 -- to clean up by the RTS. This is apparently a feature:
@@ -88,7 +102,7 @@ mkLogger name exec = mkLoggerImpl
 --    -- in the presence of exceptions in the child thread.
 -- @
 mkBulkLogger :: T.Text -> ([LogMessage] -> IO ()) -> IO () -> IO Logger
-mkBulkLogger = mkBulkLogger' sbDefaultCapacity 1000000
+mkBulkLogger = mkBulkLogger' defaultQueueCapacity 1000000
 
 -- | Like 'mkBulkLogger', but with configurable queue size and thread delay.
 --
@@ -106,13 +120,14 @@ mkBulkLogger' cap dur = mkLoggerImpl
 
 ----------------------------------------
 
+-- | Default capacity of log queues (TBQueue for regular logger, 'SBQueue' for
+-- bulk loggers). This corresponds to approximately 200 MiB memory residency
+-- when the queue is full.
+defaultQueueCapacity :: Int
+defaultQueueCapacity = 1000000
+
 -- | A simple STM based bounded queue.
 data SBQueue a = SBQueue !(TVar [a]) !(TVar Int) !Int
-
--- | Default capacity of a 'SBQueue'. This corresponds to
--- approximately 200 MiB memory residency when the queue is full.
-sbDefaultCapacity :: Int
-sbDefaultCapacity = 1000000
 
 -- | Create an instance of 'SBQueue' with a given capacity.
 newSBQueueIO :: Int -> IO (SBQueue a)
@@ -141,7 +156,8 @@ writeSBQueue (SBQueue queue count capacity) a = do
   numElems <- readTVar count
   if numElems < capacity
     then do modifyTVar queue (a :)
-            modifyTVar count (+1)
+            -- Strict modification of the queue size to avoid space leak
+            modifyTVar' count (+1)
     else return ()
 
 ----------------------------------------
