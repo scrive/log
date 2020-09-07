@@ -29,15 +29,15 @@ library
                        Log.Backend.ElasticSearch.Internal
                        Log.Backend.ElasticSearch.Lens
   build-depends:       base >= 4.8 && <5,
-                       log-base >= 0.7,
                        aeson >=1.0.0.0,
                        aeson-pretty >=0.8.2,
-                       bytestring,
                        base64-bytestring,
+                       bytestring,
                        deepseq,
                        http-client,
                        http-client-tls,
                        http-types,
+                       log-base >= 0.7 && <0.10,
                        network-uri,
                        semigroups,
                        text,

@@ -1,3 +1,6 @@
+# log-postgres-0.7.1.4 (2020-09-07)
+* Update bounds of log-base.
+
 # log-postgres-0.7.1.3 (2020-05-08)
 * Support latest hpqtypes.
 
