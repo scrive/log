@@ -1,4 +1,4 @@
-# log-base-0.9.1.0 (2021-??-??)
+# log-base-0.9.1.0 (2021-03-01)
 * Add a `LogList` logger
 
 # log-base-0.9.0.0 (2020-09-07)
