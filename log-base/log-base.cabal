@@ -1,5 +1,5 @@
 name:                log-base
-version:             0.9.0.0
+version:             0.9.1.0
 synopsis:            Structured logging solution (base package)
 
 description:         A library that provides a way to record structured log
@@ -29,6 +29,7 @@ Source-repository head
 
 library
   exposed-modules:     Log,
+                       Log.Backend.LogList,
                        Log.Backend.StandardOutput,
                        Log.Backend.StandardOutput.Bulk,
                        Log.Backend.Text,

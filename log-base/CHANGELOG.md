@@ -1,3 +1,6 @@
+# log-base-0.9.1.0 (2021-??-??)
+* Add a `LogList` logger
+
 # log-base-0.9.0.0 (2020-09-07)
 * Always make data attached to a log message a json object
 * Add unliftio-core-0.2 compatiblity
