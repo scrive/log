@@ -1,0 +1,3 @@
+branches:       master
+doctest:        False
+tests:          True
