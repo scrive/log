@@ -1,9 +1,6 @@
 -- | The 'MonadLog' type class of monads with logging capabilities.
-{-# OPTIONS_GHC -fno-warn-deprecated-flags #-}
-{-# LANGUAGE OverlappingInstances #-}
 module Log.Class (
     UTCTime
-  , MonadTime(..)
   , MonadLog(..)
   , logAttention
   , logInfo
@@ -13,7 +10,6 @@ module Log.Class (
   , logTrace_
   ) where
 
-import Control.Monad.Time
 import Control.Monad.Trans
 import Control.Monad.Trans.Control
 import Data.Aeson
@@ -29,13 +25,13 @@ import Log.Logger
 -- 'MonadLog' carries with it some associated state (the logging
 -- environment) that can be modified locally with 'localData' and
 -- 'localDomain'.
-class MonadTime m => MonadLog m where
+class Monad m => MonadLog m where
   -- | Write a message to the log.
-  logMessage  :: UTCTime  -- ^ Time of the event.
-              -> LogLevel -- ^ Log level.
-              -> T.Text   -- ^ Log message.
-              -> Value    -- ^ Additional data associated with the message.
-              -> m ()
+  logMessage
+    :: LogLevel -- ^ Log level.
+    -> T.Text   -- ^ Log message.
+    -> Value    -- ^ Additional data associated with the message.
+    -> m ()
   -- | Extend the additional data associated with each log message locally.
   localData   :: [Pair] -> m a -> m a
   -- | Extend the current application domain locally.
@@ -45,12 +41,12 @@ class MonadTime m => MonadLog m where
   getLoggerEnv :: m LoggerEnv
 
 -- | Generic, overlapping instance.
-instance (
+instance {-# OVERLAPPABLE #-} (
     MonadLog m
   , Monad (t m)
   , MonadTransControl t
   ) => MonadLog (t m) where
-    logMessage time level message = lift . logMessage time level message
+    logMessage level message = lift . logMessage level message
     localData data_ m = controlT $ \run -> localData data_ (run m)
     localDomain domain m = controlT $ \run -> localDomain domain (run m)
     getLoggerEnv = lift getLoggerEnv
@@ -64,17 +60,17 @@ controlT f = liftWith f >>= restoreT . return
 -- | Log a message and its associated data using current time as the
 -- event time and the 'LogAttention' log level.
 logAttention :: (MonadLog m, ToJSON a) => T.Text -> a -> m ()
-logAttention msg = logNow LogAttention msg . toJSON
+logAttention msg = logMessage LogAttention msg . toJSON
 
 -- | Log a message and its associated data using current time as the
 -- event time and the 'LogInfo' log level.
 logInfo :: (MonadLog m, ToJSON a) => T.Text -> a -> m ()
-logInfo msg = logNow LogInfo msg . toJSON
+logInfo msg = logMessage LogInfo msg . toJSON
 
 -- | Log a message and its associated data using current time as the
 -- event time and the 'LogTrace' log level.
 logTrace :: (MonadLog m, ToJSON a) => T.Text -> a -> m ()
-logTrace msg = logNow LogTrace msg . toJSON
+logTrace msg = logMessage LogTrace msg . toJSON
 
 -- | Like 'logAttention', but without any additional associated data.
 logAttention_ :: MonadLog m => T.Text -> m ()
@@ -87,12 +83,3 @@ logInfo_ = (`logInfo` emptyObject)
 -- | Like 'logTrace', but without any additional associated data.
 logTrace_ :: MonadLog m => T.Text -> m ()
 logTrace_ = (`logTrace` emptyObject)
-
-----------------------------------------
-
--- | Write a log message using the given log level, message text and
--- additional data. Current time is used as the event time.
-logNow :: MonadLog m => LogLevel -> T.Text -> Value -> m ()
-logNow level message data_ = do
-  time <- currentTime
-  logMessage time level message data_

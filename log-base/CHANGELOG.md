@@ -1,3 +1,6 @@
+# log -base-0.10.0.0 (2021-05-28)
+* Drop `MonadTime` constraint and use system time by default.
+
 # log-base-0.9.1.1 (2021-05-28)
 * Support GHC 9.0.
 

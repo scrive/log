@@ -135,14 +135,7 @@ createIndexWithMapping version env ElasticSearchConfig{..} index = do
   where
     logsMapping = object
       [ "properties" .= object
-        [ "insertion_order" .= object
-          [ "type" .= ("integer"::T.Text)
-          ]
-        , "insertion_time" .= object
-          [ "type"   .= ("date"::T.Text)
-          , "format" .= ("date_time"::T.Text)
-          ]
-        , "time" .= object
+        [ "time" .= object
           [ "type"   .= ("date"::T.Text)
           , "format" .= ("date_time"::T.Text)
           ]

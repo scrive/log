@@ -1,3 +1,6 @@
+# log-postgres-0.8.0.0 (2021-05-28)
+* Stop putting `insertion_time` and `insertion_order` in PostgreSQL.
+
 # log-postgres-0.7.1.5 (2021-05-28)
 * Support GHC 9.0.
 
