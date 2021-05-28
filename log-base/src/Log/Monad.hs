@@ -107,7 +107,7 @@ getLoggerIO = logMessageIO <$> getLoggerEnv
 --
 -- @since 0.7.2
 instance MFunctor LogT where
-    hoist = mapLogT
+    hoist f = mapLogT f
 
 instance MonadTransControl LogT where
 #if MIN_VERSION_monad_control(1,0,0)

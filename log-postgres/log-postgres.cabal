@@ -19,6 +19,7 @@ category:            System
 build-type:          Simple
 extra-source-files:  CHANGELOG.md, README.md
 tested-with:         GHC ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.4
+                      || ==9.0.1
 
 Source-repository head
   Type:     git
@@ -27,23 +28,23 @@ Source-repository head
 library
   exposed-modules:    Log.Backend.PostgreSQL
   build-depends:      base                  >= 4.9  && < 5
-                    , aeson                 >= 1.0  && < 1.6
-                    , aeson-pretty         ^>= 0.8
-                    , base64-bytestring    ^>= 1.0
-                    , bytestring           ^>= 0.10
-                    , deepseq              ^>= 1.4
-                    , hpqtypes              >= 1.7  && <= 2.0
-                    , http-client           >= 0.5  && < 0.6  || ^>= 0.6
-                    , lifted-base          ^>= 0.2
+                    , aeson                 >= 1.0
+                    , aeson-pretty          >= 0.8
+                    , base64-bytestring     >= 1.0
+                    , bytestring            >= 0.10
+                    , deepseq               >= 1.4
+                    , hpqtypes              >= 1.7
+                    , http-client           >= 0.5
+                    , lifted-base           >= 0.2
                     , log-base              >= 0.7  && < 0.10
-                    , mtl                  ^>= 2.2
-                    , semigroups            >= 0.16 && < 0.19 || ^>= 0.19
-                    , split                ^>= 0.2
-                    , text                 ^>= 1.2
-                    , text-show             >= 3.7  && < 3.8  || ^>= 3.8
-                    , time                  >= 1.6  && < 1.9  || ^>= 1.9
-                    , unordered-containers ^>= 0.2
-                    , vector               ^>= 0.12
+                    , mtl                   >= 2.2
+                    , semigroups            >= 0.16
+                    , split                 >= 0.2
+                    , text                  >= 1.2
+                    , text-show             >= 3.7
+                    , time                  >= 1.6
+                    , unordered-containers  >= 0.2
+                    , vector                >= 0.12
 
   hs-source-dirs:     src
 
