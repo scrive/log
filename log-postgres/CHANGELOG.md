@@ -1,3 +1,6 @@
+# log-postgres-0.7.1.5 (2021-05-28)
+* Support GHC 9.0.
+
 # log-postgres-0.7.1.4 (2020-09-07)
 * Update bounds of log-base.
 
