@@ -1,4 +1,4 @@
-# log-elasticsearch-0.12.0.0 (2021-05-28)
+# log-elasticsearch-0.12.0.0 (2021-06-09)
 * Stop putting `insertion_time` and `insertion_order` in ElasticSearch.
 
 # log-elasticsearch-0.11.0.0 (2020-08-24)
