@@ -25,7 +25,6 @@ import Data.IORef
 import Data.Maybe
 import Data.Semigroup
 import Data.Time
-import Data.Word
 import Log
 import Log.Internal.Logger
 import Network.HTTP.Client
@@ -99,7 +98,7 @@ elasticSearchLogger esConf@ElasticSearchConfig{..} = do
           unless (isSuccess reply) $ do
             printEsError "error while creating index" $ responseBody reply
         writeIORef indexRef index
-      let jsonMsgs = V.fromList $ map (toJsonMsg now) $ zip [1..] msgs
+      let jsonMsgs = V.fromList $ map toJsonMsg msgs
       reply <- responseBody <$> bulkIndex version env esConf index jsonMsgs
       -- Try to parse parts of reply to get information about log messages that
       -- failed to be inserted for some reason.
@@ -195,13 +194,8 @@ elasticSearchLogger esConf@ElasticSearchConfig{..} = do
                . T.toLazyText
                . encodePrettyToTextBuilder' defConfig { confIndent = Spaces 2 }
 
-    toJsonMsg :: UTCTime -> (Word32, LogMessage) -> H.HashMap T.Text Value
-    toJsonMsg now (n, msg) = H.union jMsg $ H.fromList
-      [ ("insertion_order", toJSON n)
-      , ("insertion_time",  toJSON now)
-      ]
-      where
-        Object jMsg = toJSON msg
+    toJsonMsg :: LogMessage -> H.HashMap T.Text Value
+    toJsonMsg msg = let Object jMsg = toJSON msg in jMsg
 
 ----------------------------------------
 

@@ -51,18 +51,17 @@ pgLogger cs = mkBulkLogger loggerName
 
     sqlInsertLog :: SQL
     sqlInsertLog = "INSERT INTO logs "
-      <+> "(insertion_time, insertion_order, time, level, component,"
-      <+> " domain, message, data) VALUES"
+      <+> "(time, level, component, domain, message, data) VALUES"
 
     serialize :: InvalidEncodingRecoveryAttempt -> [LogMessage] -> IO ()
     serialize !attempt msgs = runDBT cs ts
       (runSQL_ $ sqlInsertLog
-       <+> mintercalate ", " (map sqlifyMessage $ zip [1..] msgs))
+       <+> mintercalate ", " (map sqlifyMessage msgs))
       `catches` [
         -- Propagate base async exceptions thrown by the runtime system.
         Handler $ \(e::AsyncException) -> throwIO e
       , Handler $ \(e::SomeException) -> case fromException e of
-        Just dbe@DBException{..}
+        Just dbe@DBException{}
           | Just qe <- getEncodingQueryError dbe -> case attempt of
             Attempt 1 -> do
               -- If a client uses UTF-8 encoding (TODO: in fact it should
@@ -163,11 +162,9 @@ pgLogger cs = mkBulkLogger loggerName
         doValue (String s)   = String <$> doText s
         doValue v            = return v
 
-    sqlifyMessage :: (Int, LogMessage) -> SQL
-    sqlifyMessage (n, LogMessage{..}) = mconcat [
+    sqlifyMessage :: LogMessage -> SQL
+    sqlifyMessage LogMessage{..} = mconcat [
         "("
-      , "now()"
-      , "," <?> n
       , "," <?> lmTime
       , "," <?> showLogLevel lmLevel
       , "," <?> lmComponent

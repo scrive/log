@@ -16,7 +16,6 @@ import Control.DeepSeq
 import Control.Monad.Base
 import Control.Monad.Catch
 import Control.Monad.Error.Class
-import Control.Monad.Fail (MonadFail)
 import Control.Monad.IO.Unlift
 import Control.Monad.Morph (MFunctor (..))
 import Control.Monad.Reader
@@ -25,7 +24,9 @@ import Control.Monad.Trans.Control
 import Control.Monad.Writer.Class
 import Data.Aeson
 import Data.Text (Text)
+import Data.Time
 import Prelude
+import qualified Control.Monad.Fail as MF
 import qualified Control.Exception as E
 import qualified Data.HashMap.Strict as H
 
@@ -38,7 +39,7 @@ type InnerLogT = ReaderT LoggerEnv
 -- | Monad transformer that adds logging capabilities to the underlying monad.
 newtype LogT m a = LogT { unLogT :: InnerLogT m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadBase b, MonadCatch
-           ,MonadIO, MonadMask, MonadPlus, MonadThrow, MonadTrans, MonadFail
+           ,MonadIO, MonadMask, MonadPlus, MonadThrow, MonadTrans, MF.MonadFail
            ,MonadError e, MonadWriter w, MonadState s)
 
 instance MonadReader r m => MonadReader r (LogT m) where
@@ -139,9 +140,10 @@ instance MonadUnliftIO m => MonadUnliftIO (LogT m) where
   withRunInIO inner = LogT $ withRunInIO $ \run -> inner (run . unLogT)
   {-# INLINE withRunInIO #-}
 
-instance (MonadBase IO m, MonadTime m) => MonadLog (LogT m) where
-  logMessage time level message data_ = LogT . ReaderT $ \logEnv ->
-    liftBase $ logMessageIO logEnv time level message data_
+instance MonadBase IO m => MonadLog (LogT m) where
+  logMessage level message data_ = LogT . ReaderT $ \logEnv -> liftBase $ do
+    time <- getCurrentTime
+    logMessageIO logEnv time level message data_
 
   localData data_ =
     LogT . local (\e -> e { leData = data_ ++ leData e }) . unLogT

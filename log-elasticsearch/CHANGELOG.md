@@ -1,3 +1,6 @@
+# log-elasticsearch-0.12.0.0 (2021-05-28)
+* Stop putting `insertion_time` and `insertion_order` in ElasticSearch.
+
 # log-elasticsearch-0.11.0.0 (2020-08-24)
 * Drop dependency on bloodhound
 * Unify V1 and V5 specific modules
