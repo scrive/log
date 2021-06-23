@@ -136,7 +136,7 @@ createIndexWithMapping version env ElasticSearchConfig{..} index = do
     logsMapping = object
       [ "properties" .= object
         [ "time" .= object
-          [ "type"   .= ("date"::T.Text)
+          [ "type"   .= timeTy
           , "format" .= ("date_time"::T.Text)
           ]
         , "domain" .= object
@@ -154,6 +154,11 @@ createIndexWithMapping version env ElasticSearchConfig{..} index = do
         ]
       ]
       where
+        timeTy :: T.Text
+        timeTy = if version >= esV7
+                 then "date_nanos"
+                 else "date"
+
         textTy :: T.Text
         textTy = if version >= esV5
                  then "text"

@@ -1,3 +1,6 @@
+# log-elasticsearch-0.12.1.0 (2021-06-23)
+* Map `time` as `date_nanos` in ElasticSearch >= 7.0.
+
 # log-elasticsearch-0.12.0.0 (2021-06-09)
 * Stop putting `insertion_time` and `insertion_order` in ElasticSearch.
 
