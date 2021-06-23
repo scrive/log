@@ -1,5 +1,5 @@
 name:                log-elasticsearch
-version:             0.12.0.0
+version:             0.12.1.0
 synopsis:            Structured logging solution (Elasticsearch back end)
 
 description:         Elasticsearch back end for the 'log' library suite.
