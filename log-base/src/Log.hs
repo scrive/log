@@ -18,7 +18,7 @@
 --         esMapping = "log"
 --         }
 --   'Log.Backend.ElasticSearch.withElasticSearchLogger' config randomIO $ \\logger -> do
---     'runLogT' "main" logger $ do
+--     'runLogT' "main" logger defaultLogLevel $ do
 --       'logTrace_' "foo"
 -- @
 module Log (

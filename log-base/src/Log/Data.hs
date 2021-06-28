@@ -5,6 +5,7 @@ module Log.Data (
   , readLogLevel
   , LogMessage(..)
   , showLogMessage
+  , defaultLogLevel
   ) where
 
 import Control.DeepSeq
@@ -39,6 +40,9 @@ showLogLevel :: LogLevel -> T.Text
 showLogLevel LogAttention = "attention"
 showLogLevel LogInfo      = "info"
 showLogLevel LogTrace     = "trace"
+
+defaultLogLevel :: LogLevel
+defaultLogLevel = LogTrace
 
 instance ToJSON LogLevel where
   toJSON = toJSON . showLogLevel
