@@ -54,13 +54,16 @@ instance MonadReader r m => MonadReader r (LogT m) where
 -- for that.
 runLogT :: Text     -- ^ Application component name to use.
         -> Logger   -- ^ The logging back-end to use.
+        -> LogLevel -- ^ The maximum allowed log level.
+                    --   Only messages less or equal than this level with be logged.
         -> LogT m a -- ^ The 'LogT' computation to run.
         -> m a
-runLogT component logger m = runReaderT (unLogT m) LoggerEnv {
+runLogT component logger maxLogLevel m = runReaderT (unLogT m) LoggerEnv {
   leLogger = logger
 , leComponent = component
 , leDomain = []
 , leData = []
+, leMaxLogLevel = maxLogLevel
 } -- We can't do synchronisation here, since 'runLogT' can be invoked
   -- quite often from the application (e.g. on every request).
 
@@ -72,7 +75,8 @@ mapLogT f = LogT . mapReaderT f . unLogT
 -- 'LoggerEnv'. Useful for reimplementation of 'MonadLog' instance.
 logMessageIO :: LoggerEnv -> UTCTime -> LogLevel -> Text -> Value -> IO ()
 logMessageIO LoggerEnv{..} time level message data_ =
-  execLogger leLogger =<< E.evaluate (force lm)
+  when (level <= leMaxLogLevel) $
+    execLogger leLogger =<< E.evaluate (force lm)
   where
     lm = LogMessage
       { lmComponent = leComponent
@@ -150,5 +154,8 @@ instance MonadBase IO m => MonadLog (LogT m) where
 
   localDomain domain =
     LogT . local (\e -> e { leDomain = leDomain e ++ [domain] }) . unLogT
+
+  localLogLevel level =
+    LogT . local (\e -> e { leMaxLogLevel = level }) . unLogT
 
   getLoggerEnv = LogT ask
