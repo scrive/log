@@ -32,6 +32,7 @@ data LoggerEnv = LoggerEnv
   , leDomain    :: ![T.Text] -- ^ Current application domain.
   , leData      :: ![A.Pair] -- ^ Additional data to be merged with the log
                              -- message\'s data.
+  , leMaxLogLevel :: LogLevel -- ^ The maximum log level to be logged.
   }
 
 -- | Start a logger thread that consumes one queued message at a time.
@@ -80,7 +81,7 @@ mkLogger' cap name exec = mkLoggerImpl
 -- main = do
 --    logger \<- 'Log.Backend.ElasticSearch.elasticSearchLogger'
 --    a \<- 'Control.Concurrent.Async.async' ('Log.Backend.ElasticSearch.withElasticSearchLogger' $ \\logger ->
---                'Log.Monad.runLogT' "main" logger $ 'Log.Class.logTrace_' "foo")
+--                'Log.Monad.runLogT' "main" logger defaultLogLevel $ 'Log.Class.logTrace_' "foo")
 --    -- Main thread exits without waiting for the child
 --    -- to finish and without giving the child a chance
 --    -- to do proper cleanup.
@@ -95,7 +96,7 @@ mkLogger' cap name exec = mkLoggerImpl
 -- main = do
 --    logger \<- 'Log.Backend.ElasticSearch.elasticSearchLogger'
 --    a \<- 'Control.Concurrent.Async.async' ('Log.Backend.ElasticSearch.withElasticSearchLogger' $ \\logger ->
---                'Log.Monad.runLogT' "main" logger $ 'Log.Class.logTrace_' "foo")
+--                'Log.Monad.runLogT' "main" logger defaultLogLevel $ 'Log.Class.logTrace_' "foo")
 --    'Control.Concurrent.Async.wait' a
 --    -- Main thread waits for the child to finish, giving
 --    -- it a chance to shut down properly. This works even
