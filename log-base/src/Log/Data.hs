@@ -3,6 +3,7 @@ module Log.Data (
     LogLevel(..)
   , showLogLevel
   , readLogLevel
+  , readLogLevelEither
   , LogMessage(..)
   , showLogMessage
   , defaultLogLevel
