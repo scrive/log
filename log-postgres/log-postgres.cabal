@@ -33,7 +33,7 @@ library
                     , base64-bytestring     >= 1.0
                     , bytestring            >= 0.10
                     , deepseq               >= 1.4
-                    , hpqtypes              >= 1.7
+                    , hpqtypes              >= 1.9.1.2
                     , http-client           >= 0.5
                     , lifted-base           >= 0.2
                     , log-base              >= 0.10  && < 0.11
