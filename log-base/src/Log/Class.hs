@@ -51,10 +51,6 @@ instance {-# OVERLAPPABLE #-} (
     localDomain domain m = controlT $ \run -> localDomain domain (run m)
     getLoggerEnv = lift getLoggerEnv
 
-controlT :: (MonadTransControl t, Monad (t m), Monad m)
-         => (Run t -> m (StT t a)) -> t m a
-controlT f = liftWith f >>= restoreT . return
-
 ----------------------------------------
 
 -- | Log a message and its associated data using current time as the
