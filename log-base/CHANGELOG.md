@@ -1,3 +1,6 @@
+# log-base-0.10.0.1 (2021-07-29)
+* Fix compilation issues caused by ambiguos occurence of `controlT`.
+
 # log -base-0.10.0.0 (2021-06-09)
 * Drop `MonadTime` constraint and use system time by default.
 
