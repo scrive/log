@@ -1,5 +1,5 @@
 name:                log-base
-version:             0.10.0.0
+version:             0.10.0.1
 synopsis:            Structured logging solution (base package)
 
 description:         A library that provides a way to record structured log

@@ -1,3 +1,6 @@
+# log-postgres-0.8.0.1 (2021-07-29)
+* Fix compilation issues caused by ambiguos occurence of `controlT`.
+
 # log-postgres-0.8.0.0 (2021-06-09)
 * Stop putting `insertion_time` and `insertion_order` in PostgreSQL.
 
