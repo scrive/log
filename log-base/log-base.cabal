@@ -39,22 +39,22 @@ library
                        Log.Internal.Logger,
                        Log.Logger,
                        Log.Monad
-  build-depends:       base >= 4.9 && <5,
-                       aeson >=0.11.0.0,
-                       aeson-pretty >=0.8.2,
-                       bytestring,
-                       deepseq,
-                       exceptions >=0.6,
-                       mmorph >=1.0.9 && <1.2,
-                       monad-control >=0.3,
-                       mtl,
-                       semigroups,
-                       stm >=2.4,
-                       text,
-                       time >= 1.5,
-                       transformers-base,
-                       unliftio-core >= 0.1.2.0 && < 0.3,
-                       unordered-containers
+  build-depends:       base >= 4.9 && <5
+                     , aeson                >= 1.0
+                     , aeson-pretty         >= 0.8
+                     , bytestring           >= 0.10
+                     , deepseq              >= 1.4
+                     , exceptions           >= 0.6
+                     , mmorph               >= 1.0.9
+                     , monad-control        >= 0.3
+                     , mtl                  >= 2.2
+                     , semigroups           >= 0.16
+                     , stm                  >= 2.4.0
+                     , text                 >= 1.2
+                     , time                 >= 1.6
+                     , transformers-base    >= 0.4
+                     , unliftio-core        >= 0.1
+                     , unordered-containers >= 0.2
   hs-source-dirs:      src
 
   ghc-options:         -Wall
