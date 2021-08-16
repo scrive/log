@@ -32,7 +32,7 @@ data LoggerEnv = LoggerEnv
   , leDomain    :: ![T.Text] -- ^ Current application domain.
   , leData      :: ![A.Pair] -- ^ Additional data to be merged with the log
                              -- message\'s data.
-  , leMaxLogLevel :: LogLevel -- ^ The maximum log level to be logged.
+  , leMaxLogLevel :: LogLevel -- ^ The maximum log level allowed to be logged.
   }
 
 -- | Start a logger thread that consumes one queued message at a time.

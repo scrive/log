@@ -54,7 +54,7 @@ instance MonadReader r m => MonadReader r (LogT m) where
 -- for that.
 runLogT :: Text     -- ^ Application component name to use.
         -> Logger   -- ^ The logging back-end to use.
-        -> LogLevel -- ^ The maximum allowed log level.
+        -> LogLevel -- ^ The maximum log level allowed to be logged.
                     --   Only messages less or equal than this level with be logged.
         -> LogT m a -- ^ The 'LogT' computation to run.
         -> m a
@@ -155,7 +155,7 @@ instance MonadBase IO m => MonadLog (LogT m) where
   localDomain domain =
     LogT . local (\e -> e { leDomain = leDomain e ++ [domain] }) . unLogT
 
-  localLogLevel level =
+  localMaxLogLevel level =
     LogT . local (\e -> e { leMaxLogLevel = level }) . unLogT
 
   getLoggerEnv = LogT ask

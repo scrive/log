@@ -22,6 +22,8 @@ import qualified Data.Text.Encoding as T
 import qualified Data.Monoid as Monoid
 
 -- | Available log levels.
+-- Note that ordering in this definintion determines what the maximum log level is.
+-- See 'Log.Monad.leMaxLogLevel'.
 data LogLevel = LogAttention | LogInfo | LogTrace
   deriving (Bounded, Eq, Ord, Show)
 
@@ -43,7 +45,7 @@ showLogLevel LogInfo      = "info"
 showLogLevel LogTrace     = "trace"
 
 defaultLogLevel :: LogLevel
-defaultLogLevel = LogTrace
+defaultLogLevel = LogInfo
 
 instance ToJSON LogLevel where
   toJSON = toJSON . showLogLevel
