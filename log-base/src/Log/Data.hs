@@ -44,6 +44,7 @@ showLogLevel LogAttention = "attention"
 showLogLevel LogInfo      = "info"
 showLogLevel LogTrace     = "trace"
 
+-- | The default log level. Returns `LogInfo`.
 defaultLogLevel :: LogLevel
 defaultLogLevel = LogInfo
 
