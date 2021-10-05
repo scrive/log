@@ -3,8 +3,10 @@ module Log.Data (
     LogLevel(..)
   , showLogLevel
   , readLogLevel
+  , readLogLevelEither
   , LogMessage(..)
   , showLogMessage
+  , defaultLogLevel
   ) where
 
 import Control.DeepSeq
@@ -20,6 +22,8 @@ import qualified Data.Text.Encoding as T
 import qualified Data.Monoid as Monoid
 
 -- | Available log levels.
+-- Note that ordering in this definintion determines what the maximum log level is.
+-- See 'Log.Monad.leMaxLogLevel'.
 data LogLevel = LogAttention | LogInfo | LogTrace
   deriving (Bounded, Eq, Ord, Show)
 
@@ -39,6 +43,10 @@ showLogLevel :: LogLevel -> T.Text
 showLogLevel LogAttention = "attention"
 showLogLevel LogInfo      = "info"
 showLogLevel LogTrace     = "trace"
+
+-- | The default log level. Returns `LogInfo`.
+defaultLogLevel :: LogLevel
+defaultLogLevel = LogInfo
 
 instance ToJSON LogLevel where
   toJSON = toJSON . showLogLevel

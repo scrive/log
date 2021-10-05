@@ -36,6 +36,8 @@ class Monad m => MonadLog m where
   localData   :: [Pair] -> m a -> m a
   -- | Extend the current application domain locally.
   localDomain :: T.Text -> m a -> m a
+  -- | Override the current maximum log level.
+  localMaxLogLevel :: LogLevel -> m a -> m a
   -- | Get current 'LoggerEnv' object. Useful for construction of logging
   -- functions that work in a different monad, see 'getLoggerIO' as an example.
   getLoggerEnv :: m LoggerEnv
@@ -49,6 +51,7 @@ instance {-# OVERLAPPABLE #-} (
     logMessage level message = lift . logMessage level message
     localData data_ m = controlT $ \run -> localData data_ (run m)
     localDomain domain m = controlT $ \run -> localDomain domain (run m)
+    localMaxLogLevel level m = controlT $ \run -> localMaxLogLevel level (run m)
     getLoggerEnv = lift getLoggerEnv
 
 ----------------------------------------
