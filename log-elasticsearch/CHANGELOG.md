@@ -1,3 +1,6 @@
+# log-elasticsearch-0.12.1.1 (2021-10-11)
+* Make compatible with log-base-0.11.0.0.
+
 # log-elasticsearch-0.12.1.0 (2021-06-23)
 * Map `time` as `date_nanos` in ElasticSearch >= 7.0.
 
