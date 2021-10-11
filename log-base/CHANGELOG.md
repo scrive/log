@@ -1,3 +1,6 @@
+# log-base-0.11.0.0 (2021-10-11)
+* Add support for defining maximum log level.
+
 # log-base-0.10.0.1 (2021-07-29)
 * Fix compilation issues caused by ambiguos occurence of `controlT`.
 
