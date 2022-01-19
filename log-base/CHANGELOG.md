@@ -1,3 +1,7 @@
+# log-base-0.11.1.0 (2022-02-??)
+* Add support for aeson 2.0.1.0.
+* Drop support for GHC 8.0 and 8.2.
+
 # log-base-0.11.0.0 (2021-10-11)
 * Add support for defining maximum log level.
 

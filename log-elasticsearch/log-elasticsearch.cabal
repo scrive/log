@@ -1,5 +1,5 @@
 name:                log-elasticsearch
-version:             0.12.1.1
+version:             0.12.2.0
 synopsis:            Structured logging solution (Elasticsearch back end)
 
 description:         Elasticsearch back end for the 'log' library suite.
@@ -18,8 +18,7 @@ category:            System
 build-type:          Simple
 cabal-version:       >=1.10
 extra-source-files:  CHANGELOG.md, README.md
-tested-with:         GHC ==8.0.2 || ==8.2.2 || ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.4
-                      || ==9.0.1
+tested-with:         GHC ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.7 || ==9.0.2
 
 Source-repository head
   Type:     git
@@ -29,8 +28,8 @@ library
   exposed-modules:     Log.Backend.ElasticSearch
                        Log.Backend.ElasticSearch.Internal
                        Log.Backend.ElasticSearch.Lens
-  build-depends:       base >= 4.8 && <5,
-                       aeson >=1.0.0.0 && <1.6,
+  build-depends:       base >= 4.11 && <5,
+                       aeson >= 1.0,
                        aeson-pretty >=0.8.2,
                        base64-bytestring,
                        bytestring,

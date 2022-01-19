@@ -14,7 +14,6 @@ import Database.PostgreSQL.PQTypes
 import Prelude
 import qualified Data.ByteString.Base64 as B64
 import qualified Data.Foldable as Foldable
-import qualified Data.HashMap.Strict as H
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import qualified Data.Vector as V
@@ -22,6 +21,7 @@ import qualified Data.Vector as V
 import Log.Data
 import Log.Logger
 import Log.Internal.Logger
+import qualified Log.Internal.Aeson.Compat as AC
 
 newtype InvalidEncodingRecoveryAttempt = Attempt Int
   deriving Enum
@@ -116,7 +116,7 @@ pgLogger cs = mkBulkLogger loggerName
 
     addPair :: Value -> (T.Text, Value) -> Value
     addPair data_ (name, value) = case data_ of
-      Object obj -> Object $ H.insert name value obj
+      Object obj -> Object $ AC.insert (AC.fromText name) value obj
       _          -> object
                     [ "_data" .= data_
                     , "_log"  .= value
@@ -156,8 +156,8 @@ pgLogger cs = mkBulkLogger loggerName
         doValue (Object obj) =
           Object <$> Foldable.foldrM
           (\(name, value) acc ->
-             H.insert <$> doText name <*> doValue value <*> pure acc)
-          H.empty (H.toList obj)
+             AC.insert <$> AC.doName doText name <*> doValue value <*> pure acc)
+          AC.empty (AC.toList obj)
         doValue (Array arr)  = Array <$> V.mapM doValue arr
         doValue (String s)   = String <$> doText s
         doValue v            = return v

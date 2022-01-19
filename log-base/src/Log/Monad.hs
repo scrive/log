@@ -28,11 +28,11 @@ import Data.Time
 import Prelude
 import qualified Control.Monad.Fail as MF
 import qualified Control.Exception as E
-import qualified Data.HashMap.Strict as H
 
 import Log.Class
 import Log.Data
 import Log.Logger
+import qualified Log.Internal.Aeson.Compat as AC
 
 type InnerLogT = ReaderT LoggerEnv
 
@@ -89,7 +89,7 @@ logMessageIO LoggerEnv{..} time level message data_ =
           -- the singleton value with key reflecting its type. It's required for
           -- ElasticSearch as ES needs fields with the same name to be of the
           -- same type in all log messages.
-          Object obj      -> Object . H.union obj $ H.fromList leData
+          Object obj      -> Object . AC.union obj $ AC.fromList leData
           _ | null leData -> object [dataTyped data_ .= data_]
             | otherwise   -> object $ (dataTyped data_, data_) : leData
       }
