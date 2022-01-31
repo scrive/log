@@ -26,7 +26,7 @@ Source-repository head
 
 flag openssl
   Description:   Use http-client-openssl instead of http-client-tls
-  Default:       False
+  Default:       True
 
 library
   exposed-modules:     Log.Backend.ElasticSearch
