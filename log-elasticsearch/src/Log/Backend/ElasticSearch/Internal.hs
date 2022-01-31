@@ -209,7 +209,7 @@ data EsEnv = EsEnv
 mkEsEnv :: ElasticSearchConfig -> IO EsEnv
 mkEsEnv ElasticSearchConfig{..} = do
 #if OPENSSL
-  envManager <- newManager opensslManagerSettings
+  envManager <- withOpenSSL $ newManager opensslManagerSettings
 #else
   envManager <- newManager tlsManagerSettings
 #endif
