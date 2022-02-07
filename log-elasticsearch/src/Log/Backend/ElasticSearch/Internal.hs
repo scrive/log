@@ -34,11 +34,11 @@ import Network.HTTP.Client.TLS (tlsManagerSettings)
 import Prelude
 import qualified Data.ByteString.Builder as BSB
 import qualified Data.ByteString.Lazy.Char8 as BSL
-import qualified Data.HashMap.Strict as H
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import qualified Data.Vector as V
 
+import qualified Log.Internal.Aeson.Compat as AC
 
 -- | Configuration for the Elasticsearch 'Logger'. See
 -- <https://www.elastic.co/guide/en/elasticsearch/reference/current/glossary.html>
@@ -86,8 +86,8 @@ data EsVersion = EsVersion !Int !Int !Int
 parseEsVersion :: Value -> Maybe EsVersion
 parseEsVersion js = do
   Object props <- pure js
-  Object version <- "version" `H.lookup` props
-  String number <- "number" `H.lookup` version
+  Object version <- "version" `AC.lookup` props
+  String number <- "number" `AC.lookup` version
   [v1, v2, v3] <- mapM (maybeRead . T.unpack) $ T.splitOn "." number
   pure $ EsVersion v1 v2 v3
   where
@@ -130,7 +130,7 @@ createIndexWithMapping version env ElasticSearchConfig{..} index = do
       ]
     , "mappings" .= if version >= esV7
                     then logsMapping
-                    else object [ esMapping .= logsMapping ]
+                    else object [ AC.fromText esMapping .= logsMapping ]
     ]
   where
     logsMapping = object
@@ -170,7 +170,7 @@ bulkIndex
   -> EsEnv
   -> ElasticSearchConfig
   -> T.Text
-  -> V.Vector (H.HashMap T.Text Value)
+  -> V.Vector Object
   -> IO (Response Value)
 bulkIndex version env conf index objs = do
   dispatch env methodPost route . Just . BSB.toLazyByteString $ foldMap ixOp objs

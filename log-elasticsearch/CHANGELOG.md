@@ -1,3 +1,7 @@
+# log-elasticsearch-0.12.2.0 (2022-02-??)
+* Add support for aeson 2.0.1.0.
+* Drop support for GHC 8.0 and 8.2.
+
 # log-elasticsearch-0.12.1.1 (2021-10-11)
 * Make compatible with log-base-0.11.0.0.
 

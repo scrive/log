@@ -29,7 +29,6 @@ import Log
 import Log.Internal.Logger
 import Network.HTTP.Client
 import Prelude
-import qualified Data.HashMap.Strict as H
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Data.Text.Lazy as TL
@@ -38,6 +37,7 @@ import qualified Data.Traversable as F
 import qualified Data.Vector as V
 
 import Log.Backend.ElasticSearch.Internal
+import qualified Log.Internal.Aeson.Compat as AC
 
 ----------------------------------------
 -- | Create an 'elasticSearchLogger' for the duration of the given
@@ -111,15 +111,15 @@ elasticSearchLogger esConf@ElasticSearchConfig{..} = do
           let newMsgs =
                 let modifyData :: Maybe Value -> Value -> Value
                     modifyData merr (Object hm) = Object $
-                      let newData = H.foldlWithKey' keyAddValueTypeSuffix H.empty hm
+                      let newData = AC.foldrWithKey keyAddValueTypeSuffix AC.empty hm
                       in case merr of
                         -- We have the error message, i.e. we're at the top
                         -- level object, so add it to the data.
-                        Just err -> newData `H.union` H.singleton "__es_error" err
+                        Just err -> newData `AC.union` AC.singleton "__es_error" err
                         Nothing  -> newData
                     modifyData _ v = v
 
-                    keyAddValueTypeSuffix acc k v = H.insert
+                    keyAddValueTypeSuffix k v acc = AC.insert
                       (case v of
                           Object{} -> k <> "_object"
                           Array{}  -> k <> "_array"
@@ -154,25 +154,28 @@ elasticSearchLogger esConf@ElasticSearchConfig{..} = do
       -> Maybe (Bool, V.Vector Object)
     checkForBulkErrors jsonMsgs replyBody = do
       Object response <- pure replyBody
-      Bool hasErrors  <- "errors" `H.lookup` response
-      Array jsonItems <- "items"  `H.lookup` response
+      Bool hasErrors  <- "errors" `AC.lookup` response
+      Array jsonItems <- "items"  `AC.lookup` response
       items <- F.forM jsonItems $ \v -> do
         Object item   <- pure v
-        Object index_ <- "index" `H.lookup` item
+        Object index_ <- "index" `AC.lookup` item
           -- ES <= 2.x returns 'create' for some reason, so consider both.
-          <|> "create" `H.lookup` item
+          <|> "create" `AC.lookup` item
         pure index_
       guard $ V.length items == V.length jsonMsgs
       pure (hasErrors, items)
 
     adjustFailedMessagesWith
       :: (Maybe err -> obj -> obj)
-      -> V.Vector (H.HashMap T.Text obj)
-      -> V.Vector (H.HashMap T.Text err)
-      -> V.Vector (H.HashMap T.Text obj)
+      -> V.Vector (AC.KeyMap obj)
+      -> V.Vector (AC.KeyMap err)
+      -> V.Vector (AC.KeyMap obj)
     adjustFailedMessagesWith f jsonMsgs responses =
-      let failed = V.imapMaybe (\n item -> (n, ) <$> "error" `H.lookup` item) responses
-      in (`V.map` failed) $ \(n, err) -> H.adjust (f $ Just err) "data" $ jsonMsgs V.! n
+      let failed = V.imapMaybe (\n item -> (n, ) <$> "error" `AC.lookup` item) responses
+          adjust act key m = case AC.lookup key m of
+            Nothing -> m
+            Just v -> AC.insert key (act v) m
+      in (`V.map` failed) $ \(n, err) -> adjust (f $ Just err) "data" $ jsonMsgs V.! n
 
     printEsError msg body =
       T.putStrLn $ "elasticSearchLogger: " <> msg <> " " <> prettyJson body
@@ -194,7 +197,7 @@ elasticSearchLogger esConf@ElasticSearchConfig{..} = do
                . T.toLazyText
                . encodePrettyToTextBuilder' defConfig { confIndent = Spaces 2 }
 
-    toJsonMsg :: LogMessage -> H.HashMap T.Text Value
+    toJsonMsg :: LogMessage -> Object
     toJsonMsg msg = let Object jMsg = toJSON msg in jMsg
 
 ----------------------------------------
