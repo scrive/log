@@ -32,7 +32,7 @@ import GHC.Generics (Generic)
 import Network.HTTP.Client
 import Network.HTTP.Types
 #if OPENSSL
-import Network.HTTP.Client.OpenSSL (opensslManagerSettings)
+import Network.HTTP.Client.OpenSSL (newOpenSSLManager, withOpenSSL)
 #else
 import Network.HTTP.Client.TLS (tlsManagerSettings)
 #endif
@@ -209,7 +209,7 @@ data EsEnv = EsEnv
 mkEsEnv :: ElasticSearchConfig -> IO EsEnv
 mkEsEnv ElasticSearchConfig{..} = do
 #if OPENSSL
-  envManager <- withOpenSSL $ newManager opensslManagerSettings
+  envManager <- withOpenSSL newOpenSSLManager
 #else
   envManager <- newManager tlsManagerSettings
 #endif

@@ -71,6 +71,6 @@ library
 
   if flag(openssl)
     cpp-options: -DOPENSSL
-    build-depends: http-client-openssl
+    build-depends: http-client-openssl >= 0.3.2
   else
     build-depends: http-client-tls
