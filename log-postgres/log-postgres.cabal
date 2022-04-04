@@ -18,7 +18,7 @@ copyright:           Scrive AB
 category:            System
 build-type:          Simple
 extra-source-files:  CHANGELOG.md, README.md
-tested-with:         GHC ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.7 || ==9.0.2
+tested-with:         GHC ==8.8.4 || ==8.10.7 || ==9.0.2 || ==9.2.2
 
 Source-repository head
   Type:     git
@@ -26,7 +26,7 @@ Source-repository head
 
 library
   exposed-modules:    Log.Backend.PostgreSQL
-  build-depends:      base                  >= 4.11  && < 5
+  build-depends:      base                  >= 4.13  && < 5
                     , aeson                 >= 1.0
                     , aeson-pretty          >= 0.8
                     , base64-bytestring     >= 1.0
