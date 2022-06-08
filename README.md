@@ -34,6 +34,6 @@ main = do
         esMapping = "log"
         }
   withElasticSearchLogger config $ \logger ->
-    runLogT "main" logger $ do
+    runLogT "main" logger defaultLogLevel $ do
       logTrace_ "foo"
 ```
