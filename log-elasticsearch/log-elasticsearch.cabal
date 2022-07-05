@@ -24,6 +24,10 @@ Source-repository head
   Type:     git
   Location: https://github.com/scrive/log.git
 
+flag openssl
+  Description:   Use http-client-openssl instead of http-client-tls
+  Default:       True
+
 library
   exposed-modules:     Log.Backend.ElasticSearch
                        Log.Backend.ElasticSearch.Internal
@@ -35,7 +39,6 @@ library
                        bytestring,
                        deepseq,
                        http-client,
-                       http-client-tls,
                        http-types,
                        log-base >= 0.10 && <0.12,
                        network-uri,
@@ -65,3 +68,9 @@ library
                     , TupleSections
                     , TypeFamilies
                     , UndecidableInstances
+
+  if flag(openssl)
+    cpp-options: -DOPENSSL
+    build-depends: http-client-openssl >= 0.3.2
+  else
+    build-depends: http-client-tls

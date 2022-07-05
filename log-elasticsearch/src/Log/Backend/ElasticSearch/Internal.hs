@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveGeneric #-}
 module Log.Backend.ElasticSearch.Internal
   ( ElasticSearchConfig(..)
@@ -30,7 +31,11 @@ import Data.Semigroup
 import GHC.Generics (Generic)
 import Network.HTTP.Client
 import Network.HTTP.Types
+#if OPENSSL
+import Network.HTTP.Client.OpenSSL (newOpenSSLManager, withOpenSSL)
+#else
 import Network.HTTP.Client.TLS (tlsManagerSettings)
+#endif
 import Prelude
 import qualified Data.ByteString.Builder as BSB
 import qualified Data.ByteString.Lazy.Char8 as BSL
@@ -203,7 +208,11 @@ data EsEnv = EsEnv
 
 mkEsEnv :: ElasticSearchConfig -> IO EsEnv
 mkEsEnv ElasticSearchConfig{..} = do
+#if OPENSSL
+  envManager <- withOpenSSL newOpenSSLManager
+#else
   envManager <- newManager tlsManagerSettings
+#endif
   let envServer = esServer
       envRequestHook = maybe id mkAuthHook esLogin
   pure EsEnv{..}
