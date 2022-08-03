@@ -1,1 +1,7 @@
 packages: log-base, log-elasticsearch, log-postgres
+
+
+source-repository-package
+    type: git
+    tag: 803feb4d78479f1ce1a9ab2a3e07b96a657be181
+    location: https://github.com/scrive/hpqtypes
