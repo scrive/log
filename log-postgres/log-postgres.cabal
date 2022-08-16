@@ -35,7 +35,7 @@ library
                     , hpqtypes              >= 1.9.1.2
                     , http-client           >= 0.5
                     , lifted-base           >= 0.2
-                    , log-base              >= 0.10  && < 0.12
+                    , log-base              >= 0.10  && < 0.13
                     , mtl                   >= 2.2
                     , semigroups            >= 0.16
                     , split                 >= 0.2

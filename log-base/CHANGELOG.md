@@ -1,3 +1,6 @@
+# log-base-0.12.0.0 (2022-08-??)
+* Remove `withSimpleStdOutLogger` as it's broken in multithreaded environments.
+
 # log-base-0.11.1.0 (2022-04-04)
 * Add support for aeson 2.0.1.0.
 * Add support for GHC 9.2.
