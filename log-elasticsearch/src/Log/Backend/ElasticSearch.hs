@@ -23,7 +23,6 @@ import Data.Aeson
 import Data.Aeson.Encode.Pretty
 import Data.IORef
 import Data.Maybe
-import Data.Semigroup
 import Data.Time
 import Log
 import Log.Internal.Logger
@@ -195,7 +194,9 @@ elasticSearchLogger esConf@ElasticSearchConfig{..} = do
                . encodePrettyToTextBuilder' defConfig { confIndent = Spaces 2 }
 
     toJsonMsg :: LogMessage -> Object
-    toJsonMsg msg = let Object jMsg = toJSON msg in jMsg
+    toJsonMsg msg = case toJSON msg of
+      Object jMsg -> jMsg
+      value       -> error $ "unexpected non-object: " ++ show value
 
 ----------------------------------------
 

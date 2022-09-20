@@ -2,10 +2,8 @@
 -- testing.
 module Log.Backend.Text ( withSimpleTextLogger ) where
 
-import Control.Applicative
 import Control.Monad.IO.Unlift
 import Data.IORef
-import Data.Monoid
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as L
 import qualified Data.Text.Lazy.Builder as B

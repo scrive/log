@@ -8,7 +8,6 @@ module Log.Internal.Logger (
   , withLogger
   ) where
 
-import Data.Semigroup
 import Control.Exception
 
 import Log.Data

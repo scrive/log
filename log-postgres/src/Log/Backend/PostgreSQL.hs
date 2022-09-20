@@ -1,7 +1,6 @@
 -- | PostgreSQL logging back-end.
 module Log.Backend.PostgreSQL (withPgLogger) where
 
-import Control.Applicative
 import Control.Concurrent
 import Control.Exception.Lifted
 import Control.Monad.State.Lazy

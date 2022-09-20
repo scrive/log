@@ -11,12 +11,10 @@ module Log.Logger
   , shutdownLogger
   ) where
 
-import Control.Applicative
 import Control.Concurrent
 import Control.Concurrent.STM
 import Control.Exception
 import Control.Monad
-import Data.Semigroup
 import qualified Data.Aeson.Types as A
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
