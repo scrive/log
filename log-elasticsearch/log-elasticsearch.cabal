@@ -40,7 +40,7 @@ library
                        deepseq,
                        http-client,
                        http-types,
-                       log-base >= 0.10 && <0.12,
+                       log-base >= 0.10 && <0.13,
                        network-uri,
                        semigroups,
                        text,
