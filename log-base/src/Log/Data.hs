@@ -30,7 +30,6 @@ data LogLevel = LogAttention | LogInfo | LogTrace
 -- | This function is partial.
 readLogLevel :: T.Text -> LogLevel
 readLogLevel = either error id . readLogLevelEither
-{-# INLINE readLogLevel #-}
 
 readLogLevelEither :: T.Text -> Either String LogLevel
 readLogLevelEither "attention" = Right LogAttention

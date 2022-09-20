@@ -115,34 +115,17 @@ instance MFunctor LogT where
     hoist f = mapLogT f
 
 instance MonadTransControl LogT where
-#if MIN_VERSION_monad_control(1,0,0)
   type StT LogT m = StT InnerLogT m
   liftWith = defaultLiftWith LogT unLogT
   restoreT = defaultRestoreT LogT
-#else
-  newtype StT LogT m = StLogT { unStLogT :: StT InnerLogT m }
-  liftWith = defaultLiftWith LogT unLogT StLogT
-  restoreT = defaultRestoreT LogT unStLogT
-#endif
-  {-# INLINE liftWith #-}
-  {-# INLINE restoreT #-}
 
 instance MonadBaseControl b m => MonadBaseControl b (LogT m) where
-#if MIN_VERSION_monad_control(1,0,0)
   type StM (LogT m) a = ComposeSt LogT m a
   liftBaseWith = defaultLiftBaseWith
   restoreM     = defaultRestoreM
-#else
-  newtype StM (LogT m) a = StMLogT { unStMLogT :: ComposeSt LogT m a }
-  liftBaseWith = defaultLiftBaseWith StMLogT
-  restoreM     = defaultRestoreM unStMLogT
-#endif
-  {-# INLINE liftBaseWith #-}
-  {-# INLINE restoreM #-}
 
 instance MonadUnliftIO m => MonadUnliftIO (LogT m) where
   withRunInIO inner = LogT $ withRunInIO $ \run -> inner (run . unLogT)
-  {-# INLINE withRunInIO #-}
 
 instance MonadBase IO m => MonadLog (LogT m) where
   logMessage level message data_ = LogT . ReaderT $ \logEnv -> liftBase $ do
