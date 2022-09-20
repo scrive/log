@@ -6,7 +6,6 @@ module Log.Backend.StandardOutput.Bulk
 
 import Control.Monad.IO.Unlift
 import Data.Aeson
-import Prelude
 import System.IO (hFlush, stdout)
 import qualified Data.Text.IO as T
 import qualified Data.ByteString.Lazy.Char8 as BSL

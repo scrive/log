@@ -28,7 +28,6 @@ import Data.Time
 import Log
 import Log.Internal.Logger
 import Network.HTTP.Client
-import Prelude
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Data.Text.Lazy as TL

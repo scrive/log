@@ -12,7 +12,6 @@ import Data.Monoid.Utils
 import Data.String
 import Data.Typeable
 import Database.PostgreSQL.PQTypes
-import Prelude
 import qualified Data.ByteString.Base64 as B64
 import qualified Data.Foldable as Foldable
 import qualified Data.Text as T

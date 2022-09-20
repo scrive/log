@@ -36,7 +36,6 @@ import Network.HTTP.Client.OpenSSL (newOpenSSLManager, withOpenSSL)
 #else
 import Network.HTTP.Client.TLS (tlsManagerSettings)
 #endif
-import Prelude
 import qualified Data.ByteString.Builder as BSB
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import qualified Data.Text as T

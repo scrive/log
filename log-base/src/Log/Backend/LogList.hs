@@ -10,7 +10,6 @@ module Log.Backend.LogList
 
 import Control.Concurrent.MVar
 import Control.Monad.IO.Unlift
-import Prelude
 
 import Log.Data
 import Log.Internal.Logger

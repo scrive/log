@@ -61,7 +61,6 @@ library
                     , GeneralizedNewtypeDeriving
                     , LambdaCase
                     , MultiParamTypeClasses
-                    , NoImplicitPrelude
                     , OverloadedStrings
                     , RankNTypes
                     , RecordWildCards

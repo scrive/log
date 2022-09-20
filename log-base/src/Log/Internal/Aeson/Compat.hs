@@ -9,7 +9,6 @@ module Log.Internal.Aeson.Compat
   ) where
 
 import Data.Text
-import Prelude
 
 #if MIN_VERSION_aeson(2,0,1)
 import Data.Aeson.KeyMap as Map 

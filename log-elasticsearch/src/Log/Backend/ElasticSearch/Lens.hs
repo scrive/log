@@ -13,7 +13,6 @@ module Log.Backend.ElasticSearch.Lens
   , I.withElasticSearchLogger
   ) where
 
-import Prelude
 import qualified Data.Text as T
 import qualified Log.Backend.ElasticSearch as I
 

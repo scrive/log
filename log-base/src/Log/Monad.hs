@@ -25,7 +25,6 @@ import Control.Monad.Writer.Class
 import Data.Aeson
 import Data.Text (Text)
 import Data.Time
-import Prelude
 import qualified Control.Monad.Fail as MF
 import qualified Control.Exception as E
 

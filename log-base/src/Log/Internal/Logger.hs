@@ -10,7 +10,6 @@ module Log.Internal.Logger (
 
 import Data.Semigroup
 import Control.Exception
-import Prelude
 
 import Log.Data
 

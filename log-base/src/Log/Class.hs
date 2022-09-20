@@ -15,7 +15,6 @@ import Control.Monad.Trans.Control
 import Data.Aeson
 import Data.Aeson.Types
 import Data.Time
-import Prelude
 import qualified Data.Text as T
 
 import Log.Data
