@@ -1,5 +1,5 @@
 # log-base-0.12.0.0 (2022-??-??)
-* Remove `withSimpleStdOutLogger` as it's broken in multithreaded environments.
+* Deprecate `withSimpleStdOutLogger` as it's broken in multithreaded environments.
 * Generalize logger related functions to `MonadUnliftIO`.
 
 # log-base-0.11.1.0 (2022-04-04)

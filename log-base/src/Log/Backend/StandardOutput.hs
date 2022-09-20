@@ -1,6 +1,7 @@
 -- | Stdout logging back-end.
 module Log.Backend.StandardOutput
-  ( withStdOutLogger
+  ( withSimpleStdOutLogger
+  , withStdOutLogger
   , withJsonStdOutLogger
   ) where
 
@@ -14,6 +15,10 @@ import qualified Data.ByteString.Lazy.Char8 as BSL
 import Log.Data
 import Log.Internal.Logger
 import Log.Logger
+
+withSimpleStdOutLogger :: MonadUnliftIO m => (Logger -> m r) -> m r
+withSimpleStdOutLogger = withStdOutLogger
+{-# DEPRECATED withSimpleStdOutLogger "Use withStdOutLogger instead" #-}
 
 -- | Create a logger that prints messages to standard output for the duration of
 -- the given action.
