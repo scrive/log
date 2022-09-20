@@ -9,7 +9,7 @@ module Log.Backend.LogList
   ) where
 
 import Control.Concurrent.MVar
-import System.IO
+import Control.Monad.IO.Unlift
 import Prelude
 
 import Log.Data
@@ -19,25 +19,27 @@ newtype LogList = LogList (MVar [LogMessage])
   deriving Eq
 
 -- | Create a new, empty list.
-newLogList :: IO LogList
-newLogList = LogList <$> newMVar []
+newLogList :: MonadIO m => m LogList
+newLogList = LogList <$> liftIO (newMVar [])
 
 -- | Retrieve messages stored in the list.
-getLogList :: LogList -> IO [LogMessage]
-getLogList (LogList ll) = reverse <$> readMVar ll
+getLogList :: MonadIO m => LogList -> m [LogMessage]
+getLogList (LogList ll) = reverse <$> liftIO (readMVar ll)
 
 -- | Put a message into the list.
-putLogList :: LogList -> LogMessage -> IO ()
-putLogList (LogList ll) msg = modifyMVar_ ll $ \msgs -> return $! msg : msgs
+putLogList :: MonadIO m => LogList -> LogMessage -> m ()
+putLogList (LogList ll) msg = liftIO . modifyMVar_ ll $ \msgs -> return $! msg : msgs
 
 -- | Clear the list.
-clearLogList :: LogList -> IO ()
-clearLogList (LogList ll) = modifyMVar_ ll . const $ return []
+clearLogList :: MonadIO m => LogList -> m ()
+clearLogList (LogList ll) = liftIO . modifyMVar_ ll . const $ return []
 
 -- | Creates a logger that stores messages in the given 'LogList'.
-withLogListLogger :: LogList -> (Logger -> IO r) -> IO r
-withLogListLogger ll = withLogger $ Logger
-  { loggerWriteMessage = putLogList ll
-  , loggerWaitForWrite = return ()
-  , loggerShutdown     = return ()
-  }
+withLogListLogger :: MonadUnliftIO m => LogList -> (Logger -> m r) -> m r
+withLogListLogger ll act = withRunInIO $ \unlift -> withLogger logger (unlift . act)
+  where
+    logger = Logger
+      { loggerWriteMessage = putLogList ll
+      , loggerWaitForWrite = return ()
+      , loggerShutdown     = return ()
+      }

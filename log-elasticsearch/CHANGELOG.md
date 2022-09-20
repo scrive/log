@@ -1,3 +1,7 @@
+# log-elasticsearch-0.13.0.0 (2022-??-??)
+* Remove deprecated `elasticSearchLogger`.
+* Generalize logger related functions to `MonadUnliftIO`.
+
 # log-elasticsearch-0.12.2.0 (2022-04-04)
 * Add support for aeson 2.0.1.0.
 * Add support for GHC 9.2.

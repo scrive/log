@@ -3,6 +3,7 @@
 module Log.Backend.Text ( withSimpleTextLogger ) where
 
 import Control.Applicative
+import Control.Monad.IO.Unlift
 import Data.IORef
 import Data.Monoid
 import Prelude
@@ -16,8 +17,8 @@ import Log.Internal.Logger
 -- | Create an in-memory logger for the duration of the given action,
 -- returning both the result of the action and the logger's output as
 -- a 'Text' value afterwards.
-withSimpleTextLogger :: (Logger -> IO r) -> IO (T.Text, r)
-withSimpleTextLogger act = do
+withSimpleTextLogger :: MonadUnliftIO m => (Logger -> m r) -> m (T.Text, r)
+withSimpleTextLogger act = withRunInIO $ \unlift -> do
   builderRef <- newIORef mempty
   let logger = Logger
         { loggerWriteMessage = \msg -> do
@@ -26,6 +27,6 @@ withSimpleTextLogger act = do
         , loggerWaitForWrite = return ()
         , loggerShutdown     = return ()
         }
-  r <- act logger
+  r <- unlift $ act logger
   txt <- L.toStrict . B.toLazyText <$> readIORef builderRef
   return (txt, r)

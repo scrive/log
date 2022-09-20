@@ -221,3 +221,7 @@ mkLoggerImpl newQueue isQueueEmpty readQueue writeQueue afterExecDo
       when (not isEmpty || isInProgress) retry
 
     printLoggerTerminated = T.putStrLn $ name <> ": logger thread terminated"
+-- Prevent GHC from inlining this function so its callers are small and
+-- considered for inlining instead (as they will be generalized to MonadIO or
+-- MonadUnliftIO).
+{-# NOINLINE mkLoggerImpl #-}

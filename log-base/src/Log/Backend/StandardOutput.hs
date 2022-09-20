@@ -4,6 +4,7 @@ module Log.Backend.StandardOutput
   , withJsonStdOutLogger
   ) where
 
+import Control.Monad.IO.Unlift
 import Data.Aeson
 import Prelude
 import System.IO
@@ -16,18 +17,18 @@ import Log.Logger
 
 -- | Create a logger that prints messages to standard output for the duration of
 -- the given action.
-withStdOutLogger :: (Logger -> IO r) -> IO r
-withStdOutLogger act = do
+withStdOutLogger :: MonadUnliftIO m => (Logger -> m r) -> m r
+withStdOutLogger act = withRunInIO $ \unlift -> do
   logger <- mkLogger "stdout" $ \msg -> do
     T.putStrLn $ showLogMessage Nothing msg
     hFlush stdout
-  withLogger logger act
+  withLogger logger (unlift . act)
 
 -- | Create a logger that prints messages in the JSON format to standard output
 -- for the duration of the given action.
-withJsonStdOutLogger :: (Logger -> IO r) -> IO r
-withJsonStdOutLogger act = do
+withJsonStdOutLogger :: MonadUnliftIO m => (Logger -> m r) -> m r
+withJsonStdOutLogger act = withRunInIO $ \unlift -> do
   logger <- mkLogger "stdout-json" $ \msg -> do
     BSL.putStrLn $ encode msg
     hFlush stdout
-  withLogger logger act
+  withLogger logger (unlift . act)
