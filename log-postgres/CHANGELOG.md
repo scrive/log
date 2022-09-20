@@ -1,3 +1,7 @@
+# log-postgres-0.9.0.0 (2022-09-??)
+* Remove deprecated `pgLogger`.
+* Generalize logger related functions to `MonadUnliftIO`.
+
 # log-postgres-0.8.1.0 (2022-04-04)
 * Add support for aeson 2.0.1.0.
 * Add support for GHC 9.2.

@@ -12,13 +12,13 @@ module Log.Backend.ElasticSearch
   , checkElasticSearchConnection
   , defaultElasticSearchConfig
   , withElasticSearchLogger
-  , elasticSearchLogger
   ) where
 
 import Control.Applicative
 import Control.Concurrent
 import Control.Exception
 import Control.Monad
+import Control.Monad.IO.Unlift
 import Data.Aeson
 import Data.Aeson.Encode.Pretty
 import Data.IORef
@@ -43,12 +43,10 @@ import qualified Log.Internal.Aeson.Compat as AC
 -- | Create an 'elasticSearchLogger' for the duration of the given
 -- action, and shut it down afterwards, making sure that all buffered
 -- messages are actually written to the Elasticsearch store.
-withElasticSearchLogger :: ElasticSearchConfig -> (Logger -> IO r) -> IO r
-withElasticSearchLogger conf act = do
+withElasticSearchLogger :: MonadUnliftIO m => ElasticSearchConfig -> (Logger -> m r) -> m r
+withElasticSearchLogger conf act = withRunInIO $ \unlift -> do
   logger <- elasticSearchLogger conf
-  withLogger logger act
-
-{-# DEPRECATED elasticSearchLogger "Use 'withElasticSearchLogger' instead!" #-}
+  withLogger logger (unlift . act)
 
 -- | Start an asynchronous logger thread that stores messages using
 -- Elasticsearch.
@@ -205,18 +203,18 @@ elasticSearchLogger esConf@ElasticSearchConfig{..} = do
 -- | Check that login credentials are specified properly.
 --
 -- @since 0.10.0.0
-checkElasticSearchLogin :: ElasticSearchConfig -> IO ()
-checkElasticSearchLogin ElasticSearchConfig{..} =
-    when (isJust esLogin
-          && not esLoginInsecure
-          && not ("https:" `T.isPrefixOf` esServer)) $
-      error $ "ElasticSearch: insecure login: "
-        <> "Attempting to send login credentials over an insecure connection. "
-        <> "Set esLoginInsecure = True to disable this check."
+checkElasticSearchLogin :: MonadIO m => ElasticSearchConfig -> m ()
+checkElasticSearchLogin ElasticSearchConfig{..} = liftIO $ do
+  when (isJust esLogin
+        && not esLoginInsecure
+        && not ("https:" `T.isPrefixOf` esServer)) $
+    error $ "ElasticSearch: insecure login: "
+      <> "Attempting to send login credentials over an insecure connection. "
+      <> "Set esLoginInsecure = True to disable this check."
 
 -- | Check that we can connect to the ES server.
 --
 -- @since 0.10.0.0
-checkElasticSearchConnection :: ElasticSearchConfig -> IO (Either HttpException ())
-checkElasticSearchConnection esConf =
+checkElasticSearchConnection :: MonadIO m => ElasticSearchConfig -> m (Either HttpException ())
+checkElasticSearchConnection esConf = liftIO $ do
   fmap (const ()) <$> (serverInfo =<< mkEsEnv esConf)

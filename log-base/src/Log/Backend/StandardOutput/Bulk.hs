@@ -4,6 +4,7 @@ module Log.Backend.StandardOutput.Bulk
   , withBulkJsonStdOutLogger
   ) where
 
+import Control.Monad.IO.Unlift
 import Data.Aeson
 import Prelude
 import System.IO (hFlush, stdout)
@@ -17,23 +18,23 @@ import Log.Internal.Logger
 -- | Create an asynchronouis logger thread that prints messages to standard
 -- output once per second for the duration of the given action. Flushes 'stdout'
 -- on each bulk write.
-withBulkStdOutLogger :: (Logger -> IO r) -> IO r
-withBulkStdOutLogger act = do
+withBulkStdOutLogger :: MonadUnliftIO m => (Logger -> m r) -> m r
+withBulkStdOutLogger act = withRunInIO $ \unlift -> do
   logger <- mkBulkLogger "stdout-bulk"
     (\msgs -> do
         mapM_ (T.putStrLn . showLogMessage Nothing) msgs
         hFlush stdout
     ) (return ())
-  withLogger logger act
+  withLogger logger (unlift . act)
 
 -- | Create a bulk logger that prints messages in the JSON format to standard
 -- output once per second for the duration of the given action. Flushes 'stdout'
 -- on each bulk write.
-withBulkJsonStdOutLogger :: (Logger -> IO r) -> IO r
-withBulkJsonStdOutLogger act = do
+withBulkJsonStdOutLogger :: MonadUnliftIO m => (Logger -> m r) -> m r
+withBulkJsonStdOutLogger act = withRunInIO $ \unlift -> do
   logger <- mkBulkLogger "stdout-bulk-json"
     (\msgs -> do
         mapM_ (BSL.putStrLn . encode) msgs
         hFlush stdout
     ) (return ())
-  withLogger logger act
+  withLogger logger (unlift . act)

@@ -50,6 +50,10 @@ withLogger :: Logger -> (Logger -> IO r) -> IO r
 withLogger logger act = act logger `finally` cleanup
   where
     cleanup = waitForLogger logger >> shutdownLogger logger
+-- Prevent GHC from inlining this function so its callers are small and
+-- considered for inlining instead (as they will be generalized to MonadIO or
+-- MonadUnliftIO).
+{-# NOINLINE withLogger #-}
 
 instance Semigroup Logger where
   l1 <> l2 = Logger {

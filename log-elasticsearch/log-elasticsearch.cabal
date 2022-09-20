@@ -1,5 +1,5 @@
 name:                log-elasticsearch
-version:             0.12.2.0
+version:             0.13.0.0
 synopsis:            Structured logging solution (Elasticsearch back end)
 
 description:         Elasticsearch back end for the 'log' library suite.
@@ -47,6 +47,7 @@ library
                        text-show >= 2,
                        time >= 1.5,
                        transformers,
+                       unliftio-core >= 0.2,
                        unordered-containers,
                        vector
   hs-source-dirs:      src

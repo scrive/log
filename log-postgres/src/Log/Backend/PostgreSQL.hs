@@ -1,10 +1,11 @@
 -- | PostgreSQL logging back-end.
-module Log.Backend.PostgreSQL (pgLogger, withPgLogger) where
+module Log.Backend.PostgreSQL (withPgLogger) where
 
 import Control.Applicative
 import Control.Concurrent
 import Control.Exception.Lifted
 import Control.Monad.State.Lazy
+import Control.Monad.IO.Unlift
 import Data.Aeson ((.=), Value(..), object, encode)
 import Data.List.Split
 import Data.Monoid.Utils
@@ -29,12 +30,10 @@ newtype InvalidEncodingRecoveryAttempt = Attempt Int
 -- | Create a 'pgLogger' for the duration of the given action, and
 -- shut it down afterwards, making sure that all buffered messages are
 -- actually written to the DB.
-withPgLogger :: ConnectionSourceM IO -> (Logger -> IO r) -> IO r
-withPgLogger cs act = do
+withPgLogger :: MonadUnliftIO m => ConnectionSourceM IO -> (Logger -> m r) -> m r
+withPgLogger cs act = withRunInIO $ \unlift -> do
   logger <- pgLogger cs
-  withLogger logger act
-
-{-# DEPRECATED pgLogger "Use 'withPgLogger' instead!" #-}
+  withLogger logger (unlift . act)
 
 -- | Start an asynchronous logger thread that inserts log messages
 -- into a PostgreSQL database.
