@@ -21,13 +21,11 @@ module Log.Backend.ElasticSearch.Internal
   , isSuccess
   ) where
 
-import Control.Applicative
 import Control.Exception
 import Control.Monad
 import Data.Aeson
 import Data.Ix (inRange)
 import Data.Maybe
-import Data.Semigroup
 import GHC.Generics (Generic)
 import Network.HTTP.Client
 import Network.HTTP.Types
