@@ -1,5 +1,6 @@
 # log-elasticsearch-0.13.0.0 (2022-??-??)
 * Remove deprecated `elasticSearchLogger`.
+* Use `http-client-openssl` by default instead of `http-client-tls`.
 * Generalize logger related functions to `MonadUnliftIO`.
 
 # log-elasticsearch-0.12.2.0 (2022-04-04)
