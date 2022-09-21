@@ -21,7 +21,6 @@ A sample usage for logging to both standard output and Elasticsearch:
 
 ```haskell
 {-# LANGUAGE OverloadedStrings #-}
-
 module Main where
 
 import Log
@@ -31,8 +30,8 @@ import Log.Backend.StandardOutput
 main :: IO ()
 main = do
   let config = defaultElasticSearchConfig
-        { esServer  = "http://localhost:9200"
-        , esIndex   = "logs"
+        { esServer = "http://localhost:9200"
+        , esIndex  = "logs"
         }
   withStdOutLogger $ \stdoutLogger -> do
     withElasticSearchLogger config $ \esLogger -> do
