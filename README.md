@@ -17,6 +17,8 @@ Supported backends:
 
 ## Example
 
+A sample usage for logging to both standard output and Elasticsearch:
+
 ```haskell
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -24,6 +26,7 @@ module Main where
 
 import Log
 import Log.Backend.ElasticSearch
+import Log.Backend.StandardOutput
 
 main :: IO ()
 main = do
@@ -31,7 +34,8 @@ main = do
         { esServer  = "http://localhost:9200"
         , esIndex   = "logs"
         }
-  withElasticSearchLogger config $ \logger -> do
-    runLogT "main" logger defaultLogLevel $ do
-      logInfo_ "Hi there"
+  withStdOutLogger $ \stdoutLogger -> do
+    withElasticSearchLogger config $ \esLogger -> do
+      runLogT "main" (stdoutLogger <> esLogger) defaultLogLevel $ do
+        logInfo_ "Hi there"
 ```
