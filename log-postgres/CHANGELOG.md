@@ -1,4 +1,4 @@
-# log-postgres-0.9.0.0 (2022-09-??)
+# log-postgres-0.9.0.0 (2022-09-21)
 * Remove deprecated `pgLogger`.
 * Generalize logger related functions to `MonadUnliftIO`.
 
