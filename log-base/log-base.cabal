@@ -45,7 +45,7 @@ library
                        bytestring,
                        deepseq,
                        exceptions >=0.6,
-                       mmorph >=1.0.9 && <1.2,
+                       mmorph >=1.0.9 && <1.3,
                        monad-control >=1.0.3,
                        mtl,
                        semigroups,
