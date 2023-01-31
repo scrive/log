@@ -89,9 +89,14 @@ parseEsVersion :: Value -> Maybe EsVersion
 parseEsVersion js = do
   Object props <- pure js
   Object version <- "version" `AC.lookup` props
-  String number <- "number" `AC.lookup` version
-  [v1, v2, v3] <- mapM (maybeRead . T.unpack) $ T.splitOn "." number
-  pure $ EsVersion v1 v2 v3
+  case "distribution" `AC.lookup` version of
+    Just "opensearch" -> do
+      -- OpenSearch is compatible (so far) with esV7 mappings.
+      pure esV7
+    _ -> do
+      String number <- "number" `AC.lookup` version
+      [v1, v2, v3] <- mapM (maybeRead . T.unpack) $ T.splitOn "." number
+      pure $ EsVersion v1 v2 v3
   where
     maybeRead s = do
       [(v, "")] <- pure $ reads s

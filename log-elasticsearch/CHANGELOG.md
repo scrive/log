@@ -1,3 +1,6 @@
+# log-elasticsearch-0.13.0.1 (2023-??-??)
+* Add support for OpenSearch.
+
 # log-elasticsearch-0.13.0.0 (2022-09-21)
 * Remove deprecated `elasticSearchLogger`.
 * Use `http-client-openssl` by default instead of `http-client-tls`.
