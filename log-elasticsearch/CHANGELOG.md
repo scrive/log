@@ -1,4 +1,4 @@
-# log-elasticsearch-0.13.0.1 (2023-??-??)
+# log-elasticsearch-0.13.0.1 (2023-01-31)
 * Add support for OpenSearch.
 
 # log-elasticsearch-0.13.0.0 (2022-09-21)
