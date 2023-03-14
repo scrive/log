@@ -1,3 +1,5 @@
 branches:       master
 doctest:        False
 tests:          True
+
+ghcup-jobs:     True

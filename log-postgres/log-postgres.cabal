@@ -1,6 +1,6 @@
 cabal-version:       2.0
 name:                log-postgres
-version:             0.9.0.0
+version:             0.9.0.1
 synopsis:            Structured logging solution (PostgreSQL back end)
 
 description:         PostgreSQL back end for the 'log' library suite.
@@ -18,7 +18,7 @@ copyright:           Scrive AB
 category:            System
 build-type:          Simple
 extra-source-files:  CHANGELOG.md, README.md
-tested-with:         GHC ==8.8.4 || ==8.10.7 || ==9.0.2 || ==9.2.5 || ==9.4.4
+tested-with:         GHC ==8.8.4 || ==8.10.7 || ==9.0.2 || ==9.2.7 || ==9.4.4 || ==9.6.1
 
 Source-repository head
   Type:     git

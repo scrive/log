@@ -1,1 +1,8 @@
-packages: log-base, log-elasticsearch, log-postgres
+packages: log-base
+        , log-elasticsearch
+        , log-postgres
+
+-- GHC 9.6
+allow-newer: *:base
+           , *:ghc-prim
+           , *:template-haskell

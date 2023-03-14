@@ -3,6 +3,7 @@ module Log.Backend.PostgreSQL (withPgLogger) where
 
 import Control.Concurrent
 import Control.Exception.Lifted
+import Control.Monad
 import Control.Monad.State.Lazy
 import Control.Monad.IO.Unlift
 import Data.Aeson ((.=), Value(..), object, encode)

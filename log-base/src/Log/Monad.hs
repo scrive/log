@@ -13,6 +13,7 @@ module Log.Monad (
 
 import Control.Applicative
 import Control.DeepSeq
+import Control.Monad
 import Control.Monad.Base
 import Control.Monad.Catch
 import Control.Monad.Error.Class

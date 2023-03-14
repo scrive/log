@@ -1,3 +1,6 @@
+# log-base-0.12.0.1 (2023-??-??)
+* Add support for GHC 9.6.
+
 # log-base-0.12.0.0 (2022-09-21)
 * Deprecate `withSimpleStdOutLogger` as it's broken in multithreaded environments.
 * Generalize logger related functions to `MonadUnliftIO`.
