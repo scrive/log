@@ -1,3 +1,4 @@
+cabal-version:       3.0
 name:                log-elasticsearch
 version:             0.13.0.1
 synopsis:            Structured logging solution (Elasticsearch back end)
@@ -6,7 +7,7 @@ description:         Elasticsearch back end for the 'log' library suite.
                      Depends on 'log-base'.
 
 homepage:            https://github.com/scrive/log
-license:             BSD3
+license:             BSD-3-Clause
 license-file:        LICENSE
 author:              Scrive AB
 maintainer:          Andrzej Rybczak <andrzej@rybczak.net>,
@@ -16,17 +17,16 @@ maintainer:          Andrzej Rybczak <andrzej@rybczak.net>,
 copyright:           Scrive AB
 category:            System
 build-type:          Simple
-cabal-version:       >=1.10
 extra-source-files:  CHANGELOG.md, README.md
-tested-with:         GHC ==8.8.4 || ==8.10.7 || ==9.0.2 || ==9.2.7 || ==9.4.4 || ==9.6.1
+tested-with:         GHC == { 8.10.7, 9.0.2, 9.2.8, 9.4.8, 9.6.6, 9.8.4, 9.10.1, 9.12.1 }
 
-Source-repository head
-  Type:     git
-  Location: https://github.com/scrive/log.git
+source-repository head
+  type:     git
+  location: https://github.com/scrive/log.git
 
 flag openssl
-  Description:   Use http-client-openssl instead of http-client-tls
-  Default:       True
+  description:   Use http-client-openssl instead of http-client-tls
+  default:       True
 
 library
   exposed-modules:     Log.Backend.ElasticSearch
