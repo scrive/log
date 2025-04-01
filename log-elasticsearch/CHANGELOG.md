@@ -1,3 +1,7 @@
+# log-elasticsearch-0.13.1.0 (2025-04-01)
+* Switch back to `http-client-tls` by default, and add a constraint
+  on a more recent version.
+
 # log-elasticsearch-0.13.0.1 (2023-01-31)
 * Add support for OpenSearch.
 

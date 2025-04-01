@@ -1,6 +1,6 @@
 cabal-version:       3.0
 name:                log-elasticsearch
-version:             0.13.0.1
+version:             0.13.1.0
 synopsis:            Structured logging solution (Elasticsearch back end)
 
 description:         Elasticsearch back end for the 'log' library suite.
@@ -26,7 +26,7 @@ source-repository head
 
 flag openssl
   description:   Use http-client-openssl instead of http-client-tls
-  default:       True
+  default:       False
 
 library
   exposed-modules:     Log.Backend.ElasticSearch
@@ -73,4 +73,4 @@ library
     cpp-options: -DOPENSSL
     build-depends: http-client-openssl >= 0.3.2
   else
-    build-depends: http-client-tls
+    build-depends: http-client-tls >= 0.3.6.3
