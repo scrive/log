@@ -1,4 +1,4 @@
-# log-elasticsearch-0.13.1.0 (2025-04-01)
+# log-elasticsearch-0.13.0.2 (2025-04-01)
 * Switch back to `http-client-tls` by default, and add a constraint
   on a more recent version.
 

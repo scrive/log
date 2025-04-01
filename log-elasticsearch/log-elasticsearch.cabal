@@ -1,6 +1,6 @@
 cabal-version:       3.0
 name:                log-elasticsearch
-version:             0.13.1.0
+version:             0.13.0.2
 synopsis:            Structured logging solution (Elasticsearch back end)
 
 description:         Elasticsearch back end for the 'log' library suite.
