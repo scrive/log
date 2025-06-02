@@ -24,7 +24,7 @@ import Control.Monad.State.Class
 import Control.Monad.Trans.Control
 import Control.Monad.Writer.Class
 import Data.Aeson
-import Data.Text (Text)
+import Data.Text (Text, pack)
 import Data.Time
 import qualified Control.Monad.Fail as MF
 import qualified Control.Exception as E
@@ -46,26 +46,35 @@ instance MonadReader r m => MonadReader r (LogT m) where
     ask   = lift ask
     local = mapLogT . local
 
--- | Run a 'LogT' computation.
---
--- Note that in the case of asynchronous/bulk loggers 'runLogT'
--- doesn't guarantee that all messages are actually written to the log
--- once it finishes. Use 'withPGLogger' or 'withElasticSearchLogger'
--- for that.
-runLogT :: Text     -- ^ Application component name to use.
+runLogT :: (MonadMask m, MonadBase IO m)
+        => Text     -- ^ Application component name to use.
         -> Logger   -- ^ The logging back-end to use.
         -> LogLevel -- ^ The maximum log level allowed to be logged.
                     --   Only messages less or equal than this level with be logged.
         -> LogT m a -- ^ The 'LogT' computation to run.
         -> m a
-runLogT component logger maxLogLevel m = runReaderT (unLogT m) LoggerEnv {
-  leLogger = logger
-, leComponent = component
-, leDomain = []
-, leData = []
-, leMaxLogLevel = maxLogLevel
-} -- We can't do synchronisation here, since 'runLogT' can be invoked
-  -- quite often from the application (e.g. on every request).
+runLogT component logger maxLogLevel m =
+  fst <$> runReaderT
+    (unLogT $
+    generalBracket
+      (pure ())
+      (\_ -> \case
+        ExitCaseSuccess _ -> pure ()
+        ExitCaseException (SomeException e) -> do
+          logAttention "Uncaught exception raised" $ object ["error" .= (pack . show $ e)]
+          throwM e
+        ExitCaseAbort ->
+          logAttention_ "Process was aborted manually"
+      )
+      (const m))
+    LoggerEnv
+        { leLogger = logger
+        , leComponent = component
+        , leDomain = []
+        , leData = []
+        , leMaxLogLevel = maxLogLevel
+        } -- We can't do synchronisation here, since 'runLogT' can be invoked
+        -- quite often from the application (e.g. on every request).
 
 -- | Transform the computation inside a 'LogT'.
 mapLogT :: (m a -> n b) -> LogT m a -> LogT n b
