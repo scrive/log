@@ -24,7 +24,7 @@ import Control.Monad.State.Class
 import Control.Monad.Trans.Control
 import Control.Monad.Writer.Class
 import Data.Aeson
-import Data.Text (Text, pack)
+import Data.Text (Text)
 import Data.Time
 import qualified Control.Monad.Fail as MF
 import qualified Control.Exception as E
@@ -46,6 +46,7 @@ instance MonadReader r m => MonadReader r (LogT m) where
     ask   = lift ask
     local = mapLogT . local
 
+-- | Run a 'LogT' computation
 runLogT :: (MonadMask m, MonadBase IO m)
         => Text     -- ^ Application component name to use.
         -> Logger   -- ^ The logging back-end to use.
@@ -61,10 +62,10 @@ runLogT component logger maxLogLevel m =
       (\_ -> \case
         ExitCaseSuccess _ -> pure ()
         ExitCaseException (SomeException e) -> do
-          logAttention "Uncaught exception raised" $ object ["error" .= (pack . show $ e)]
+          logAttention "Uncaught exception raised" $ object ["error" .= show e]
           throwM e
         ExitCaseAbort ->
-          logAttention_ "Process was aborted manually"
+          logAttention_ "Process was aborted"
       )
       (const m))
     LoggerEnv
