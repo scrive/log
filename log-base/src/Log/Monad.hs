@@ -60,7 +60,7 @@ runLogT component logger maxLogLevel m =
       m `catch`
         (\(SomeException e) -> do
           logAttention "Uncaught exception raised" $ object ["error" .= show e]
-          throwM e))
+          error "In a catch"))
     LoggerEnv
         { leLogger = logger
         , leComponent = component
