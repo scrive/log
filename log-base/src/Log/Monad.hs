@@ -75,7 +75,7 @@ runLogT component logger maxLogLevel m = runReaderT (unLogT m) LoggerEnv {
 -- doesn't guarantee that all messages are actually written to the log
 -- once it finishes. Use 'withPGLogger' or 'withElasticSearchLogger'
 -- for that.
-runLogTAttentionOnFailure :: (MonadCatch m, MonadBase IO m)
+runLogTAttentionOnFailure :: (MonadBase IO m, MonadMask m)
         => Text     -- ^ Application component name to use.
         -> Logger   -- ^ The logging back-end to use.
         -> LogLevel -- ^ The maximum log level allowed to be logged.
@@ -83,12 +83,19 @@ runLogTAttentionOnFailure :: (MonadCatch m, MonadBase IO m)
         -> LogT m a -- ^ The 'LogT' computation to run.
         -> m a
 runLogTAttentionOnFailure component logger maxLogLevel m =
-  runReaderT
-    (unLogT $ do
-      m `catch`
-        (\(SomeException e) -> do
+    fst <$> runReaderT
+    (unLogT $
+    generalBracket
+      (pure ())
+      (\_ -> \case
+        ExitCaseSuccess _ -> pure ()
+        ExitCaseException (SomeException e) -> do
           logAttention "Uncaught exception raised" $ object ["error" .= show e]
-          error "In a catch"))
+          error "In a catch"
+        ExitCaseAbort ->
+          logAttention_ "Process was aborted"
+      )
+      (const m))
     LoggerEnv
         { leLogger = logger
         , leComponent = component
