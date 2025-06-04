@@ -47,7 +47,7 @@ instance MonadReader r m => MonadReader r (LogT m) where
     local = mapLogT . local
 
 -- | Run a 'LogT' computation
-runLogT :: (MonadMask m, MonadBase IO m)
+runLogT :: (MonadCatch m, MonadBase IO m)
         => Text     -- ^ Application component name to use.
         -> Logger   -- ^ The logging back-end to use.
         -> LogLevel -- ^ The maximum log level allowed to be logged.
@@ -55,19 +55,12 @@ runLogT :: (MonadMask m, MonadBase IO m)
         -> LogT m a -- ^ The 'LogT' computation to run.
         -> m a
 runLogT component logger maxLogLevel m =
-  fst <$> runReaderT
-    (unLogT $
-    generalBracket
-      (pure ())
-      (\_ -> \case
-        ExitCaseSuccess _ -> pure ()
-        ExitCaseException (SomeException e) -> do
+  runReaderT
+    (unLogT $ do
+      m `catch`
+        (\(SomeException e) -> do
           logAttention "Uncaught exception raised" $ object ["error" .= show e]
-          throwM e
-        ExitCaseAbort ->
-          logAttention_ "Process was aborted"
-      )
-      (const m))
+          throwM e))
     LoggerEnv
         { leLogger = logger
         , leComponent = component
