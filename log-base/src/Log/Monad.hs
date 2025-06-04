@@ -6,6 +6,7 @@ module Log.Monad (
   , InnerLogT
   , LogT(..)
   , runLogT
+  , runLogTAttentionOnFailure
   , mapLogT
   , logMessageIO
   , getLoggerIO
@@ -47,14 +48,41 @@ instance MonadReader r m => MonadReader r (LogT m) where
     local = mapLogT . local
 
 -- | Run a 'LogT' computation
-runLogT :: (MonadCatch m, MonadBase IO m)
+--
+-- Note that in the case of asynchronous/bulk loggers 'runLogT'
+-- doesn't guarantee that all messages are actually written to the log
+-- once it finishes. Use 'withPGLogger' or 'withElasticSearchLogger'
+-- for that.
+runLogT :: Text     -- ^ Application component name to use.
+        -> Logger   -- ^ The logging back-end to use.
+        -> LogLevel -- ^ The maximum log level allowed to be logged.
+                    --   Only messages less or equal than this level with be logged.
+        -> LogT m a -- ^ The 'LogT' computation to run.
+        -> m a
+runLogT component logger maxLogLevel m = runReaderT (unLogT m) LoggerEnv {
+  leLogger = logger
+, leComponent = component
+, leDomain = []
+, leData = []
+, leMaxLogLevel = maxLogLevel
+} -- We can't do synchronisation here, since 'runLogT' can be invoked
+  -- quite often from the application (e.g. on every request).
+
+
+-- | Run a 'LogT' computation and log any uncaught exception
+-- 
+-- Note that in the case of asynchronous/bulk loggers 'runLogT'
+-- doesn't guarantee that all messages are actually written to the log
+-- once it finishes. Use 'withPGLogger' or 'withElasticSearchLogger'
+-- for that.
+runLogTAttentionOnFailure :: (MonadCatch m, MonadBase IO m)
         => Text     -- ^ Application component name to use.
         -> Logger   -- ^ The logging back-end to use.
         -> LogLevel -- ^ The maximum log level allowed to be logged.
                     --   Only messages less or equal than this level with be logged.
         -> LogT m a -- ^ The 'LogT' computation to run.
         -> m a
-runLogT component logger maxLogLevel m =
+runLogTAttentionOnFailure component logger maxLogLevel m =
   runReaderT
     (unLogT $ do
       m `catch`
