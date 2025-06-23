@@ -62,7 +62,7 @@ runLogT :: (MonadBaseControl IO m)
 runLogT component logger maxLogLevel m = runReaderT
   (unLogT $ liftedCatch m (\(SomeException e) -> do
       logAttention "Uncaught exception" $ object ["error" .= show e]
-      E.throw e)
+      liftBase $ E.throwIO e)
   )
   LoggerEnv {
   leLogger = logger
@@ -81,7 +81,7 @@ liftedCatch :: (MonadBaseControl IO m, Exception e)
 liftedCatch a handler = control $ \runInIO ->
   E.catch
     (runInIO a)
-    (\e -> runInIO $ handler e)
+    (runInIO . handler)
 
 -- | Transform the computation inside a 'LogT'.
 mapLogT :: (m a -> n b) -> LogT m a -> LogT n b
