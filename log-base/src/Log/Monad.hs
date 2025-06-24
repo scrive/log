@@ -6,9 +6,9 @@ module Log.Monad (
   , InnerLogT
   , LogT(..)
   , runLogT
+  , logExceptions
   , mapLogT
   , logMessageIO
-  , logExceptions
   , getLoggerIO
   ) where
 
@@ -68,7 +68,7 @@ runLogT component logger maxLogLevel m = runReaderT (unLogT m) LoggerEnv {
 } -- We can't do synchronisation here, since 'runLogT' can be invoked
   -- quite often from the application (e.g. on every request).
 
--- | Unsure uncaught exceptions get logged
+-- | Ensure uncaught exceptions get logged.
 -- Convenient to compose right after `runLogT` so any exception
 -- will show up.
 logExceptions :: (MonadBaseControl IO m, MonadLog m) => m a -> m a
@@ -77,7 +77,7 @@ logExceptions f =
       logAttention "Uncaught exception" $ object ["error" .= show e]
       liftBase $ E.throwIO e
 
--- Generalized version of catch taken from `lifted-base`
+-- Generalized version of catch taken from `lifted-base`.
 liftedCatch :: (MonadBaseControl IO m, Exception e)
       => m a       -- ^ The computation to run
       -> (e -> m a) -- ^ Handler to invoke if an exception is raised
