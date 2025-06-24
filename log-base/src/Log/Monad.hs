@@ -8,6 +8,7 @@ module Log.Monad (
   , runLogT
   , mapLogT
   , logMessageIO
+  , logExceptions
   , getLoggerIO
   ) where
 
@@ -46,25 +47,19 @@ instance MonadReader r m => MonadReader r (LogT m) where
     ask   = lift ask
     local = mapLogT . local
 
--- | Run a 'LogT' computation and log any uncaught exceptions.
+-- | Run a 'LogT' computation.
 --
 -- Note that in the case of asynchronous/bulk loggers 'runLogT'
 -- doesn't guarantee that all messages are actually written to the log
 -- once it finishes. Use 'withPGLogger' or 'withElasticSearchLogger'
 -- for that.
-runLogT :: (MonadBaseControl IO m)
-        => Text     -- ^ Application component name to use.
+runLogT :: Text     -- ^ Application component name to use.
         -> Logger   -- ^ The logging back-end to use.
         -> LogLevel -- ^ The maximum log level allowed to be logged.
                     --   Only messages less or equal than this level with be logged.
         -> LogT m a -- ^ The 'LogT' computation to run.
         -> m a
-runLogT component logger maxLogLevel m = runReaderT
-  (unLogT $ liftedCatch m (\(SomeException e) -> do
-      logAttention "Uncaught exception" $ object ["error" .= show e]
-      liftBase $ E.throwIO e)
-  )
-  LoggerEnv {
+runLogT component logger maxLogLevel m = runReaderT (unLogT m) LoggerEnv {
   leLogger = logger
 , leComponent = component
 , leDomain = []
@@ -72,6 +67,15 @@ runLogT component logger maxLogLevel m = runReaderT
 , leMaxLogLevel = maxLogLevel
 } -- We can't do synchronisation here, since 'runLogT' can be invoked
   -- quite often from the application (e.g. on every request).
+
+-- | Unsure uncaught exceptions get logged
+-- Convenient to compose right after `runLogT` so any exception
+-- will show up.
+logExceptions :: (MonadBaseControl IO m, MonadLog m) => m a -> m a
+logExceptions f =
+  liftedCatch f $ \(SomeException e) -> do
+      logAttention "Uncaught exception" $ object ["error" .= show e]
+      liftBase $ E.throwIO e
 
 -- Generalized version of catch taken from `lifted-base`
 liftedCatch :: (MonadBaseControl IO m, Exception e)
