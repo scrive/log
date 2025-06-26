@@ -1,3 +1,6 @@
+# log-base-0.12.1.0 (2025-??-??)
+* Add utility function to log unhandled exceptions.
+
 # log-base-0.12.0.1 (2023-03-14)
 * Add support for GHC 9.6.
 
