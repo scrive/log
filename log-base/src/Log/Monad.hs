@@ -74,7 +74,7 @@ runLogT component logger maxLogLevel m = runReaderT (unLogT m) LoggerEnv {
 logExceptions :: (MonadBaseControl IO m, MonadLog m) => m a -> m a
 logExceptions f =
   liftedCatch f $ \(SomeException e) -> do
-      logAttention "Uncaught exception" $ object ["error" .= show e]
+      logAttention "Uncaught exception" $ object ["exception" .= show e]
       liftBase $ E.throwIO e
 
 -- Generalized version of catch taken from `lifted-base`.
