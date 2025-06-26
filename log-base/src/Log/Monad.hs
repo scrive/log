@@ -79,8 +79,8 @@ logExceptions f =
 
 -- Generalized version of catch taken from `lifted-base`.
 liftedCatch :: (MonadBaseControl IO m, Exception e)
-      => m a       -- ^ The computation to run
-      -> (e -> m a) -- ^ Handler to invoke if an exception is raised
+      => m a       -- ^ The computation to run.
+      -> (e -> m a) -- ^ Handler to invoke if an exception is raised.
       -> m a
 liftedCatch a handler = control $ \runInIO ->
   E.catch
