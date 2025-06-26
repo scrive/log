@@ -1,4 +1,4 @@
-# log-base-0.12.1.0 (2025-??-??)
+# log-base-0.12.1.0 (2025-06-26)
 * Add utility function to log unhandled exceptions.
 
 # log-base-0.12.0.1 (2023-03-14)
