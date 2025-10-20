@@ -24,7 +24,7 @@ import qualified Data.Monoid as Monoid
 -- Note that ordering in this definintion determines what the maximum log level is.
 -- See 'Log.Monad.leMaxLogLevel'.
 data LogLevel = LogAttention | LogInfo | LogTrace
-  deriving (Bounded, Eq, Ord, Show)
+  deriving (Bounded, Enum, Eq, Ord, Show)
 
 -- | This function is partial.
 readLogLevel :: T.Text -> LogLevel
