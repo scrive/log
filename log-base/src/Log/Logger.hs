@@ -113,50 +113,19 @@ mkBulkLogger'
     -> IO ()                    -- ^ flush
     -> IO Logger
 mkBulkLogger' cap dur = mkLoggerImpl
-  (newSBQueueIO cap) isEmptySBQueue readSBQueue writeSBQueue
+  (newTBQueueIO $ fromIntegral cap) isEmptyTBQueue readWholeNonEmptyTBQueue writeTBQueue
   (threadDelay dur)
+  where
+    readWholeNonEmptyTBQueue queue = do
+      isEmpty <- isEmptyTBQueue queue
+      if isEmpty
+        then retry
+        else flushTBQueue queue
 
-----------------------------------------
-
--- | Default capacity of log queues (TBQueue for regular logger, 'SBQueue' for
--- bulk loggers). This corresponds to approximately 200 MiB memory residency
--- when the queue is full.
+-- | Default capacity of log queues. This corresponds to approximately 200 MiB
+-- memory residency when the queue is full.
 defaultQueueCapacity :: Int
 defaultQueueCapacity = 1000000
-
--- | A simple STM based bounded queue.
-data SBQueue a = SBQueue !(TVar [a]) !(TVar Int) !Int
-
--- | Create an instance of 'SBQueue' with a given capacity.
-newSBQueueIO :: Int -> IO (SBQueue a)
-newSBQueueIO capacity = SBQueue <$> newTVarIO [] <*> newTVarIO 0 <*> pure capacity
-
--- | Check if an 'SBQueue' is empty.
-isEmptySBQueue :: SBQueue a -> STM Bool
-isEmptySBQueue (SBQueue queue count _capacity) = do
-  isEmpty  <- null <$> readTVar queue
-  numElems <- readTVar count
-  assert (if isEmpty then numElems == 0 else numElems > 0) $
-    return isEmpty
-
--- | Read all the values stored in an 'SBQueue'.
-readSBQueue :: SBQueue a -> STM [a]
-readSBQueue (SBQueue queue count _capacity) = do
-  elems <- readTVar queue
-  when (null elems) retry
-  writeTVar queue []
-  writeTVar count 0
-  return $ reverse elems
-
--- | Write a value to an 'SBQueue'.
-writeSBQueue :: SBQueue a -> a -> STM ()
-writeSBQueue (SBQueue queue count capacity) a = do
-  numElems <- readTVar count
-  if numElems < capacity
-    then do modifyTVar queue (a :)
-            -- Strict modification of the queue size to avoid space leak
-            modifyTVar' count (+1)
-    else return ()
 
 ----------------------------------------
 
