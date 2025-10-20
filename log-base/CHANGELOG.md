@@ -1,3 +1,7 @@
+# log-base-0.xx.x.x (xxxx-xx-xx)
+* Add base tests in log-base testing message ordering and dropping
+* Add fourmolu config file
+
 # log-base-0.12.1.0 (2025-06-26)
 * Add utility function to log unhandled exceptions.
 
