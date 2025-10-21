@@ -233,6 +233,9 @@ jobs:
           ${CABAL} -vnormal check
           cd ${PKGDIR_log_postgres} || false
           ${CABAL} -vnormal check
+      - name: cabal tests
+        run: |
+          ${CABAL} test $ARG_COMPILER all
       - name: haddock
         run: |
           $CABAL v2-haddock --disable-documentation --haddock-all $ARG_COMPILER --with-haddock $HADDOCK $ARG_TESTS $ARG_BENCH all
