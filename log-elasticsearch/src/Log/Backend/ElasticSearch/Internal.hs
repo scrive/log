@@ -19,6 +19,10 @@ module Log.Backend.ElasticSearch.Internal
   , dispatch
   , decodeReply
   , isSuccess
+  -- * ES error cases
+  , ElasticSearchCouldNotConnectToServerError (..)
+  , ElasticSearchCouldNotParseVersion (..)
+  , ElasticSearchInsecureLogin (..)
   ) where
 
 import Control.Exception
@@ -247,3 +251,29 @@ isSuccess = statusCheck (inRange (200, 299))
   where
     statusCheck :: (Int -> Bool) -> Response a -> Bool
     statusCheck p = p . statusCode . responseStatus
+
+----------------------------------------
+
+newtype ElasticSearchCouldNotConnectToServerError = ElasticSearchCouldNotConnectToServerError HttpException
+  deriving Show
+
+instance Exception ElasticSearchCouldNotConnectToServerError where
+  displayException (ElasticSearchCouldNotConnectToServerError ex) = "elasticSearchLogger: unexpected error: "
+    <> show ex
+    <> " (is ElasticSearch server running?)"
+
+data ElasticSearchInsecureLogin = ElasticSearchInsecureLogin
+  deriving Show
+
+instance Exception ElasticSearchInsecureLogin where
+  displayException ElasticSearchInsecureLogin = "ElasticSearch: insecure login: "
+      <> "Attempting to send login credentials over an insecure connection. "
+      <> "Set esLoginInsecure = True to disable this check."
+
+newtype ElasticSearchCouldNotParseVersion = ElasticSearchCouldNotParseVersion (Response Value)
+  deriving Show
+
+instance Exception ElasticSearchCouldNotParseVersion where
+  displayException (ElasticSearchCouldNotParseVersion reply) =
+    "elasticSearchLogger: invalid response when parsing version number: "
+      <> show reply

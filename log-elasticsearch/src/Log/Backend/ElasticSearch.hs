@@ -68,14 +68,9 @@ elasticSearchLogger esConf@ElasticSearchConfig{..} = do
       version <- readIORef versionRef >>= \case
         Just version -> pure version
         Nothing -> serverInfo env >>= \case
-          Left (ex :: HttpException) -> error
-            $  "elasticSearchLogger: unexpected error: "
-            <> show ex
-            <> " (is ElasticSearch server running?)"
+          Left (ex :: HttpException) -> throwM $ ElasticSearchCouldNotConnectToServerError ex
           Right reply -> case parseEsVersion $ responseBody reply of
-            Nothing -> error
-              $  "elasticSearchLogger: invalid response when parsing version number: "
-              <> show reply
+            Nothing -> throwM $ ElasticSearchCouldNotParseVersion reply
             Just version -> pure version
       -- Elasticsearch index names are additionally indexed by date so that each
       -- day is logged to a separate index to make log management easier.
@@ -208,9 +203,7 @@ checkElasticSearchLogin ElasticSearchConfig{..} = liftIO $ do
   when (isJust esLogin
         && not esLoginInsecure
         && not ("https:" `T.isPrefixOf` esServer)) $
-    error $ "ElasticSearch: insecure login: "
-      <> "Attempting to send login credentials over an insecure connection. "
-      <> "Set esLoginInsecure = True to disable this check."
+    throwM ElasticSearchInsecureLogin
 
 -- | Check that we can connect to the ES server.
 --
