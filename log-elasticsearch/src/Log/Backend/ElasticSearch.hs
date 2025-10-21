@@ -15,10 +15,11 @@ module Log.Backend.ElasticSearch
   ) where
 
 import Control.Applicative
-import Control.Concurrent
-import Control.Exception
+import Control.Exception (SomeAsyncException)
 import Control.Monad
+import Control.Monad.Catch
 import Control.Monad.IO.Unlift
+import Control.Retry
 import Data.Aeson
 import Data.Aeson.Encode.Pretty
 import Data.IORef
@@ -62,7 +63,7 @@ elasticSearchLogger esConf@ElasticSearchConfig{..} = do
   mkBulkLogger "ElasticSearch" (\msgs -> do
     now <- getCurrentTime
     oldIndex <- readIORef indexRef
-    retryOnException versionRef $ do
+    retryTransientExceptions versionRef $ do
       -- We need to consider version of ES because ES >= 5.0.0 and ES >= 7.0.0
       -- have slight differences in parts of API used for logging.
       version <- readIORef versionRef >>= \case
@@ -110,16 +111,16 @@ elasticSearchLogger esConf@ElasticSearchConfig{..} = do
                         Nothing  -> newData
                     modifyData _ v = v
 
-                    keyAddValueTypeSuffix k v acc = AC.insert
-                      (case v of
+                    keyAddValueTypeSuffix k v = flip AC.insert (modifyData Nothing v) $
+                      case v of
                           Object{} -> k <> "_object"
                           Array{}  -> k <> "_array"
                           String{} -> k <> "_string"
                           Number{} -> k <> "_number"
                           Bool{}   -> k <> "_bool"
                           Null{}   -> k <> "_null"
-                      ) (modifyData Nothing v) acc
                 in adjustFailedMessagesWith modifyData jsonMsgs responses
+
           -- Attempt to put modified messages.
           newReply <- responseBody <$> bulkIndex version env esConf index newMsgs
           case checkForBulkErrors newMsgs newReply of
@@ -171,17 +172,21 @@ elasticSearchLogger esConf@ElasticSearchConfig{..} = do
     printEsError msg body =
       T.putStrLn $ "elasticSearchLogger: " <> msg <> " " <> prettyJson body
 
-    retryOnException :: forall r. IORef (Maybe EsVersion) -> IO r -> IO r
-    retryOnException versionRef m = try m >>= \case
-      Left (ex::SomeException) -> do
-        putStrLn $ "ElasticSearch: unexpected error: "
-          <> show ex <> ", retrying in 10 seconds"
-        -- If there was an exception, ElasticSearch version might've changed, so
-        -- reset it.
-        writeIORef versionRef Nothing
-        threadDelay $ 10 * 1000000
-        retryOnException versionRef m
-      Right result -> return result
+    retryTransientExceptions :: IORef (Maybe EsVersion) -> IO () -> IO ()
+    retryTransientExceptions versionRef m =
+      catches (recovering esRetryPolicy (skipAsyncExceptions <> [const $ Handler $ allSomeExceptions versionRef]) (const m))
+        [ -- Rethrow async exceptions so this thread doesn't unintentionally get
+          -- orphaned by the next handler
+          Handler $ \(e :: SomeAsyncException) -> throwM e
+        , Handler $ \(e :: SomeException) -> case esRetryFailure of
+            ElasticSearchThrowLogFailure -> throwM e
+            ElasticSearchDropLogMessage -> pure ()
+        ]
+
+    allSomeExceptions :: IORef (Maybe EsVersion) -> SomeException -> IO Bool
+    allSomeExceptions versionRef _ = do
+      writeIORef versionRef Nothing
+      pure True
 
     prettyJson :: Value -> T.Text
     prettyJson = TL.toStrict
@@ -210,4 +215,4 @@ checkElasticSearchLogin ElasticSearchConfig{..} = liftIO $ do
 -- @since 0.10.0.0
 checkElasticSearchConnection :: MonadIO m => ElasticSearchConfig -> m (Either HttpException ())
 checkElasticSearchConnection esConf = liftIO $ do
-  fmap (const ()) <$> (serverInfo =<< mkEsEnv esConf)
+  void <$> (serverInfo =<< mkEsEnv esConf)
