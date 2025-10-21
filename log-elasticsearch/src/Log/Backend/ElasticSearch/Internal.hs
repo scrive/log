@@ -2,6 +2,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 module Log.Backend.ElasticSearch.Internal
   ( ElasticSearchConfig(..)
+  , ElasticSearchLogFailure (..)
   , defaultElasticSearchConfig
   -- * ES version
   , EsVersion(..)
@@ -26,6 +27,7 @@ module Log.Backend.ElasticSearch.Internal
   ) where
 
 import Control.Exception
+import Control.Retry
 import Control.Monad
 import Data.Aeson
 import Data.Ix (inRange)
@@ -66,7 +68,20 @@ data ElasticSearchConfig = ElasticSearchConfig
     -- ^ Elasticsearch basic authentication username and password.
   , esLoginInsecure :: !Bool
     -- ^ Allow basic authentication over non-TLS connections.
-  } deriving (Eq, Show, Generic)
+  , esRetryPolicy   :: RetryPolicyM IO
+    -- ^ Allow basic authentication over non-TLS connections.
+    --
+    -- @since 0.xx.x.x
+  , esRetryFailure  :: ElasticSearchLogFailure
+    -- ^ Allow specifying what should happen with log messages that fail to be
+    -- sent off to elastic.
+    --
+    -- @since 0.xx.x.x
+  } deriving Generic
+
+-- | Indicates what to do when the logging action fails beyond the retry policy.
+-- We either drop the log message (recommended), or we rethrow the exception.
+data ElasticSearchLogFailure = ElasticSearchDropLogMessage | ElasticSearchThrowLogFailure
 
 -- | Sensible defaults for 'ElasticSearchConfig'.
 defaultElasticSearchConfig :: ElasticSearchConfig
@@ -78,6 +93,10 @@ defaultElasticSearchConfig = ElasticSearchConfig
   , esMapping       = "log"
   , esLogin         = Nothing
   , esLoginInsecure = False
+  -- Will retry upto 3 times with exponential backoff and jitter.
+  --   So approx: sum [0.5 * (2 ** i) / 2 | i <- [1..3]] ~ 3.5s
+  , esRetryPolicy   = limitRetries 3 <> fullJitterBackoff 500_000 -- 0.5 Secs
+  , esRetryFailure  = ElasticSearchDropLogMessage
   }
 
 ----------------------------------------

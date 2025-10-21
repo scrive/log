@@ -38,10 +38,12 @@ library
                        base64-bytestring,
                        bytestring,
                        deepseq,
+                       exceptions,
                        http-client,
                        http-types,
                        log-base >= 0.10 && <0.13,
                        network-uri,
+                       retry,
                        semigroups,
                        text,
                        text-show >= 2,
@@ -61,6 +63,7 @@ library
                     , GeneralizedNewtypeDeriving
                     , LambdaCase
                     , MultiParamTypeClasses
+                    , NumericUnderscores
                     , OverloadedStrings
                     , RankNTypes
                     , RecordWildCards

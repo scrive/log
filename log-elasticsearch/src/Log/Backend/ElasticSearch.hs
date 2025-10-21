@@ -135,7 +135,7 @@ elasticSearchLogger esConf@ElasticSearchConfig{..} = do
                     in adjustFailedMessagesWith modifyData newMsgs newResponses
               -- Ignore any further errors.
               void $ bulkIndex version env esConf index newerMsgs)
-    (refreshIndex env =<< readIORef indexRef)
+    (recoverAll esRetryPolicy . const . refreshIndex env =<< readIORef indexRef)
   where
     -- Process reply of bulk indexing to get responses for each index operation
     -- and check whether any insertion failed.
