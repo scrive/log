@@ -28,7 +28,26 @@ flag openssl
   description:   Use http-client-openssl instead of http-client-tls
   default:       False
 
+common shared
+  ghc-options:        -Wall
+  default-language:   Haskell2010
+  default-extensions: BangPatterns
+                    , FlexibleContexts
+                    , FlexibleInstances
+                    , GeneralizedNewtypeDeriving
+                    , LambdaCase
+                    , MultiParamTypeClasses
+                    , NumericUnderscores
+                    , OverloadedStrings
+                    , RankNTypes
+                    , RecordWildCards
+                    , ScopedTypeVariables
+                    , TupleSections
+                    , TypeFamilies
+                    , UndecidableInstances
+
 library
+  import:              shared
   exposed-modules:     Log.Backend.ElasticSearch
                        Log.Backend.ElasticSearch.Internal
                        Log.Backend.ElasticSearch.Lens
@@ -38,10 +57,12 @@ library
                        base64-bytestring,
                        bytestring,
                        deepseq,
+                       exceptions,
                        http-client,
                        http-types,
                        log-base >= 0.10 && <0.13,
                        network-uri,
+                       retry,
                        semigroups,
                        text,
                        text-show >= 2,
@@ -52,25 +73,35 @@ library
                        vector
   hs-source-dirs:      src
 
-  ghc-options:         -Wall
-
-  default-language:   Haskell2010
-  default-extensions: BangPatterns
-                    , FlexibleContexts
-                    , FlexibleInstances
-                    , GeneralizedNewtypeDeriving
-                    , LambdaCase
-                    , MultiParamTypeClasses
-                    , OverloadedStrings
-                    , RankNTypes
-                    , RecordWildCards
-                    , ScopedTypeVariables
-                    , TupleSections
-                    , TypeFamilies
-                    , UndecidableInstances
-
   if flag(openssl)
     cpp-options: -DOPENSSL
     build-depends: http-client-openssl >= 0.3.2
   else
     build-depends: http-client-tls >= 0.3.6.3
+
+test-suite log-elasticsearch-tests
+  import: shared
+  type: exitcode-stdio-1.0
+  main-is: Driver.hs
+  hs-source-dirs: tests
+  ghc-options: -threaded -rtsopts
+  build-depends:
+    , base
+    , aeson
+    , containers
+    , log-base
+    , log-elasticsearch
+    , hedgehog
+    , http-client
+    , http-types
+    , tasty
+    , tasty-hedgehog
+    , tasty-hunit
+    , tasty-discover
+    , text
+    , time
+    , uuid
+  build-tool-depends:
+    tasty-discover:tasty-discover
+  other-modules:
+    ElasticSearchTest

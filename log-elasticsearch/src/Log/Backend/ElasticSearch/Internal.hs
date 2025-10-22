@@ -2,6 +2,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 module Log.Backend.ElasticSearch.Internal
   ( ElasticSearchConfig(..)
+  , ElasticSearchLogFailure (..)
   , defaultElasticSearchConfig
   -- * ES version
   , EsVersion(..)
@@ -19,9 +20,14 @@ module Log.Backend.ElasticSearch.Internal
   , dispatch
   , decodeReply
   , isSuccess
+  -- * ES error cases
+  , ElasticSearchCouldNotConnectToServerError (..)
+  , ElasticSearchCouldNotParseVersion (..)
+  , ElasticSearchInsecureLogin (..)
   ) where
 
 import Control.Exception
+import Control.Retry
 import Control.Monad
 import Data.Aeson
 import Data.Ix (inRange)
@@ -62,7 +68,20 @@ data ElasticSearchConfig = ElasticSearchConfig
     -- ^ Elasticsearch basic authentication username and password.
   , esLoginInsecure :: !Bool
     -- ^ Allow basic authentication over non-TLS connections.
-  } deriving (Eq, Show, Generic)
+  , esRetryPolicy   :: RetryPolicyM IO
+    -- ^ Allow basic authentication over non-TLS connections.
+    --
+    -- @since 0.xx.x.x
+  , esRetryFailure  :: ElasticSearchLogFailure
+    -- ^ Allow specifying what should happen with log messages that fail to be
+    -- sent off to elastic.
+    --
+    -- @since 0.xx.x.x
+  } deriving Generic
+
+-- | Indicates what to do when the logging action fails beyond the retry policy.
+-- We either drop the log message (recommended), or we rethrow the exception.
+data ElasticSearchLogFailure = ElasticSearchDropLogMessage | ElasticSearchThrowLogFailure
 
 -- | Sensible defaults for 'ElasticSearchConfig'.
 defaultElasticSearchConfig :: ElasticSearchConfig
@@ -74,6 +93,10 @@ defaultElasticSearchConfig = ElasticSearchConfig
   , esMapping       = "log"
   , esLogin         = Nothing
   , esLoginInsecure = False
+  -- Will retry upto 3 times with exponential backoff and jitter.
+  --   So approx: sum [0.5 * (2 ** i) / 2 | i <- [1..3]] ~ 3.5s
+  , esRetryPolicy   = limitRetries 3 <> fullJitterBackoff 500_000 -- 0.5 Secs
+  , esRetryFailure  = ElasticSearchDropLogMessage
   }
 
 ----------------------------------------
@@ -247,3 +270,29 @@ isSuccess = statusCheck (inRange (200, 299))
   where
     statusCheck :: (Int -> Bool) -> Response a -> Bool
     statusCheck p = p . statusCode . responseStatus
+
+----------------------------------------
+
+newtype ElasticSearchCouldNotConnectToServerError = ElasticSearchCouldNotConnectToServerError HttpException
+  deriving Show
+
+instance Exception ElasticSearchCouldNotConnectToServerError where
+  displayException (ElasticSearchCouldNotConnectToServerError ex) = "elasticSearchLogger: unexpected error: "
+    <> show ex
+    <> " (is ElasticSearch server running?)"
+
+data ElasticSearchInsecureLogin = ElasticSearchInsecureLogin
+  deriving Show
+
+instance Exception ElasticSearchInsecureLogin where
+  displayException ElasticSearchInsecureLogin = "ElasticSearch: insecure login: "
+      <> "Attempting to send login credentials over an insecure connection. "
+      <> "Set esLoginInsecure = True to disable this check."
+
+newtype ElasticSearchCouldNotParseVersion = ElasticSearchCouldNotParseVersion (Response Value)
+  deriving Show
+
+instance Exception ElasticSearchCouldNotParseVersion where
+  displayException (ElasticSearchCouldNotParseVersion reply) =
+    "elasticSearchLogger: invalid response when parsing version number: "
+      <> show reply
