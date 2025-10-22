@@ -1,3 +1,9 @@
+# log-elasticsearch-x.x.x.x (xxxx-xx-xx)
+* Add support for specifying a retry policy on elasticsearch interactions.
+* Add testsuite for logging to elastic.
+* Make default retry policy a short 3.5s window, and subsequently dropping
+  log messages.
+
 # log-elasticsearch-0.13.0.2 (2025-06-26)
 * Switch back to `http-client-tls` by default since `HsOpenSSL` is based on a
   deprecated `openssl` API (soon to be removed).
