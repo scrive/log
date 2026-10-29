@@ -14,6 +14,8 @@ Supported backends:
   [`log-elasticsearch`](https://hackage.haskell.org/package/log-elasticsearch).
 * PostgreSQL via
   [`log-postgres`](https://hackage.haskell.org/package/log-postgres).
+* OpenTelemetry via
+  [`log-hs-opentelemetry`](https://hackage.haskell.org/package/log-hs-opentelemetry).
 
 ## Example
 
