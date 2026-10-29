@@ -1,3 +1,4 @@
 packages: log-base
         , log-elasticsearch
+        , log-hs-opentelemetry
         , log-postgres
